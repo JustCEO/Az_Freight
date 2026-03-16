@@ -1,0 +1,421 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  manager
+  accountant
+  client
+}
+
+enum TenantPlan {
+  starter
+  business
+  pro
+  corporate
+}
+
+enum TransportType {
+  road_tir
+  sea
+  air
+  rail
+}
+
+enum ShipmentStatus {
+  request
+  confirmed
+  in_transit
+  customs
+  delivered
+  cancelled
+}
+
+enum CustomsStatus {
+  not_started
+  in_progress
+  cleared
+  issue
+}
+
+enum InvoiceStatus {
+  draft
+  sent
+  paid
+  partially_paid
+  overdue
+  cancelled
+}
+
+enum DocType {
+  cmr
+  bill_of_lading
+  awb
+  rail_waybill
+  invoice
+  packing_list
+  certificate
+  declaration
+  contract
+  scan_signed
+  other
+}
+
+enum VehicleStatus {
+  available
+  on_route
+  maintenance
+  inactive
+}
+
+enum DriverStatus {
+  available
+  on_route
+  on_leave
+  inactive
+}
+
+enum DeclarationType {
+  import
+  export
+  transit
+}
+
+enum DeclarationStatus {
+  preparing
+  filed
+  under_review
+  cleared
+  rejected
+}
+
+model Tenant {
+  id                 String      @id @default(uuid())
+  name               String      @db.VarChar(255)
+  slug               String      @unique @db.VarChar(100)
+  plan               TenantPlan  @default(starter)
+  settings           Json?
+  logoUrl            String?     @map("logo_url") @db.VarChar(500)
+  maxUsers           Int         @default(5) @map("max_users")
+  maxShipmentsMonth  Int         @default(100) @map("max_shipments_month")
+  modulesEnabled     String[]    @map("modules_enabled")
+  planExpiresAt      DateTime?   @map("plan_expires_at")
+  isActive           Boolean     @default(true) @map("is_active")
+  createdAt          DateTime    @default(now()) @map("created_at")
+
+  users              User[]
+  clients            Client[]
+  carriers           Carrier[]
+  shipments          Shipment[]
+  documents          Document[]
+  invoices           Invoice[]
+  vehicles           Vehicle[]
+  drivers            Driver[]
+  customsDeclarations CustomsDeclaration[]
+  auditLogs          AuditLog[]
+
+  @@map("tenants")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  tenantId      String    @map("tenant_id")
+  email         String    @db.VarChar(255)
+  passwordHash  String    @map("password_hash") @db.VarChar(255)
+  name          String    @db.VarChar(255)
+  role          UserRole  @default(manager)
+  phone         String?   @db.VarChar(50)
+  isActive      Boolean   @default(true) @map("is_active")
+  lastLogin     DateTime? @map("last_login")
+  refreshToken  String?   @map("refresh_token") @db.VarChar(500)
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  tenant        Tenant    @relation(fields: [tenantId], references: [id])
+
+  assignedShipments  Shipment[]  @relation("AssignedTo")
+  createdShipments   Shipment[]  @relation("CreatedBy")
+  statusLogs         ShipmentStatusLog[]
+  uploadedDocuments  Document[]
+  createdInvoices    Invoice[]
+  auditLogs          AuditLog[]
+
+  @@unique([tenantId, email])
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Client {
+  id                 String    @id @default(uuid())
+  tenantId           String    @map("tenant_id")
+  companyName        String    @map("company_name") @db.VarChar(255)
+  taxId              String?   @map("tax_id") @db.VarChar(50)
+  address            String?
+  country            String?   @db.VarChar(3)
+  city               String?   @db.VarChar(255)
+  phone              String?   @db.VarChar(50)
+  email              String?   @db.VarChar(255)
+  website            String?   @db.VarChar(500)
+  paymentTermsDays   Int?      @map("payment_terms_days")
+  creditLimit        Decimal?  @map("credit_limit") @db.Decimal(12, 2)
+  outstandingBalance Decimal   @default(0) @map("outstanding_balance") @db.Decimal(12, 2)
+  notes              String?
+  isActive           Boolean   @default(true) @map("is_active")
+  createdAt          DateTime  @default(now()) @map("created_at")
+
+  tenant             Tenant    @relation(fields: [tenantId], references: [id])
+  shipments          Shipment[]
+  invoices           Invoice[]
+
+  @@index([tenantId])
+  @@map("clients")
+}
+
+model Carrier {
+  id              String    @id @default(uuid())
+  tenantId        String    @map("tenant_id")
+  companyName     String    @map("company_name") @db.VarChar(255)
+  transportTypes  String[]  @map("transport_types")
+  taxId           String?   @map("tax_id") @db.VarChar(50)
+  country         String?   @db.VarChar(3)
+  city            String?   @db.VarChar(255)
+  phone           String?   @db.VarChar(50)
+  email           String?   @db.VarChar(255)
+  rating          Decimal   @default(0) @db.Decimal(3, 2)
+  totalShipments  Int       @default(0) @map("total_shipments")
+  onTimeRate      Decimal   @default(0) @map("on_time_rate") @db.Decimal(5, 2)
+  notes           String?
+  isActive        Boolean   @default(true) @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  tenant          Tenant    @relation(fields: [tenantId], references: [id])
+  shipments       Shipment[]
+
+  @@index([tenantId])
+  @@map("carriers")
+}
+
+model Shipment {
+  id                 String          @id @default(uuid())
+  tenantId           String          @map("tenant_id")
+  referenceNumber    String          @map("reference_number") @db.VarChar(50)
+  transportType      TransportType   @map("transport_type")
+  status             ShipmentStatus  @default(request)
+  clientId           String          @map("client_id")
+  carrierId          String?         @map("carrier_id")
+  originCountry      String          @map("origin_country") @db.VarChar(3)
+  originCity         String          @map("origin_city") @db.VarChar(255)
+  originAddress      String?         @map("origin_address")
+  destinationCountry String          @map("destination_country") @db.VarChar(3)
+  destinationCity    String          @map("destination_city") @db.VarChar(255)
+  destinationAddress String?         @map("destination_address")
+  cargoDescription   String?         @map("cargo_description")
+  weightKg           Decimal?        @map("weight_kg") @db.Decimal(12, 2)
+  volumeCbm          Decimal?        @map("volume_cbm") @db.Decimal(10, 3)
+  packageCount       Int?            @map("package_count")
+  hsCode             String?         @map("hs_code") @db.VarChar(20)
+  incoterms          String?         @db.VarChar(10)
+  clientRate         Decimal?        @map("client_rate") @db.Decimal(12, 2)
+  carrierRate        Decimal?        @map("carrier_rate") @db.Decimal(12, 2)
+  currency           String          @default("USD") @db.VarChar(3)
+  profit             Decimal?        @db.Decimal(12, 2)
+  customsStatus      CustomsStatus   @default(not_started) @map("customs_status")
+  vesselName         String?         @map("vessel_name") @db.VarChar(255)
+  containerNumber    String?         @map("container_number") @db.VarChar(50)
+  awbNumber          String?         @map("awb_number") @db.VarChar(50)
+  wagonNumber        String?         @map("wagon_number") @db.VarChar(50)
+  tirNumber          String?         @map("tir_number") @db.VarChar(50)
+  eta                DateTime?
+  atd                DateTime?
+  ata                DateTime?
+  assignedToId       String?         @map("assigned_to")
+  createdById        String          @map("created_by")
+  notes              String?
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
+
+  tenant             Tenant          @relation(fields: [tenantId], references: [id])
+  client             Client          @relation(fields: [clientId], references: [id])
+  carrier            Carrier?        @relation(fields: [carrierId], references: [id])
+  assignedTo         User?           @relation("AssignedTo", fields: [assignedToId], references: [id])
+  createdBy          User            @relation("CreatedBy", fields: [createdById], references: [id])
+
+  statusLogs         ShipmentStatusLog[]
+  invoices           Invoice[]
+  customsDeclarations CustomsDeclaration[]
+
+  @@unique([tenantId, referenceNumber])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, clientId])
+  @@map("shipments")
+}
+
+model ShipmentStatusLog {
+  id          String          @id @default(uuid())
+  shipmentId  String          @map("shipment_id")
+  oldStatus   ShipmentStatus  @map("old_status")
+  newStatus   ShipmentStatus  @map("new_status")
+  changedById String          @map("changed_by")
+  comment     String?
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  shipment    Shipment        @relation(fields: [shipmentId], references: [id])
+  changedBy   User            @relation(fields: [changedById], references: [id])
+
+  @@index([shipmentId])
+  @@map("shipment_status_logs")
+}
+
+model Document {
+  id               String    @id @default(uuid())
+  tenantId         String    @map("tenant_id")
+  fileKey          String    @map("file_key") @db.VarChar(500)
+  originalName     String    @map("original_name") @db.VarChar(500)
+  mimeType         String    @map("mime_type") @db.VarChar(100)
+  sizeBytes        BigInt    @map("size_bytes")
+  docType          DocType   @map("doc_type")
+  version          Int       @default(1)
+  parentDocumentId String?   @map("parent_document_id")
+  linkedEntityType String    @map("linked_entity_type") @db.VarChar(50)
+  linkedEntityId   String    @map("linked_entity_id")
+  aiExtractedData  Json?     @map("ai_extracted_data")
+  uploadedById     String    @map("uploaded_by")
+  description      String?
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  tenant           Tenant    @relation(fields: [tenantId], references: [id])
+  parentDocument   Document? @relation("DocumentVersions", fields: [parentDocumentId], references: [id])
+  childDocuments   Document[] @relation("DocumentVersions")
+  uploadedBy       User      @relation(fields: [uploadedById], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, linkedEntityType, linkedEntityId])
+  @@map("documents")
+}
+
+model Invoice {
+  id            String        @id @default(uuid())
+  tenantId      String        @map("tenant_id")
+  invoiceNumber String        @map("invoice_number") @db.VarChar(50)
+  clientId      String        @map("client_id")
+  shipmentId    String?       @map("shipment_id")
+  amount        Decimal       @db.Decimal(12, 2)
+  currency      String        @default("USD") @db.VarChar(3)
+  status        InvoiceStatus @default(draft)
+  issuedDate    DateTime      @map("issued_date") @db.Date
+  dueDate       DateTime      @map("due_date") @db.Date
+  paidAmount    Decimal       @default(0) @map("paid_amount") @db.Decimal(12, 2)
+  paidDate      DateTime?     @map("paid_date") @db.Date
+  lineItems     Json?         @map("line_items")
+  notes         String?
+  createdById   String        @map("created_by")
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  client        Client        @relation(fields: [clientId], references: [id])
+  shipment      Shipment?     @relation(fields: [shipmentId], references: [id])
+  createdBy     User          @relation(fields: [createdById], references: [id])
+
+  @@unique([tenantId, invoiceNumber])
+  @@index([tenantId])
+  @@index([tenantId, clientId])
+  @@map("invoices")
+}
+
+model Vehicle {
+  id               String        @id @default(uuid())
+  tenantId         String        @map("tenant_id")
+  plateNumber      String        @map("plate_number") @db.VarChar(20)
+  brand            String?       @db.VarChar(100)
+  model            String?       @db.VarChar(100)
+  year             Int?
+  vin              String?       @db.VarChar(50)
+  capacityTons     Decimal?      @map("capacity_tons") @db.Decimal(8, 2)
+  volumeCbm        Decimal?      @map("volume_cbm") @db.Decimal(8, 2)
+  insuranceExpiry  DateTime?     @map("insurance_expiry") @db.Date
+  inspectionExpiry DateTime?     @map("inspection_expiry") @db.Date
+  tirCarnetExpiry  DateTime?     @map("tir_carnet_expiry") @db.Date
+  gpsTrackerId     String?       @map("gps_tracker_id") @db.VarChar(100)
+  gpsProvider      String?       @map("gps_provider") @db.VarChar(100)
+  status           VehicleStatus @default(available)
+  fuelType         String?       @map("fuel_type") @db.VarChar(20)
+  createdAt        DateTime      @default(now()) @map("created_at")
+
+  tenant           Tenant        @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("vehicles")
+}
+
+model Driver {
+  id                String       @id @default(uuid())
+  tenantId          String       @map("tenant_id")
+  name              String       @db.VarChar(255)
+  phone             String?      @db.VarChar(50)
+  email             String?      @db.VarChar(255)
+  licenseNumber     String?      @map("license_number") @db.VarChar(50)
+  licenseExpiry     DateTime?    @map("license_expiry") @db.Date
+  licenseCategories String[]     @map("license_categories")
+  medicalExpiry     DateTime?    @map("medical_expiry") @db.Date
+  passportNumber    String?      @map("passport_number") @db.VarChar(50)
+  passportExpiry    DateTime?    @map("passport_expiry") @db.Date
+  status            DriverStatus @default(available)
+  createdAt         DateTime     @default(now()) @map("created_at")
+
+  tenant            Tenant       @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId])
+  @@map("drivers")
+}
+
+model CustomsDeclaration {
+  id                String            @id @default(uuid())
+  tenantId          String            @map("tenant_id")
+  shipmentId        String            @map("shipment_id")
+  declarationNumber String?           @map("declaration_number") @db.VarChar(50)
+  type              DeclarationType
+  status            DeclarationStatus @default(preparing)
+  hsCodes           String[]          @map("hs_codes")
+  customsValue      Decimal?          @map("customs_value") @db.Decimal(12, 2)
+  dutyAmount        Decimal?          @map("duty_amount") @db.Decimal(12, 2)
+  vatAmount         Decimal?          @map("vat_amount") @db.Decimal(12, 2)
+  brokerName        String?           @map("broker_name") @db.VarChar(255)
+  filedAt           DateTime?         @map("filed_at")
+  clearedAt         DateTime?         @map("cleared_at")
+  deadline          DateTime?
+  notes             String?
+  createdAt         DateTime          @default(now()) @map("created_at")
+
+  tenant            Tenant            @relation(fields: [tenantId], references: [id])
+  shipment          Shipment          @relation(fields: [shipmentId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, shipmentId])
+  @@map("customs_declarations")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  userId      String   @map("user_id")
+  action      String   @db.VarChar(50)
+  entityType  String   @map("entity_type") @db.VarChar(50)
+  entityId    String   @map("entity_id")
+  changes     Json?
+  ipAddress   String?  @map("ip_address") @db.VarChar(45)
+  userAgent   String?  @map("user_agent") @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, entityType, entityId])
+  @@map("audit_logs")
+}
