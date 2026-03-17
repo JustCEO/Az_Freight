@@ -109,6 +109,12 @@ model Tenant {
   isActive           Boolean     @default(true) @map("is_active")
   createdAt          DateTime    @default(now()) @map("created_at")
 
+  portalEnabled      Boolean     @default(true) @map("portal_enabled")
+  portalThemeColor   String?     @default("#2563EB") @map("portal_theme_color") @db.VarChar(7)
+  portalLogoUrl      String?     @map("portal_logo_url") @db.VarChar(500)
+  portalWelcomeText  String?     @map("portal_welcome_text")
+  portalDomain       String?     @unique @map("portal_domain") @db.VarChar(255)
+
   users              User[]
   clients            Client[]
   carriers           Carrier[]
@@ -119,6 +125,8 @@ model Tenant {
   drivers            Driver[]
   customsDeclarations CustomsDeclaration[]
   auditLogs          AuditLog[]
+  invitations        Invitation[]
+  shipmentRequests   ShipmentRequest[]
 
   @@map("tenants")
 }
@@ -138,12 +146,14 @@ model User {
 
   tenant        Tenant    @relation(fields: [tenantId], references: [id])
 
-  assignedShipments  Shipment[]  @relation("AssignedTo")
-  createdShipments   Shipment[]  @relation("CreatedBy")
-  statusLogs         ShipmentStatusLog[]
-  uploadedDocuments  Document[]
-  createdInvoices    Invoice[]
-  auditLogs          AuditLog[]
+  assignedShipments      Shipment[]  @relation("AssignedTo")
+  createdShipments       Shipment[]  @relation("CreatedBy")
+  statusLogs             ShipmentStatusLog[]
+  uploadedDocuments      Document[]
+  createdInvoices        Invoice[]
+  auditLogs              AuditLog[]
+  sentInvitations        Invitation[]
+  assignedRequests       ShipmentRequest[] @relation("RequestAssignedTo")
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -171,6 +181,7 @@ model Client {
   tenant             Tenant    @relation(fields: [tenantId], references: [id])
   shipments          Shipment[]
   invoices           Invoice[]
+  shipmentRequests   ShipmentRequest[]
 
   @@index([tenantId])
   @@map("clients")
@@ -418,4 +429,89 @@ model AuditLog {
   @@index([tenantId])
   @@index([tenantId, entityType, entityId])
   @@map("audit_logs")
+}
+
+model Invitation {
+  id          String    @id @default(uuid())
+  tenantId    String    @map("tenant_id")
+  email       String    @db.VarChar(255)
+  role        UserRole
+  token       String    @unique @default(uuid())
+  expiresAt   DateTime  @map("expires_at")
+  usedAt      DateTime? @map("used_at")
+  invitedById String    @map("invited_by")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  invitedBy   User      @relation(fields: [invitedById], references: [id])
+
+  @@index([token])
+  @@index([tenantId])
+  @@map("invitations")
+}
+
+model ShipmentRequest {
+  id                 String    @id @default(uuid())
+  tenantId           String    @map("tenant_id")
+
+  requesterName      String    @map("requester_name") @db.VarChar(255)
+  requesterEmail     String    @map("requester_email") @db.VarChar(255)
+  requesterPhone     String?   @map("requester_phone") @db.VarChar(50)
+  companyName        String?   @map("company_name") @db.VarChar(255)
+
+  originCountry      String    @map("origin_country") @db.VarChar(100)
+  originCity         String    @map("origin_city") @db.VarChar(255)
+  destinationCountry String    @map("destination_country") @db.VarChar(100)
+  destinationCity    String    @map("destination_city") @db.VarChar(255)
+
+  cargoType          String    @map("cargo_type") @db.VarChar(50)
+  cargoDescription   String    @map("cargo_description")
+  weightKg           Decimal?  @map("weight_kg") @db.Decimal(12, 2)
+  volumeCbm          Decimal?  @map("volume_cbm") @db.Decimal(10, 3)
+  packageCount       Int?      @map("package_count")
+  declaredValue      Decimal?  @map("declared_value") @db.Decimal(12, 2)
+  currency           String    @default("USD") @db.VarChar(3)
+  incoterms          String?   @db.VarChar(10)
+  hsCode             String?   @map("hs_code") @db.VarChar(20)
+
+  transportType      String    @map("transport_type") @db.VarChar(20)
+  preferredDate      DateTime? @map("preferred_date")
+  isUrgent           Boolean   @default(false) @map("is_urgent")
+
+  specialRequirements Json?    @map("special_requirements")
+
+  status             String    @default("new") @db.VarChar(20)
+  assignedToId       String?   @map("assigned_to_id")
+  clientId           String?   @map("client_id")
+  shipmentId         String?   @map("shipment_id")
+
+  notes              String?
+  rejectionReason    String?   @map("rejection_reason")
+
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  tenant             Tenant    @relation(fields: [tenantId], references: [id])
+  assignedTo         User?     @relation("RequestAssignedTo", fields: [assignedToId], references: [id])
+  client             Client?   @relation(fields: [clientId], references: [id])
+  documents          ShipmentRequestDocument[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("shipment_requests")
+}
+
+model ShipmentRequestDocument {
+  id           String   @id @default(uuid())
+  requestId    String   @map("request_id")
+  fileKey      String   @map("file_key") @db.VarChar(500)
+  originalName String   @map("original_name") @db.VarChar(500)
+  mimeType     String   @map("mime_type") @db.VarChar(100)
+  sizeBytes    BigInt   @map("size_bytes")
+  docType      String   @map("doc_type") @db.VarChar(50)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  request      ShipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@map("shipment_request_documents")
 }

@@ -1,0 +1,71 @@
+import { get, post, patch } from '@/lib/api-client';
+import type { PaginatedResponse } from '@/types';
+
+export interface ShipmentRequestSummary {
+  id: string;
+  requesterName: string;
+  requesterEmail: string;
+  companyName: string | null;
+  originCountry: string;
+  originCity: string;
+  destinationCountry: string;
+  destinationCity: string;
+  cargoType: string;
+  transportType: string;
+  status: string;
+  isUrgent: boolean;
+  assignedTo: { id: string; name: string } | null;
+  _count: { documents: number };
+  createdAt: string;
+}
+
+export interface ShipmentRequestDetail extends ShipmentRequestSummary {
+  requesterPhone: string | null;
+  cargoDescription: string;
+  weightKg: number | null;
+  volumeCbm: number | null;
+  packageCount: number | null;
+  declaredValue: number | null;
+  currency: string;
+  incoterms: string | null;
+  hsCode: string | null;
+  preferredDate: string | null;
+  specialRequirements: Record<string, unknown> | null;
+  notes: string | null;
+  rejectionReason: string | null;
+  shipmentId: string | null;
+  client: { id: string; companyName: string } | null;
+  documents: {
+    id: string;
+    fileKey: string;
+    originalName: string;
+    mimeType: string;
+    sizeBytes: number;
+    docType: string;
+    createdAt: string;
+  }[];
+}
+
+export function listShipmentRequests(params: Record<string, string | number | undefined>) {
+  const query = Object.entries(params)
+    .filter(([, v]) => v !== undefined && v !== '')
+    .map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`)
+    .join('&');
+  return get<PaginatedResponse<ShipmentRequestSummary>>(`/shipment-requests?${query}`);
+}
+
+export function getShipmentRequest(id: string) {
+  return get<ShipmentRequestDetail>(`/shipment-requests/${id}`);
+}
+
+export function updateRequestStatus(id: string, data: { status: string; assignedToId?: string; notes?: string; rejectionReason?: string }) {
+  return patch<ShipmentRequestDetail>(`/shipment-requests/${id}/status`, data);
+}
+
+export function convertRequest(id: string) {
+  return post<{ shipment: unknown; client: unknown }>(`/shipment-requests/${id}/convert`);
+}
+
+export function getNewRequestCount() {
+  return get<number>('/shipment-requests/new-count');
+}

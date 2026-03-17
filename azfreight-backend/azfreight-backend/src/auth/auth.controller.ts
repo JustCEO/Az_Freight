@@ -5,10 +5,15 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser, JwtPayload } from '../common/decorators/current-user.decorator';
+import { InvitationsService } from '../invitations/invitations.service';
+import { RegisterByInviteDto } from '../invitations/dto/register-by-invite.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private invitationsService: InvitationsService,
+  ) {}
 
   @Post('register')
   register(@Body() dto: RegisterDto) {
@@ -35,5 +40,10 @@ export class AuthController {
   @Post('logout')
   logout(@CurrentUser() user: JwtPayload) {
     return this.authService.logout(user.sub);
+  }
+
+  @Post('register-by-invite')
+  registerByInvite(@Body() dto: RegisterByInviteDto) {
+    return this.invitationsService.registerByInvite(dto);
   }
 }

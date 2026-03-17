@@ -8,4 +8,12 @@ export default () => ({
   database: {
     url: process.env.DATABASE_URL,
   },
+  s3: {
+    endpoint: process.env.S3_ENDPOINT || 'http://localhost:9000',
+    region: process.env.S3_REGION || 'us-east-1',
+    bucket: process.env.S3_BUCKET || 'azfreight',
+    accessKeyId: process.env.S3_ACCESS_KEY || 'minioadmin',
+    secretAccessKey: process.env.S3_SECRET_KEY || 'minioadmin',
+    forcePathStyle: true,
+  },
 });
