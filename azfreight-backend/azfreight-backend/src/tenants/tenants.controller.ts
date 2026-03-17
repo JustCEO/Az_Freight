@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Patch, Body, UseGuards } from '@nestjs/common';
 import { TenantsService } from './tenants.service';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -16,9 +16,20 @@ export class TenantsController {
     return this.tenantsService.findOne(user.tenantId);
   }
 
+  @Get('me')
+  getMe(@CurrentUser() user: JwtPayload) {
+    return this.tenantsService.findOne(user.tenantId);
+  }
+
   @Put('current')
   @Roles('admin')
   updateCurrent(@CurrentUser() user: JwtPayload, @Body() dto: UpdateTenantDto) {
+    return this.tenantsService.update(user.tenantId, dto);
+  }
+
+  @Patch('me')
+  @Roles('admin')
+  updateMe(@CurrentUser() user: JwtPayload, @Body() dto: UpdateTenantDto) {
     return this.tenantsService.update(user.tenantId, dto);
   }
 }

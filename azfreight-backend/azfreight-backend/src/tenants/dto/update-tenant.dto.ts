@@ -16,4 +16,24 @@ export class UpdateTenantDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  portalEnabled?: boolean;
+
+  @IsOptional()
+  @IsString()
+  portalThemeColor?: string;
+
+  @IsOptional()
+  @IsString()
+  portalLogoUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  portalWelcomeText?: string;
+
+  @IsOptional()
+  @IsString()
+  portalDomain?: string;
 }
