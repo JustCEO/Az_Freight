@@ -34,13 +34,11 @@ export class ShipmentRequestsController {
     @Param('tenantSlug') tenantSlug: string,
     @Body() dto: CreateShipmentRequestDto,
     @UploadedFiles() uploadedFiles?: { files?: Express.Multer.File[] },
-    @Body('docTypes') docTypes?: string,
   ) {
-    let parsedDocTypes: string[] | undefined;
-    if (docTypes) {
-      try { parsedDocTypes = JSON.parse(docTypes); } catch { /* ignore */ }
-    }
-    return this.service.createPublic(tenantSlug, dto, uploadedFiles?.files, parsedDocTypes);
+    const docTypes = Array.isArray(dto.specialRequirements?.fileDocTypes)
+      ? (dto.specialRequirements.fileDocTypes as string[])
+      : undefined;
+    return this.service.createPublic(tenantSlug, dto, uploadedFiles?.files, docTypes);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

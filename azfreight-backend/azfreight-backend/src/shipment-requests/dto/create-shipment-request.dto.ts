@@ -8,7 +8,7 @@ import {
   IsIn,
   MinLength,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 const CARGO_TYPES = [
   'electronics', 'food', 'chemicals', 'pharma', 'machinery', 'clothing',
@@ -96,6 +96,12 @@ export class CreateShipmentRequestDto {
   isUrgent?: boolean;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try { return JSON.parse(value); } catch { return value; }
+    }
+    return value;
+  })
   @IsObject()
   specialRequirements?: Record<string, unknown>;
 }
