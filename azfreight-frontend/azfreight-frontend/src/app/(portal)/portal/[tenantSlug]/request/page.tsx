@@ -118,17 +118,21 @@ export default function ShipmentRequestPage() {
       formData.append('transportType', transportType);
       if (preferredDate) formData.append('preferredDate', preferredDate);
       formData.append('isUrgent', String(isUrgent));
+      const fileDocTypes = files.map((f) => f.docType);
       formData.append(
         'specialRequirements',
-        JSON.stringify({ isHazmat, needsRefrigeration, isFragile, needsCustomsClearance }),
+        JSON.stringify({
+          isHazmat,
+          needsRefrigeration,
+          isFragile,
+          needsCustomsClearance,
+          fileDocTypes,
+        }),
       );
 
-      const docTypes: string[] = [];
       files.forEach((f) => {
         formData.append('files', f.file);
-        docTypes.push(f.docType);
       });
-      if (docTypes.length > 0) formData.append('docTypes', JSON.stringify(docTypes));
 
       const res = await submitShipmentRequest(tenantSlug, formData);
       setSubmitted(res.id);
