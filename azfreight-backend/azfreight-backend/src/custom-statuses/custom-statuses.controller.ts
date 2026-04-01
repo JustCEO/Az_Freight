@@ -12,46 +12,33 @@ import { CurrentUser, JwtPayload } from '../common/decorators/current-user.decor
 export class CustomStatusesController {
   constructor(private customStatusesService: CustomStatusesService) {}
 
-  /** Получить все кастомные статусы тенанта */
   @Get('custom-statuses')
   @Roles('admin', 'manager')
   findAll(@CurrentUser() user: JwtPayload) {
     return this.customStatusesService.findAll(user.tenantId);
   }
 
-  /** Создать новый кастомный статус */
   @Post('custom-statuses')
   @Roles('admin')
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreateCustomStatusDto) {
     return this.customStatusesService.create(user.tenantId, dto);
   }
 
-  /** Обновить кастомный статус */
   @Put('custom-statuses/:id')
   @Roles('admin')
-  update(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') id: string,
-    @Body() dto: UpdateCustomStatusDto,
-  ) {
+  update(@CurrentUser() user: JwtPayload, @Param('id') id: string, @Body() dto: UpdateCustomStatusDto) {
     return this.customStatusesService.update(user.tenantId, id, dto);
   }
 
-  /** Удалить кастомный статус */
   @Delete('custom-statuses/:id')
   @Roles('admin')
   remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.customStatusesService.remove(user.tenantId, id);
   }
 
-  /** Назначить кастомный статус отправлению */
   @Patch('shipments/:id/custom-status')
   @Roles('admin', 'manager')
-  assignCustomStatus(
-    @CurrentUser() user: JwtPayload,
-    @Param('id') shipmentId: string,
-    @Body() body: { customStatusId?: string; customStatusNote?: string },
-  ) {
+  assignCustomStatus(@CurrentUser() user: JwtPayload, @Param('id') shipmentId: string, @Body() body: { customStatusId?: string; customStatusNote?: string }) {
     return this.customStatusesService.assignCustomStatus(user.tenantId, shipmentId, body);
   }
 }
