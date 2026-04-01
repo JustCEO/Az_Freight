@@ -73,4 +73,37 @@ export const CARGO_REQUIREMENTS: Record<string, CargoRequirement> = {
     recommended: [],
     notes: '',
   },
+  // Новые типы для обратной совместимости
+  food_beverage: {
+    required: ['invoice', 'packing_list', 'certificate_of_origin', 'quality_cert'],
+    recommended: ['phytosanitary', 'veterinary'],
+    needsRefrigeration: true,
+    notes: 'Perishable goods — specify temperature requirements',
+  },
+  clothing_textile: {
+    required: ['invoice', 'packing_list', 'certificate_of_origin'],
+    recommended: [],
+    notes: 'Material composition required for customs',
+  },
+  automotive: {
+    required: ['invoice', 'packing_list', 'certificate_of_origin'],
+    recommended: ['quality_cert'],
+    notes: 'VIN, year, engine volume for customs',
+  },
+  construction: {
+    required: ['invoice', 'packing_list'],
+    recommended: ['certificate_of_origin', 'quality_cert'],
+    notes: 'Heavy loads may require special transport permits',
+  },
+  furniture: {
+    required: ['invoice', 'packing_list'],
+    recommended: ['certificate_of_origin'],
+    notes: '',
+  },
+  oil_gas: {
+    required: ['invoice', 'packing_list', 'msds', 'license'],
+    recommended: ['certificate_of_origin'],
+    hazmat: true,
+    notes: 'Dangerous goods — special handling required',
+  },
 };

@@ -11,6 +11,7 @@ export default function NewClientPage() {
   const [form, setForm] = useState({
     companyName: '',
     taxId: '',
+    voen: '',
     address: '',
     country: '',
     city: '',
@@ -33,6 +34,7 @@ export default function NewClientPage() {
     try {
       const body: Record<string, unknown> = { companyName: form.companyName };
       if (form.taxId) body.taxId = form.taxId;
+      if (form.voen) body.voen = form.voen;
       if (form.address) body.address = form.address;
       if (form.country) body.country = form.country;
       if (form.city) body.city = form.city;
@@ -65,6 +67,7 @@ export default function NewClientPage() {
               <input type="text" value={form.companyName} onChange={(e) => updateField('companyName', e.target.value)} className="input-field" required />
             </div>
             <div><label className="label-field">Tax ID</label><input type="text" value={form.taxId} onChange={(e) => updateField('taxId', e.target.value)} className="input-field" /></div>
+            <div><label className="label-field">VOEN (Vergi ödəyicisinin eyniləşdirmə nömrəsi)</label><input type="text" value={form.voen} onChange={(e) => updateField('voen', e.target.value)} className="input-field" placeholder="1234567890" maxLength={10} /></div>
             <div><label className="label-field">Email</label><input type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} className="input-field" /></div>
             <div><label className="label-field">Phone</label><input type="text" value={form.phone} onChange={(e) => updateField('phone', e.target.value)} className="input-field" /></div>
             <div><label className="label-field">Website</label><input type="text" value={form.website} onChange={(e) => updateField('website', e.target.value)} className="input-field" /></div>

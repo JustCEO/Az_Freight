@@ -73,6 +73,18 @@ export class ShipmentRequestsController {
     return this.service.updateStatus(user.tenantId, id, dto);
   }
 
+  // Назначить перевозчика на запрос
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'manager')
+  @Patch('shipment-requests/:id/assign-carrier')
+  assignCarrier(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Body() body: { carrierId: string },
+  ) {
+    return this.service.assignCarrier(user.tenantId, id, body.carrierId);
+  }
+
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'manager')
   @Post('shipment-requests/:id/convert')

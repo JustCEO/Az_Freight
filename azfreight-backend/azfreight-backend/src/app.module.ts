@@ -16,6 +16,8 @@ import { VehiclesModule } from './vehicles/vehicles.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { ShipmentRequestsModule } from './shipment-requests/shipment-requests.module';
 import { PortalModule } from './portal/portal.module';
+import { CustomStatusesModule } from './custom-statuses/custom-statuses.module';
+import { SuperAdminModule } from './superadmin/superadmin.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { PortalModule } from './portal/portal.module';
     InvitationsModule,
     ShipmentRequestsModule,
     PortalModule,
+    SuperAdminModule,
+    CustomStatusesModule,
   ],
 })
 export class AppModule {}

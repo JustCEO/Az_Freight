@@ -29,3 +29,8 @@ export async function updateInvoice(id: string, data: Record<string, unknown>): 
 export async function updateInvoiceStatus(id: string, status: string): Promise<Invoice> {
   return patch<Invoice>(`/invoices/${id}/status`, { status });
 }
+
+// Частичная оплата
+export async function recordPayment(id: string, paidAmount: number, paidDate?: string): Promise<Invoice> {
+  return patch<Invoice>(`/invoices/${id}/payment`, { paidAmount, paidDate });
+}

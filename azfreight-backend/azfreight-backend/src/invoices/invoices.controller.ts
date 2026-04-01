@@ -44,4 +44,15 @@ export class InvoicesController {
   ) {
     return this.invoicesService.updateStatus(user.tenantId, id, dto);
   }
+
+  // Частичная оплата инвойса
+  @Patch(':id/payment')
+  @Roles('admin', 'accountant')
+  recordPayment(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') id: string,
+    @Body() body: { paidAmount: number; paidDate?: string },
+  ) {
+    return this.invoicesService.recordPayment(user.tenantId, id, body.paidAmount, body.paidDate);
+  }
 }

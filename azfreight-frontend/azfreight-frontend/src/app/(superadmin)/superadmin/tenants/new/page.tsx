@@ -1,0 +1,200 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { createTenant } from '@/lib/api/superadmin';
+
+// Доступные планы подписки
+const PLANS = ['starter', 'business', 'pro', 'corporate'];
+
+export default function CreateTenantPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const [form, setForm] = useState({
+    name: '',
+    slug: '',
+    plan: 'starter',
+    adminName: '',
+    adminEmail: '',
+    adminPassword: '',
+  });
+
+  // Обновление поля формы
+  const updateField = (field: string, value: string) => {
+    setForm((prev) => {
+      const updated = { ...prev, [field]: value };
+      // Автогенерация slug из названия компании
+      if (field === 'name') {
+        updated.slug = value
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .trim();
+      }
+      return updated;
+    });
+  };
+
+  // Отправка формы создания тенанта
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      await createTenant(form);
+      router.push('/superadmin/tenants');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Ошибка при создании тенанта';
+      setError(message);
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl">
+      {/* Навигация назад */}
+      <Link
+        href="/superadmin/tenants"
+        className="text-sm text-blue-600 hover:text-blue-700 mb-4 inline-block"
+      >
+        ← Назад к списку
+      </Link>
+
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Создать тенант</h1>
+
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-5"
+      >
+        {/* Ошибка */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
+        {/* Название компании */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Название компании
+          </label>
+          <input
+            type="text"
+            value={form.name}
+            onChange={(e) => updateField('name', e.target.value)}
+            required
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            placeholder="ООО Логистика"
+          />
+        </div>
+
+        {/* Slug (автогенерация) */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Slug
+          </label>
+          <input
+            type="text"
+            value={form.slug}
+            onChange={(e) => updateField('slug', e.target.value)}
+            required
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            placeholder="ooo-logistika"
+          />
+          <p className="text-xs text-gray-400 mt-1">Генерируется автоматически из названия</p>
+        </div>
+
+        {/* План подписки */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            План
+          </label>
+          <select
+            value={form.plan}
+            onChange={(e) => updateField('plan', e.target.value)}
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+          >
+            {PLANS.map((plan) => (
+              <option key={plan} value={plan}>
+                {plan.charAt(0).toUpperCase() + plan.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <hr className="border-gray-200" />
+
+        {/* Данные администратора тенанта */}
+        <p className="text-sm font-medium text-gray-600">Администратор тенанта</p>
+
+        {/* Имя администратора */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Имя администратора
+          </label>
+          <input
+            type="text"
+            value={form.adminName}
+            onChange={(e) => updateField('adminName', e.target.value)}
+            required
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            placeholder="Иван Иванов"
+          />
+        </div>
+
+        {/* Email администратора */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Email администратора
+          </label>
+          <input
+            type="email"
+            value={form.adminEmail}
+            onChange={(e) => updateField('adminEmail', e.target.value)}
+            required
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            placeholder="admin@company.com"
+          />
+        </div>
+
+        {/* Пароль администратора */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Пароль администратора
+          </label>
+          <input
+            type="password"
+            value={form.adminPassword}
+            onChange={(e) => updateField('adminPassword', e.target.value)}
+            required
+            minLength={6}
+            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            placeholder="••••••••"
+          />
+        </div>
+
+        {/* Кнопка создания */}
+        <div className="flex gap-3 pt-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? 'Создание...' : 'Создать'}
+          </button>
+          <Link
+            href="/superadmin/tenants"
+            className="px-6 py-2.5 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Отмена
+          </Link>
+        </div>
+      </form>
+    </div>
+  );
+}

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -109,6 +109,7 @@ export class UsersService {
     if (dto.email) data.email = dto.email;
     if (dto.role) data.role = dto.role;
     if (dto.phone !== undefined) data.phone = dto.phone;
+    if (dto.isActive !== undefined) data.isActive = dto.isActive;
     if (dto.password) {
       data.passwordHash = await bcrypt.hash(dto.password, 10);
     }
@@ -116,6 +117,34 @@ export class UsersService {
     return this.prisma.user.update({
       where: { id },
       data,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+  }
+
+  // Активация/деактивация пользователя
+  async toggleActive(tenantId: string, currentUserId: string, targetId: string, isActive: boolean) {
+    if (currentUserId === targetId) {
+      throw new BadRequestException('Cannot change your own active status');
+    }
+
+    const user = await this.prisma.user.findFirst({
+      where: { id: targetId, tenantId },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.prisma.user.update({
+      where: { id: targetId },
+      data: { isActive },
       select: {
         id: true,
         email: true,

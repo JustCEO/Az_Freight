@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'manager' | 'accountant' | 'client';
+export type UserRole = 'superadmin' | 'admin' | 'manager' | 'accountant' | 'client';
 export type ShipmentStatus = 'request' | 'confirmed' | 'in_transit' | 'customs' | 'delivered' | 'cancelled';
 export type TransportType = 'road_tir' | 'sea' | 'air' | 'rail';
 export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'partially_paid' | 'overdue' | 'cancelled';
@@ -32,6 +32,7 @@ export interface Client {
   id: string;
   companyName: string;
   taxId: string | null;
+  voen: string | null;
   address: string | null;
   country: string | null;
   city: string | null;
@@ -65,6 +66,16 @@ export interface Carrier {
   updatedAt: string;
 }
 
+export interface CustomStatus {
+  id: string;
+  name: string;
+  color: string;
+  order: number;
+  isDefault: boolean;
+  tenantId: string;
+  createdAt: string;
+}
+
 export interface Shipment {
   id: string;
   referenceNumber: string;
@@ -92,6 +103,9 @@ export interface Shipment {
   carrierRate: number | null;
   profit: number | null;
   currency: string;
+  customStatusId: string | null;
+  customStatusNote: string | null;
+  customStatus: CustomStatus | null;
   eta: string | null;
   atd: string | null;
   ata: string | null;
@@ -150,6 +164,7 @@ export interface Invoice {
   status: InvoiceStatus;
   issuedDate: string;
   dueDate: string;
+  paidAmount: number;
   paidDate: string | null;
   lineItems: unknown[] | null;
   notes: string | null;

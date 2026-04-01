@@ -5,17 +5,19 @@ import {
   IsNumber,
   IsBoolean,
   IsObject,
-  IsIn,
+  IsArray,
   MinLength,
+  Matches,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
 const CARGO_TYPES = [
-  'electronics', 'food', 'chemicals', 'pharma', 'machinery', 'clothing',
-  'alcohol_tobacco', 'weapons_ammo', 'animals', 'plants', 'vehicles', 'other',
+  'electronics', 'food_beverage', 'clothing_textile', 'chemicals', 'pharma',
+  'machinery', 'automotive', 'construction', 'furniture', 'oil_gas',
+  'alcohol_tobacco', 'animals', 'plants', 'other',
+  // обратная совместимость со старыми типами
+  'food', 'clothing', 'weapons_ammo', 'vehicles',
 ];
-
-const TRANSPORT_TYPES = ['road_tir', 'sea', 'air', 'rail', 'multimodal'];
 
 export class CreateShipmentRequestDto {
   @IsString()
@@ -33,6 +35,11 @@ export class CreateShipmentRequestDto {
   @IsString()
   companyName?: string;
 
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{10}$/, { message: 'VOEN must be exactly 10 digits' })
+  voen?: string;
+
   @IsString()
   originCountry: string;
 
@@ -45,8 +52,12 @@ export class CreateShipmentRequestDto {
   @IsString()
   destinationCity: string;
 
-  @IsIn(CARGO_TYPES)
+  @IsString()
   cargoType: string;
+
+  @IsOptional()
+  @IsString()
+  cargoSubtype?: string;
 
   @IsString()
   @MinLength(3)
@@ -84,14 +95,37 @@ export class CreateShipmentRequestDto {
   @IsString()
   hsCode?: string;
 
-  @IsIn(TRANSPORT_TYPES)
-  transportType: string;
+  // Мультимодальная доставка: массив типов транспорта
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try { return JSON.parse(value); } catch { return [value]; }
+    }
+    return value;
+  })
+  @IsArray()
+  transportTypes?: string[];
+
+  // Порядок следования этапов
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') {
+      try { return JSON.parse(value); } catch { return [value]; }
+    }
+    return value;
+  })
+  @IsArray()
+  transportOrder?: string[];
 
   @IsOptional()
   @IsString()
   preferredDate?: string;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (typeof value === 'string') return value === 'true';
+    return value;
+  })
   @IsBoolean()
   isUrgent?: boolean;
 

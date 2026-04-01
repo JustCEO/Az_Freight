@@ -14,10 +14,16 @@ export const CARGO_REQUIREMENTS: Record<string, CargoRequirement> = {
     recommended: ['certificate_of_origin'],
     notes: 'Export license may be required for certain countries',
   },
-  food: {
+  food_beverage: {
     required: ['invoice', 'packing_list', 'certificate_of_origin', 'quality_cert'],
     recommended: ['phytosanitary', 'veterinary'],
+    needsRefrigeration: true,
     notes: 'Perishable goods — specify temperature requirements',
+  },
+  clothing_textile: {
+    required: ['invoice', 'packing_list', 'certificate_of_origin'],
+    recommended: [],
+    notes: 'Material composition required for customs',
   },
   chemicals: {
     required: ['invoice', 'packing_list', 'msds'],
@@ -36,22 +42,32 @@ export const CARGO_REQUIREMENTS: Record<string, CargoRequirement> = {
     recommended: ['certificate_of_origin', 'quality_cert'],
     notes: 'Used equipment — condition report; dual-use — export license',
   },
-  clothing: {
+  automotive: {
     required: ['invoice', 'packing_list', 'certificate_of_origin'],
-    recommended: [],
-    notes: 'Material composition required for customs',
+    recommended: ['quality_cert'],
+    notes: 'VIN, year, engine volume for customs',
+  },
+  construction: {
+    required: ['invoice', 'packing_list'],
+    recommended: ['certificate_of_origin', 'quality_cert'],
+    notes: 'Heavy loads may require special transport permits',
+  },
+  furniture: {
+    required: ['invoice', 'packing_list'],
+    recommended: ['certificate_of_origin'],
+    notes: '',
+  },
+  oil_gas: {
+    required: ['invoice', 'packing_list', 'msds', 'license'],
+    recommended: ['certificate_of_origin'],
+    hazmat: true,
+    notes: 'Dangerous goods — special handling required',
   },
   alcohol_tobacco: {
     required: ['invoice', 'packing_list', 'license', 'certificate_of_origin', 'quality_cert'],
     recommended: [],
     excise: true,
     notes: 'Excise goods — import/export license required',
-  },
-  weapons_ammo: {
-    required: ['license'],
-    recommended: [],
-    restricted: true,
-    notes: 'Government license required',
   },
   animals: {
     required: ['veterinary', 'certificate_of_origin'],
@@ -63,31 +79,56 @@ export const CARGO_REQUIREMENTS: Record<string, CargoRequirement> = {
     recommended: [],
     notes: 'Phytosanitary certificate required for plants and seeds',
   },
-  vehicles: {
-    required: ['invoice', 'packing_list', 'certificate_of_origin'],
-    recommended: ['quality_cert'],
-    notes: 'VIN, year, engine volume for customs',
-  },
   other: {
     required: ['invoice', 'packing_list'],
     recommended: [],
     notes: '',
   },
+  // Обратная совместимость
+  food: {
+    required: ['invoice', 'packing_list', 'certificate_of_origin', 'quality_cert'],
+    recommended: ['phytosanitary', 'veterinary'],
+    needsRefrigeration: true,
+    notes: 'Perishable goods — specify temperature requirements',
+  },
+  clothing: {
+    required: ['invoice', 'packing_list', 'certificate_of_origin'],
+    recommended: [],
+    notes: 'Material composition required for customs',
+  },
+  vehicles: {
+    required: ['invoice', 'packing_list', 'certificate_of_origin'],
+    recommended: ['quality_cert'],
+    notes: 'VIN, year, engine volume for customs',
+  },
+  weapons_ammo: {
+    required: ['license'],
+    recommended: [],
+    restricted: true,
+    notes: 'Government license required',
+  },
 };
 
 export const CARGO_TYPE_LABELS: Record<string, string> = {
   electronics: 'Electronics',
-  food: 'Food & Perishables',
+  food_beverage: 'Food & Beverage',
+  clothing_textile: 'Clothing & Textile',
   chemicals: 'Chemicals',
   pharma: 'Pharmaceuticals',
   machinery: 'Machinery & Equipment',
-  clothing: 'Clothing & Textiles',
+  automotive: 'Automotive',
+  construction: 'Construction Materials',
+  furniture: 'Furniture & Home',
+  oil_gas: 'Oil & Gas',
   alcohol_tobacco: 'Alcohol & Tobacco',
-  weapons_ammo: 'Weapons & Ammunition',
   animals: 'Live Animals',
   plants: 'Plants & Seeds',
-  vehicles: 'Vehicles',
   other: 'Other',
+  // обратная совместимость
+  food: 'Food & Perishables',
+  clothing: 'Clothing & Textiles',
+  vehicles: 'Vehicles',
+  weapons_ammo: 'Weapons & Ammunition',
 };
 
 export const DOC_TYPE_LABELS: Record<string, string> = {
@@ -107,7 +148,6 @@ export const TRANSPORT_TYPE_OPTIONS = [
   { value: 'sea', label: 'Sea Freight' },
   { value: 'air', label: 'Air Freight' },
   { value: 'rail', label: 'Rail' },
-  { value: 'multimodal', label: 'Multimodal' },
 ];
 
 export const INCOTERMS_OPTIONS = [

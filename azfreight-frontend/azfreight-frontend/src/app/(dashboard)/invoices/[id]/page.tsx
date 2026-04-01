@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getInvoice, updateInvoiceStatus } from '@/lib/api/invoices';
+import { getInvoice, updateInvoiceStatus, recordPayment } from '@/lib/api/invoices';
 import type { Invoice } from '@/types';
 import StatusBadge from '@/components/status-badge';
 import Loading from '@/components/loading';
@@ -34,6 +34,12 @@ export default function InvoiceDetailPage() {
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
+  // Частичная оплата
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10));
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
+
   useEffect(() => {
     getInvoice(id)
       .then(setInvoice)
@@ -51,9 +57,32 @@ export default function InvoiceDetailPage() {
     setUpdatingStatus(false);
   }
 
+  async function handleRecordPayment() {
+    if (!invoice || !paymentAmount) return;
+    const amount = parseFloat(paymentAmount);
+    if (isNaN(amount) || amount <= 0) {
+      setPaymentError('Enter a valid amount');
+      return;
+    }
+    setPaymentLoading(true);
+    setPaymentError('');
+    try {
+      const updated = await recordPayment(id, amount, paymentDate);
+      setInvoice(updated);
+      setPaymentAmount('');
+    } catch (e) {
+      setPaymentError(e instanceof Error ? e.message : 'Failed to record payment');
+    }
+    setPaymentLoading(false);
+  }
+
   if (loading || !invoice) return <Loading />;
 
   const transitions = INVOICE_STATUS_TRANSITIONS[invoice.status] || [];
+  const paidAmount = Number(invoice.paidAmount) || 0;
+  const totalAmount = Number(invoice.amount) || 0;
+  const remaining = totalAmount - paidAmount;
+  const paidPercent = totalAmount > 0 ? Math.min((paidAmount / totalAmount) * 100, 100) : 0;
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -88,7 +117,7 @@ export default function InvoiceDetailPage() {
             </div>
             <div>
               <dt className="text-slate-500">Amount</dt>
-              <dd className="font-medium text-lg">{invoice.amount.toLocaleString()} {invoice.currency}</dd>
+              <dd className="font-medium text-lg">{totalAmount.toLocaleString()} {invoice.currency}</dd>
             </div>
             <div>
               <dt className="text-slate-500">Currency</dt>
@@ -120,6 +149,22 @@ export default function InvoiceDetailPage() {
           </dl>
         </div>
 
+        {/* Прогресс оплаты */}
+        <div className="bg-white rounded-xl border border-slate-200 p-6 lg:col-span-2">
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Payment Progress</h3>
+          <div className="flex items-center justify-between text-sm mb-2">
+            <span className="text-slate-500">Paid: <span className="font-medium text-slate-900">{paidAmount.toLocaleString()} {invoice.currency}</span></span>
+            <span className="text-slate-500">Remaining: <span className="font-medium text-slate-900">{remaining.toLocaleString()} {invoice.currency}</span></span>
+          </div>
+          <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${paidPercent >= 100 ? 'bg-emerald-500' : 'bg-blue-500'}`}
+              style={{ width: `${paidPercent}%` }}
+            />
+          </div>
+          <p className="text-xs text-slate-400 mt-1 text-right">{paidPercent.toFixed(0)}% paid</p>
+        </div>
+
         {/* Notes */}
         {invoice.notes && (
           <div className="bg-white rounded-xl border border-slate-200 p-6 lg:col-span-2">
@@ -128,6 +173,45 @@ export default function InvoiceDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Форма частичной оплаты */}
+      {(invoice.status === 'partially_paid' || invoice.status === 'sent' || invoice.status === 'overdue') && remaining > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Record Payment</h3>
+          <div className="flex flex-wrap items-end gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Amount ({invoice.currency})</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                max={remaining}
+                value={paymentAmount}
+                onChange={(e) => { setPaymentAmount(e.target.value); setPaymentError(''); }}
+                placeholder={`Max: ${remaining.toLocaleString()}`}
+                className="input-field w-48"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Payment Date</label>
+              <input
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+                className="input-field w-44"
+              />
+            </div>
+            <button
+              onClick={handleRecordPayment}
+              disabled={paymentLoading || !paymentAmount}
+              className="btn-primary disabled:opacity-50"
+            >
+              {paymentLoading ? 'Recording...' : 'Record Payment'}
+            </button>
+          </div>
+          {paymentError && <p className="text-sm text-red-600 mt-2">{paymentError}</p>}
+        </div>
+      )}
 
       {/* Status Transition */}
       {transitions.length > 0 && (

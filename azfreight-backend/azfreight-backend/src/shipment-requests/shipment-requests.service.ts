@@ -25,6 +25,12 @@ export class ShipmentRequestsService {
     if (!tenant) throw new NotFoundException('Tenant not found');
     if (!tenant.portalEnabled) throw new BadRequestException('Portal is disabled');
 
+    // Поддержка мультимодальной доставки
+    const transportTypes = dto.transportTypes || (dto as Record<string, unknown>).transportType
+      ? [String((dto as Record<string, unknown>).transportType)]
+      : ['road_tir'];
+    const transportOrder = dto.transportOrder || transportTypes;
+
     const request = await this.prisma.shipmentRequest.create({
       data: {
         tenantId: tenant.id,
@@ -32,11 +38,13 @@ export class ShipmentRequestsService {
         requesterEmail: dto.requesterEmail,
         requesterPhone: dto.requesterPhone,
         companyName: dto.companyName,
+        voen: dto.voen,
         originCountry: dto.originCountry,
         originCity: dto.originCity,
         destinationCountry: dto.destinationCountry,
         destinationCity: dto.destinationCity,
         cargoType: dto.cargoType,
+        cargoSubtype: dto.cargoSubtype,
         cargoDescription: dto.cargoDescription,
         weightKg: dto.weightKg,
         volumeCbm: dto.volumeCbm,
@@ -45,7 +53,8 @@ export class ShipmentRequestsService {
         currency: dto.currency || 'USD',
         incoterms: dto.incoterms,
         hsCode: dto.hsCode,
-        transportType: dto.transportType,
+        transportTypes,
+        transportOrder,
         preferredDate: dto.preferredDate ? new Date(dto.preferredDate) : undefined,
         isUrgent: dto.isUrgent || false,
         specialRequirements: dto.specialRequirements ? JSON.parse(JSON.stringify(dto.specialRequirements)) : undefined,
@@ -71,8 +80,6 @@ export class ShipmentRequestsService {
       }
     }
 
-    // TODO: Send email/WhatsApp notification to tenant managers
-
     return { id: request.id, message: 'Request submitted successfully' };
   }
 
@@ -83,7 +90,7 @@ export class ShipmentRequestsService {
     const where: Record<string, unknown> = { tenantId };
     if (status) where.status = status;
     if (cargoType) where.cargoType = cargoType;
-    if (transportType) where.transportType = transportType;
+    if (transportType) where.transportTypes = { has: transportType };
     if (dateFrom || dateTo) {
       where.createdAt = {};
       if (dateFrom) (where.createdAt as Record<string, unknown>).gte = new Date(dateFrom);
@@ -106,6 +113,7 @@ export class ShipmentRequestsService {
         orderBy: { createdAt: 'desc' },
         include: {
           assignedTo: { select: { id: true, name: true } },
+          carrier: { select: { id: true, companyName: true } },
           _count: { select: { documents: true } },
         },
       }),
@@ -121,6 +129,7 @@ export class ShipmentRequestsService {
       include: {
         assignedTo: { select: { id: true, name: true } },
         client: { select: { id: true, companyName: true } },
+        carrier: { select: { id: true, companyName: true } },
         documents: true,
       },
     });
@@ -143,6 +152,26 @@ export class ShipmentRequestsService {
     });
   }
 
+  // Назначить перевозчика на запрос
+  async assignCarrier(tenantId: string, id: string, carrierId: string) {
+    const request = await this.prisma.shipmentRequest.findFirst({ where: { id, tenantId } });
+    if (!request) throw new NotFoundException('Request not found');
+
+    const carrier = await this.prisma.carrier.findFirst({ where: { id: carrierId, tenantId, isActive: true } });
+    if (!carrier) throw new NotFoundException('Carrier not found');
+
+    return this.prisma.shipmentRequest.update({
+      where: { id },
+      data: { carrierId },
+      include: {
+        carrier: { select: { id: true, companyName: true } },
+        assignedTo: { select: { id: true, name: true } },
+        client: { select: { id: true, companyName: true } },
+        documents: true,
+      },
+    });
+  }
+
   async convert(tenantId: string, id: string, userId: string) {
     const request = await this.prisma.shipmentRequest.findFirst({
       where: { id, tenantId },
@@ -161,6 +190,7 @@ export class ShipmentRequestsService {
           companyName: request.companyName,
           email: request.requesterEmail,
           phone: request.requesterPhone,
+          voen: request.voen,
         },
       });
     }
@@ -172,26 +202,29 @@ export class ShipmentRequestsService {
           companyName: request.requesterName,
           email: request.requesterEmail,
           phone: request.requesterPhone,
+          voen: request.voen,
         },
       });
     }
 
     const refNumber = await this.generateReferenceNumber(tenantId);
 
+    // Определяем основной тип транспорта из мультимодального списка
+    const mainTransport = request.transportTypes?.[0] || 'road_tir';
     const transportMap: Record<string, string> = {
       road_tir: 'road_tir',
       sea: 'sea',
       air: 'air',
       rail: 'rail',
-      multimodal: 'road_tir',
     };
 
     const shipment = await this.prisma.shipment.create({
       data: {
         tenantId,
         referenceNumber: refNumber,
-        transportType: (transportMap[request.transportType] || 'road_tir') as 'road_tir' | 'sea' | 'air' | 'rail',
+        transportType: (transportMap[mainTransport] || 'road_tir') as 'road_tir' | 'sea' | 'air' | 'rail',
         clientId: client.id,
+        carrierId: request.carrierId,
         originCountry: request.originCountry.slice(0, 3),
         originCity: request.originCity,
         destinationCountry: request.destinationCountry.slice(0, 3),
