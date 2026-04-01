@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -33,6 +33,13 @@ export class UsersController {
   @Roles('admin')
   update(@CurrentUser() user: JwtPayload, @Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(user.tenantId, id, dto);
+  }
+
+  // Активация/деактивация пользователя
+  @Patch(':id/toggle-active')
+  @Roles('admin')
+  toggleActive(@CurrentUser() user: JwtPayload, @Param('id') id: string, @Body() body: { isActive: boolean }) {
+    return this.usersService.toggleActive(user.tenantId, user.sub, id, body.isActive);
   }
 
   @Delete(':id')

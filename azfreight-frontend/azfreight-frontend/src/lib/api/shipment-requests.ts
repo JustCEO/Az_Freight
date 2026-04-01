@@ -11,16 +11,20 @@ export interface ShipmentRequestSummary {
   destinationCountry: string;
   destinationCity: string;
   cargoType: string;
-  transportType: string;
+  transportTypes: string[];
+  transportOrder: string[];
   status: string;
   isUrgent: boolean;
   assignedTo: { id: string; name: string } | null;
+  carrier: { id: string; companyName: string } | null;
   _count: { documents: number };
   createdAt: string;
 }
 
 export interface ShipmentRequestDetail extends ShipmentRequestSummary {
   requesterPhone: string | null;
+  voen: string | null;
+  cargoSubtype: string | null;
   cargoDescription: string;
   weightKg: number | null;
   volumeCbm: number | null;
@@ -34,6 +38,7 @@ export interface ShipmentRequestDetail extends ShipmentRequestSummary {
   notes: string | null;
   rejectionReason: string | null;
   shipmentId: string | null;
+  carrierId: string | null;
   client: { id: string; companyName: string } | null;
   documents: {
     id: string;
@@ -60,6 +65,10 @@ export function getShipmentRequest(id: string) {
 
 export function updateRequestStatus(id: string, data: { status: string; assignedToId?: string; notes?: string; rejectionReason?: string }) {
   return patch<ShipmentRequestDetail>(`/shipment-requests/${id}/status`, data);
+}
+
+export function assignCarrierToRequest(id: string, carrierId: string) {
+  return patch<ShipmentRequestDetail>(`/shipment-requests/${id}/assign-carrier`, { carrierId });
 }
 
 export function convertRequest(id: string) {

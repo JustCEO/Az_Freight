@@ -1,22 +1,41 @@
 'use client';
 
-import { useState, useCallback, type DragEvent, type ChangeEvent } from 'react';
+import { useState, useCallback, useEffect, type DragEvent, type ChangeEvent } from 'react';
 import { useParams } from 'next/navigation';
 import { submitShipmentRequest } from '@/lib/api/portal';
-import {
-  CARGO_REQUIREMENTS,
-  CARGO_TYPE_LABELS,
-  DOC_TYPE_LABELS,
-  TRANSPORT_TYPE_OPTIONS,
-  INCOTERMS_OPTIONS,
-} from '@/lib/cargo-requirements';
+import { CARGO_REQUIREMENTS, DOC_TYPE_LABELS, INCOTERMS_OPTIONS } from '@/lib/cargo-requirements';
+import { COUNTRIES, type CountryData } from '@/lib/countries-cities';
 
-interface FileWithType {
-  file: File;
-  docType: string;
-}
+interface FileWithType { file: File; docType: string; }
 
 const STEPS = ['Contact Info', 'Route & Transport', 'Cargo', 'Documents', 'Confirmation'];
+const TRANSPORT_OPTS = [
+  { value: 'road_tir', label: 'Road / TIR' },
+  { value: 'sea', label: 'Sea Freight' },
+  { value: 'air', label: 'Air Freight' },
+  { value: 'rail', label: 'Rail' },
+];
+
+// Двухуровневые типы груза
+const CARGO_TYPES: Record<string, { label: string; subcategories: string[] }> = {
+  electronics: { label: 'Electronics / Электроника', subcategories: ['Computers & Laptops', 'Smartphones & Tablets', 'Computer Accessories', 'TV & Audio', 'Industrial Electronics', 'Semiconductors', 'Other Electronics'] },
+  food_beverage: { label: 'Food & Beverage / Продукты питания', subcategories: ['Fresh Fruits & Vegetables', 'Frozen Food', 'Dry Food & Grains', 'Beverages', 'Dairy Products', 'Meat & Seafood', 'Confectionery', 'Other Food'] },
+  clothing_textile: { label: 'Clothing & Textile / Одежда и ткани', subcategories: ["Men's Clothing", "Women's Clothing", "Children's Clothing", 'Footwear', 'Fabrics & Textile', 'Accessories', 'Other Clothing'] },
+  chemicals: { label: 'Chemicals / Химикаты', subcategories: ['Industrial Chemicals', 'Cleaning Products', 'Fertilizers', 'Paints & Coatings', 'Adhesives', 'Other Chemicals'] },
+  machinery: { label: 'Machinery & Equipment / Оборудование', subcategories: ['Construction Equipment', 'Agricultural Machinery', 'Industrial Equipment', 'Medical Equipment', 'HVAC Equipment', 'Power Tools', 'Other Machinery'] },
+  pharma: { label: 'Pharmaceuticals / Фармацевтика', subcategories: ['Medicines', 'Medical Devices', 'Supplements', 'Veterinary Products', 'Other Pharma'] },
+  automotive: { label: 'Automotive / Автомобили и запчасти', subcategories: ['Passenger Cars', 'Commercial Vehicles', 'Motorcycles', 'Spare Parts', 'Tires', 'Other Automotive'] },
+  construction: { label: 'Construction Materials / Стройматериалы', subcategories: ['Steel & Metal', 'Cement & Concrete', 'Wood & Timber', 'Glass', 'Tiles & Ceramics', 'Insulation', 'Other Construction'] },
+  furniture: { label: 'Furniture & Home / Мебель', subcategories: ['Office Furniture', 'Home Furniture', 'Kitchen Equipment', 'Lighting', 'Decor', 'Other Furniture'] },
+  oil_gas: { label: 'Oil & Gas / Нефть и газ', subcategories: ['Crude Oil', 'Petroleum Products', 'LPG', 'Pipeline Equipment', 'Other Oil & Gas'] },
+  alcohol_tobacco: { label: 'Alcohol & Tobacco / Алкоголь и табак', subcategories: ['Wine & Spirits', 'Beer', 'Tobacco Products', 'Other'] },
+  animals: { label: 'Live Animals / Живые животные', subcategories: ['Livestock', 'Pets', 'Poultry', 'Other Animals'] },
+  plants: { label: 'Plants & Seeds / Растения', subcategories: ['Flowers', 'Seeds', 'Seedlings', 'Other Plants'] },
+  other: { label: 'Other / Прочее', subcategories: ['Mixed Cargo', 'Personal Effects', 'Other'] },
+};
+
+// CBM коэффициенты
+const CBM_DIVISORS: Record<string, number> = { cm: 1000000, mm: 1000000000, m: 1, inch: 61023.7, ft: 35.3147 };
 
 export default function ShipmentRequestPage() {
   const params = useParams();
@@ -25,59 +44,140 @@ export default function ShipmentRequestPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [locale, setLocale] = useState('en');
 
-  // Step 1
+  useEffect(() => {
+    const saved = localStorage.getItem('locale');
+    if (saved) setLocale(saved);
+    const handler = () => { const l = localStorage.getItem('locale'); if (l) setLocale(l); };
+    window.addEventListener('locale-changed', handler);
+    return () => window.removeEventListener('locale-changed', handler);
+  }, []);
+
+  // Step 1: Contact
   const [requesterName, setRequesterName] = useState('');
   const [requesterEmail, setRequesterEmail] = useState('');
   const [requesterPhone, setRequesterPhone] = useState('');
   const [companyName, setCompanyName] = useState('');
+  const [voen, setVoen] = useState('');
 
-  // Step 2
+  // Step 2: Route — автодополнение
   const [originCountry, setOriginCountry] = useState('');
   const [originCity, setOriginCity] = useState('');
-  const [destinationCountry, setDestinationCountry] = useState('');
-  const [destinationCity, setDestinationCity] = useState('');
-  const [transportType, setTransportType] = useState('road_tir');
+  const [destCountry, setDestCountry] = useState('');
+  const [destCity, setDestCity] = useState('');
+  const [showOriginCountries, setShowOriginCountries] = useState(false);
+  const [showOriginCities, setShowOriginCities] = useState(false);
+  const [showDestCountries, setShowDestCountries] = useState(false);
+  const [showDestCities, setShowDestCities] = useState(false);
+  const [selectedOriginCountry, setSelectedOriginCountry] = useState<CountryData | null>(null);
+  const [selectedDestCountry, setSelectedDestCountry] = useState<CountryData | null>(null);
+
+  // Step 2: Мультимодальная доставка
+  const [transportTypes, setTransportTypes] = useState<string[]>(['road_tir']);
+  const [transportOrder, setTransportOrder] = useState<string[]>(['road_tir']);
   const [preferredDate, setPreferredDate] = useState('');
   const [isUrgent, setIsUrgent] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
 
-  // Step 3
+  // Step 3: Cargo
   const [cargoType, setCargoType] = useState('other');
+  const [cargoSubtype, setCargoSubtype] = useState('');
   const [cargoDescription, setCargoDescription] = useState('');
   const [weightKg, setWeightKg] = useState('');
-  const [volumeCbm, setVolumeCbm] = useState('');
   const [packageCount, setPackageCount] = useState('');
-  const [declaredValue, setDeclaredValue] = useState('');
-  const [currency, setCurrency] = useState('USD');
-  const [incoterms, setIncoterms] = useState('');
-  const [hsCode, setHsCode] = useState('');
+  const [dimLength, setDimLength] = useState('');
+  const [dimWidth, setDimWidth] = useState('');
+  const [dimHeight, setDimHeight] = useState('');
+  const [dimUnit, setDimUnit] = useState('cm');
   const [isHazmat, setIsHazmat] = useState(false);
   const [needsRefrigeration, setNeedsRefrigeration] = useState(false);
   const [isFragile, setIsFragile] = useState(false);
   const [needsCustomsClearance, setNeedsCustomsClearance] = useState(false);
+  const [isGroupage, setIsGroupage] = useState(false);
+  const [isStackable, setIsStackable] = useState(false);
+  const [customsOpen, setCustomsOpen] = useState(false);
+  const [declaredValue, setDeclaredValue] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [incoterms, setIncoterms] = useState('');
+  const [hsCode, setHsCode] = useState('');
 
-  // Step 4
+  // Step 4: Documents
   const [files, setFiles] = useState<FileWithType[]>([]);
   const [dragOver, setDragOver] = useState(false);
 
   // Step 5
   const [agreed, setAgreed] = useState(false);
 
+  // CBM расчёт
+  const calcCbm = (): number => {
+    const l = parseFloat(dimLength); const w = parseFloat(dimWidth); const h = parseFloat(dimHeight);
+    if (!l || !w || !h) return 0;
+    return (l * w * h) / CBM_DIVISORS[dimUnit];
+  };
+  const cbmValue = calcCbm();
+
+  // Автодополнение: фильтр стран по вводу
+  const filterCountries = (query: string): CountryData[] => {
+    if (query.length < 2) return [];
+    const q = query.toLowerCase();
+    return COUNTRIES.filter((c) =>
+      c.name.en.toLowerCase().includes(q) || c.name.ru.toLowerCase().includes(q) || c.name.az.toLowerCase().includes(q)
+    ).slice(0, 8);
+  };
+
+  const filterCities = (country: CountryData | null, query: string) => {
+    if (!country || query.length < 1) return [];
+    const q = query.toLowerCase();
+    return country.cities.filter((c) =>
+      c.name.en.toLowerCase().includes(q) || c.name.ru.toLowerCase().includes(q) || c.name.az.toLowerCase().includes(q)
+    ).slice(0, 8);
+  };
+
+  const getCountryName = (c: CountryData) => c.name[locale] || c.name.en;
+  const getCityName = (c: { name: Record<string, string> }) => c.name[locale] || c.name.en;
+
+  // Мультимодальная: toggle транспорта
+  const toggleTransport = (val: string) => {
+    setTransportTypes((prev) => {
+      const next = prev.includes(val) ? prev.filter((t) => t !== val) : [...prev, val];
+      setTransportOrder((ord) => {
+        const newOrd = ord.filter((t) => next.includes(t));
+        next.forEach((t) => { if (!newOrd.includes(t)) newOrd.push(t); });
+        return newOrd;
+      });
+      return next;
+    });
+  };
+
+  // Drag-and-drop порядок этапов
+  const handleOrderDragStart = (idx: number) => setDragIdx(idx);
+  const handleOrderDrop = (targetIdx: number) => {
+    if (dragIdx === null) return;
+    setTransportOrder((prev) => {
+      const arr = [...prev];
+      const [moved] = arr.splice(dragIdx, 1);
+      arr.splice(targetIdx, 0, moved);
+      return arr;
+    });
+    setDragIdx(null);
+  };
+
+  // Автооткрытие customs секции
+  useEffect(() => { if (needsCustomsClearance) setCustomsOpen(true); }, [needsCustomsClearance]);
+
   const cargoReqs = CARGO_REQUIREMENTS[cargoType] || CARGO_REQUIREMENTS.other;
   const allDocTypes = Array.from(new Set([...cargoReqs.required, ...cargoReqs.recommended]));
   const uploadedDocTypes = files.map((f) => f.docType);
 
   const handleDrop = useCallback((e: DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    const dropped = Array.from(e.dataTransfer.files);
-    setFiles((prev) => [...prev, ...dropped.map((f) => ({ file: f, docType: 'other' }))]);
+    e.preventDefault(); setDragOver(false);
+    setFiles((prev) => [...prev, ...Array.from(e.dataTransfer.files).map((f) => ({ file: f, docType: 'other' }))]);
   }, []);
 
   const handleFileInput = (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    const selected = Array.from(e.target.files);
-    setFiles((prev) => [...prev, ...selected.map((f) => ({ file: f, docType: 'other' }))]);
+    setFiles((prev) => [...prev, ...Array.from(e.target.files!).map((f) => ({ file: f, docType: 'other' }))]);
     e.target.value = '';
   };
 
@@ -87,53 +187,46 @@ export default function ShipmentRequestPage() {
 
   const canNext = (): boolean => {
     if (step === 0) return !!(requesterName && requesterEmail);
-    if (step === 1) return !!(originCountry && originCity && destinationCountry && destinationCity);
+    if (step === 1) return !!(originCountry && originCity && destCountry && destCity && transportTypes.length > 0);
     if (step === 2) return !!(cargoType && cargoDescription);
     if (step === 4) return agreed;
     return true;
   };
 
   const handleSubmit = async () => {
-    setSubmitting(true);
-    setError('');
+    setSubmitting(true); setError('');
     try {
       const formData = new FormData();
       formData.append('requesterName', requesterName);
       formData.append('requesterEmail', requesterEmail);
       if (requesterPhone) formData.append('requesterPhone', requesterPhone);
       if (companyName) formData.append('companyName', companyName);
+      if (voen) formData.append('voen', voen);
       formData.append('originCountry', originCountry);
       formData.append('originCity', originCity);
-      formData.append('destinationCountry', destinationCountry);
-      formData.append('destinationCity', destinationCity);
+      formData.append('destinationCountry', destCountry);
+      formData.append('destinationCity', destCity);
       formData.append('cargoType', cargoType);
+      if (cargoSubtype) formData.append('cargoSubtype', cargoSubtype);
       formData.append('cargoDescription', cargoDescription);
       if (weightKg) formData.append('weightKg', weightKg);
-      if (volumeCbm) formData.append('volumeCbm', volumeCbm);
+      if (cbmValue > 0) formData.append('volumeCbm', cbmValue.toFixed(3));
       if (packageCount) formData.append('packageCount', packageCount);
-      if (declaredValue) formData.append('declaredValue', declaredValue);
-      formData.append('currency', currency);
-      if (incoterms) formData.append('incoterms', incoterms);
-      if (hsCode) formData.append('hsCode', hsCode);
-      formData.append('transportType', transportType);
+      formData.append('transportTypes', JSON.stringify(transportTypes));
+      formData.append('transportOrder', JSON.stringify(transportOrder));
       if (preferredDate) formData.append('preferredDate', preferredDate);
       formData.append('isUrgent', String(isUrgent));
-      const fileDocTypes = files.map((f) => f.docType);
-      formData.append(
-        'specialRequirements',
-        JSON.stringify({
-          isHazmat,
-          needsRefrigeration,
-          isFragile,
-          needsCustomsClearance,
-          fileDocTypes,
-        }),
-      );
-
-      files.forEach((f) => {
-        formData.append('files', f.file);
-      });
-
+      if (needsCustomsClearance) {
+        if (declaredValue) formData.append('declaredValue', declaredValue);
+        formData.append('currency', currency);
+        if (incoterms) formData.append('incoterms', incoterms);
+        if (hsCode) formData.append('hsCode', hsCode);
+      }
+      formData.append('specialRequirements', JSON.stringify({
+        isHazmat, needsRefrigeration, isFragile, needsCustomsClearance, isGroupage, isStackable,
+        fileDocTypes: files.map((f) => f.docType),
+      }));
+      files.forEach((f) => formData.append('files', f.file));
       const res = await submitShipmentRequest(tenantSlug, formData);
       setSubmitted(res.id);
     } catch (e) {
@@ -176,76 +269,120 @@ export default function ShipmentRequestPage() {
         ))}
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 p-6">
+      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm transition-all duration-300">
         {/* Step 1: Contact */}
         {step === 0 && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold mb-4">Contact Information</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
-                <input type="text" value={requesterName} onChange={(e) => setRequesterName(e.target.value)} className="input-field w-full" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email *</label>
-                <input type="email" value={requesterEmail} onChange={(e) => setRequesterEmail(e.target.value)} className="input-field w-full" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                <input type="tel" value={requesterPhone} onChange={(e) => setRequesterPhone(e.target.value)} className="input-field w-full" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Company Name</label>
-                <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="input-field w-full" />
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
+                <input type="text" value={requesterName} onChange={(e) => setRequesterName(e.target.value)} className="input-field w-full" /></div>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">Email *</label>
+                <input type="email" value={requesterEmail} onChange={(e) => setRequesterEmail(e.target.value)} className="input-field w-full" /></div>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+                <input type="tel" value={requesterPhone} onChange={(e) => setRequesterPhone(e.target.value)} className="input-field w-full" /></div>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">Company Name</label>
+                <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="input-field w-full" /></div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1">VOEN (Vergi ödəyicisinin eyniləşdirmə nömrəsi)</label>
+                <input type="text" value={voen} onChange={(e) => setVoen(e.target.value.replace(/\D/g, '').slice(0, 10))} className="input-field w-full sm:w-1/2" placeholder="1234567890" maxLength={10} />
               </div>
             </div>
           </div>
         )}
 
-        {/* Step 2: Route */}
+        {/* Step 2: Route & Transport */}
         {step === 1 && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold mb-4">Route & Transport</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
+              {/* Origin Country с автодополнением */}
+              <div className="relative">
                 <label className="block text-sm font-medium text-slate-700 mb-1">Origin Country *</label>
-                <input type="text" value={originCountry} onChange={(e) => setOriginCountry(e.target.value)} className="input-field w-full" placeholder="e.g. China" />
+                <input type="text" value={originCountry} onChange={(e) => { setOriginCountry(e.target.value); setShowOriginCountries(true); setSelectedOriginCountry(null); }} onFocus={() => originCountry.length >= 2 && setShowOriginCountries(true)} onBlur={() => setTimeout(() => setShowOriginCountries(false), 200)} className="input-field w-full" placeholder="Start typing..." />
+                {showOriginCountries && filterCountries(originCountry).length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filterCountries(originCountry).map((c, i) => (
+                      <button key={i} type="button" className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 transition-colors" onMouseDown={() => { setOriginCountry(getCountryName(c)); setSelectedOriginCountry(c); setShowOriginCountries(false); setOriginCity(''); }}>
+                        {getCountryName(c)}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div>
+              {/* Origin City */}
+              <div className="relative">
                 <label className="block text-sm font-medium text-slate-700 mb-1">Origin City *</label>
-                <input type="text" value={originCity} onChange={(e) => setOriginCity(e.target.value)} className="input-field w-full" placeholder="e.g. Shanghai" />
+                <input type="text" value={originCity} onChange={(e) => { setOriginCity(e.target.value); setShowOriginCities(true); }} onFocus={() => setShowOriginCities(true)} onBlur={() => setTimeout(() => setShowOriginCities(false), 200)} className="input-field w-full" placeholder="Start typing..." />
+                {showOriginCities && selectedOriginCountry && filterCities(selectedOriginCountry, originCity).length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filterCities(selectedOriginCountry, originCity).map((c, i) => (
+                      <button key={i} type="button" className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50" onMouseDown={() => { setOriginCity(getCityName(c)); setShowOriginCities(false); }}>
+                        {getCityName(c)}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div>
+              {/* Destination Country */}
+              <div className="relative">
                 <label className="block text-sm font-medium text-slate-700 mb-1">Destination Country *</label>
-                <input type="text" value={destinationCountry} onChange={(e) => setDestinationCountry(e.target.value)} className="input-field w-full" placeholder="e.g. Azerbaijan" />
+                <input type="text" value={destCountry} onChange={(e) => { setDestCountry(e.target.value); setShowDestCountries(true); setSelectedDestCountry(null); }} onFocus={() => destCountry.length >= 2 && setShowDestCountries(true)} onBlur={() => setTimeout(() => setShowDestCountries(false), 200)} className="input-field w-full" placeholder="Start typing..." />
+                {showDestCountries && filterCountries(destCountry).length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filterCountries(destCountry).map((c, i) => (
+                      <button key={i} type="button" className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50" onMouseDown={() => { setDestCountry(getCountryName(c)); setSelectedDestCountry(c); setShowDestCountries(false); setDestCity(''); }}>
+                        {getCountryName(c)}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div>
+              {/* Destination City */}
+              <div className="relative">
                 <label className="block text-sm font-medium text-slate-700 mb-1">Destination City *</label>
-                <input type="text" value={destinationCity} onChange={(e) => setDestinationCity(e.target.value)} className="input-field w-full" placeholder="e.g. Baku" />
+                <input type="text" value={destCity} onChange={(e) => { setDestCity(e.target.value); setShowDestCities(true); }} onFocus={() => setShowDestCities(true)} onBlur={() => setTimeout(() => setShowDestCities(false), 200)} className="input-field w-full" placeholder="Start typing..." />
+                {showDestCities && selectedDestCountry && filterCities(selectedDestCountry, destCity).length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filterCities(selectedDestCountry, destCity).map((c, i) => (
+                      <button key={i} type="button" className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50" onMouseDown={() => { setDestCity(getCityName(c)); setShowDestCities(false); }}>
+                        {getCityName(c)}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
+            {/* Мультимодальная доставка — чекбоксы */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Transport Type *</label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                {TRANSPORT_TYPE_OPTIONS.map((t) => (
-                  <button
-                    key={t.value}
-                    type="button"
-                    onClick={() => setTransportType(t.value)}
-                    className={`px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                      transportType === t.value ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-slate-300'
-                    }`}
-                  >
-                    {t.label}
-                  </button>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Transport Types *</label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {TRANSPORT_OPTS.map((t) => (
+                  <label key={t.value} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${transportTypes.includes(t.value) ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
+                    <input type="checkbox" checked={transportTypes.includes(t.value)} onChange={() => toggleTransport(t.value)} className="w-4 h-4 rounded" />
+                    <span className="text-sm font-medium">{t.label}</span>
+                  </label>
                 ))}
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Порядок следования этапов (drag-and-drop) */}
+            {transportTypes.length > 1 && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Preferred Date</label>
-                <input type="date" value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} className="input-field w-full" />
+                <label className="block text-sm font-medium text-slate-700 mb-2">Transport Order (drag to reorder)</label>
+                <div className="flex flex-wrap gap-2">
+                  {transportOrder.map((t, idx) => (
+                    <div key={t} draggable onDragStart={() => handleOrderDragStart(idx)} onDragOver={(e) => e.preventDefault()} onDrop={() => handleOrderDrop(idx)}
+                      className="flex items-center gap-1 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg cursor-grab active:cursor-grabbing text-sm font-medium text-blue-700">
+                      <span className="text-blue-400 mr-1">{idx + 1}.</span>
+                      {TRANSPORT_OPTS.find((o) => o.value === t)?.label || t}
+                    </div>
+                  ))}
+                </div>
               </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">Preferred Date</label>
+                <input type="date" value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} className="input-field w-full" /></div>
               <div className="flex items-end pb-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={isUrgent} onChange={(e) => setIsUrgent(e.target.checked)} className="w-4 h-4 rounded border-slate-300" />
@@ -260,68 +397,93 @@ export default function ShipmentRequestPage() {
         {step === 2 && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold mb-4">Cargo Details</h2>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Cargo Type *</label>
-              <select value={cargoType} onChange={(e) => setCargoType(e.target.value)} className="input-field w-full">
-                {Object.keys(CARGO_TYPE_LABELS).map((k) => (
-                  <option key={k} value={k}>{CARGO_TYPE_LABELS[k]}</option>
-                ))}
-              </select>
+            {/* Двухуровневый выбор типа */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Cargo Type *</label>
+                <select value={cargoType} onChange={(e) => { setCargoType(e.target.value); setCargoSubtype(''); }} className="input-field w-full">
+                  {Object.entries(CARGO_TYPES).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
+                </select>
+              </div>
+              {CARGO_TYPES[cargoType]?.subcategories.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Subcategory</label>
+                  <select value={cargoSubtype} onChange={(e) => setCargoSubtype(e.target.value)} className="input-field w-full">
+                    <option value="">Select...</option>
+                    {CARGO_TYPES[cargoType].subcategories.map((s) => (<option key={s} value={s}>{s}</option>))}
+                  </select>
+                </div>
+              )}
             </div>
             {cargoReqs.notes && (
               <div className={`p-3 rounded-lg text-sm ${cargoReqs.hazmat || cargoReqs.restricted ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
                 {cargoReqs.notes}
               </div>
             )}
+            {/* Special Requirements */}
             <div className="flex flex-wrap gap-3">
               {cargoReqs.hazmat && (
                 <label className="flex items-center gap-2"><input type="checkbox" checked={isHazmat} onChange={(e) => setIsHazmat(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Hazardous (ADR/IMDG)</span></label>
               )}
               {cargoReqs.needsRefrigeration && (
-                <label className="flex items-center gap-2"><input type="checkbox" checked={needsRefrigeration} onChange={(e) => setNeedsRefrigeration(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Needs Refrigeration</span></label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={needsRefrigeration} onChange={(e) => setNeedsRefrigeration(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Temperature controlled</span></label>
               )}
               <label className="flex items-center gap-2"><input type="checkbox" checked={isFragile} onChange={(e) => setIsFragile(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Fragile</span></label>
               <label className="flex items-center gap-2"><input type="checkbox" checked={needsCustomsClearance} onChange={(e) => setNeedsCustomsClearance(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Customs Clearance</span></label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={isGroupage} onChange={(e) => setIsGroupage(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Groupage (LCL)</span></label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={isStackable} onChange={(e) => setIsStackable(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Stackable</span></label>
             </div>
+            {/* Description */}
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Description *</label>
               <textarea value={cargoDescription} onChange={(e) => setCargoDescription(e.target.value)} rows={3} className="input-field w-full" placeholder="Describe the cargo..." />
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Weight (kg)</label>
-                <input type="number" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} className="input-field w-full" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Volume (CBM)</label>
-                <input type="number" value={volumeCbm} onChange={(e) => setVolumeCbm(e.target.value)} className="input-field w-full" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Packages</label>
-                <input type="number" value={packageCount} onChange={(e) => setPackageCount(e.target.value)} className="input-field w-full" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">HS Code</label>
-                <input type="text" value={hsCode} onChange={(e) => setHsCode(e.target.value)} className="input-field w-full" placeholder="e.g. 8471.30" />
-              </div>
-            </div>
+            {/* Weight & Packages */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Declared Value</label>
-                <input type="number" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} className="input-field w-full" />
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">Weight (kg)</label>
+                <input type="number" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} className="input-field w-full" /></div>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">Packages</label>
+                <input type="number" value={packageCount} onChange={(e) => setPackageCount(e.target.value)} className="input-field w-full" /></div>
+            </div>
+            {/* CBM Calculator */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Volume (CBM Calculator)</label>
+              <div className="grid grid-cols-4 gap-2">
+                <div><input type="number" value={dimLength} onChange={(e) => setDimLength(e.target.value)} className="input-field w-full" placeholder="L" /></div>
+                <div><input type="number" value={dimWidth} onChange={(e) => setDimWidth(e.target.value)} className="input-field w-full" placeholder="W" /></div>
+                <div><input type="number" value={dimHeight} onChange={(e) => setDimHeight(e.target.value)} className="input-field w-full" placeholder="H" /></div>
+                <div>
+                  <select value={dimUnit} onChange={(e) => setDimUnit(e.target.value)} className="input-field w-full">
+                    {Object.keys(CBM_DIVISORS).map((u) => (<option key={u} value={u}>{u}</option>))}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Currency</label>
-                <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="input-field w-full">
-                  {['USD', 'EUR', 'GBP', 'AZN', 'TRY', 'CNY', 'RUB'].map((c) => (<option key={c} value={c}>{c}</option>))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Incoterms</label>
-                <select value={incoterms} onChange={(e) => setIncoterms(e.target.value)} className="input-field w-full">
-                  <option value="">Select...</option>
-                  {INCOTERMS_OPTIONS.map((i) => (<option key={i} value={i}>{i}</option>))}
-                </select>
+              {cbmValue > 0 && <p className="text-sm text-slate-500 mt-1">{cbmValue.toFixed(3)} CBM</p>}
+            </div>
+            {/* Customs & Financial — collapsible */}
+            <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <button type="button" onClick={() => setCustomsOpen(!customsOpen)} className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors">
+                <span>Customs & Financial Details (Optional)</span>
+                <svg className={`w-4 h-4 transition-transform ${customsOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+              </button>
+              <div style={{ maxHeight: customsOpen ? '300px' : '0', overflow: 'hidden', transition: 'max-height 0.3s ease' }}>
+                <div className="p-4 space-y-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">Declared Value</label>
+                      <input type="number" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} className="input-field w-full" /></div>
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">Currency</label>
+                      <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="input-field w-full">
+                        {['USD', 'EUR', 'GBP', 'AZN', 'TRY', 'CNY', 'RUB'].map((c) => (<option key={c} value={c}>{c}</option>))}
+                      </select></div>
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">HS Code</label>
+                      <input type="text" value={hsCode} onChange={(e) => setHsCode(e.target.value)} className="input-field w-full" placeholder="e.g. 8471.30" /></div>
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">Incoterms</label>
+                      <select value={incoterms} onChange={(e) => setIncoterms(e.target.value)} className="input-field w-full">
+                        <option value="">Select...</option>
+                        {INCOTERMS_OPTIONS.map((i) => (<option key={i} value={i}>{i}</option>))}
+                      </select></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -412,20 +574,24 @@ export default function ShipmentRequestPage() {
                 <p className="text-slate-500">{requesterEmail}</p>
                 {requesterPhone && <p className="text-slate-500">{requesterPhone}</p>}
                 {companyName && <p className="text-slate-500">{companyName}</p>}
+                {voen && <p className="text-slate-500">VOEN: {voen}</p>}
               </div>
               <div className="bg-slate-50 rounded-lg p-4">
                 <h3 className="font-medium text-slate-900 mb-2">Route</h3>
-                <p>{originCity}, {originCountry} &rarr; {destinationCity}, {destinationCountry}</p>
-                <p className="text-slate-500">{TRANSPORT_TYPE_OPTIONS.find((t) => t.value === transportType)?.label}</p>
+                <p>{originCity}, {originCountry} &rarr; {destCity}, {destCountry}</p>
+                <p className="text-slate-500">
+                  {transportOrder.map((t, i) => `${i + 1}. ${TRANSPORT_OPTS.find((o) => o.value === t)?.label || t}`).join(' → ')}
+                </p>
                 {preferredDate && <p className="text-slate-500">Date: {preferredDate}</p>}
                 {isUrgent && <p className="text-red-600 font-medium">URGENT</p>}
               </div>
               <div className="bg-slate-50 rounded-lg p-4">
                 <h3 className="font-medium text-slate-900 mb-2">Cargo</h3>
-                <p>{CARGO_TYPE_LABELS[cargoType]}</p>
+                <p>{CARGO_TYPES[cargoType]?.label || cargoType}</p>
+                {cargoSubtype && <p className="text-slate-500">{cargoSubtype}</p>}
                 <p className="text-slate-500">{cargoDescription}</p>
                 {weightKg && <p className="text-slate-500">{weightKg} kg</p>}
-                {volumeCbm && <p className="text-slate-500">{volumeCbm} CBM</p>}
+                {cbmValue > 0 && <p className="text-slate-500">{cbmValue.toFixed(3)} CBM</p>}
                 {packageCount && <p className="text-slate-500">{packageCount} packages</p>}
               </div>
               <div className="bg-slate-50 rounded-lg p-4">
@@ -449,23 +615,23 @@ export default function ShipmentRequestPage() {
           <button
             onClick={() => setStep((s) => s - 1)}
             disabled={step === 0}
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-30"
+            className="px-6 py-3 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-30 rounded-lg hover:bg-slate-50 transition-colors"
           >
-            Back
+            &larr; Back
           </button>
           {step < STEPS.length - 1 ? (
             <button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canNext()}
-              className="btn-primary disabled:opacity-50"
+              className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
-              Next
+              Next &rarr;
             </button>
           ) : (
             <button
               onClick={handleSubmit}
               disabled={!agreed || submitting}
-              className="btn-primary disabled:opacity-50"
+              className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               {submitting ? 'Submitting...' : 'Submit Request'}
             </button>

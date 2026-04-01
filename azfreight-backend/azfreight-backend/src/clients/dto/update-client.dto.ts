@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, IsEmail } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsEmail, Length } from 'class-validator';
 
 export class UpdateClientDto {
   @IsOptional()
@@ -8,6 +8,11 @@ export class UpdateClientDto {
   @IsOptional()
   @IsString()
   taxId?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(10, 10)
+  voen?: string;
 
   @IsOptional()
   @IsString()

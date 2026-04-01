@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto, UpdateInvoiceStatusDto } from './dto/update-invoice.dto';
@@ -96,6 +96,43 @@ export class InvoicesService {
     return this.prisma.invoice.update({
       where: { id },
       data: { status: dto.status as InvoiceStatus },
+    });
+  }
+
+  // Частичная оплата инвойса
+  async recordPayment(tenantId: string, id: string, paidAmount: number, paidDate?: string) {
+    const invoice = await this.prisma.invoice.findFirst({ where: { id, tenantId } });
+    if (!invoice) throw new NotFoundException('Invoice not found');
+
+    if (paidAmount <= 0) throw new BadRequestException('Paid amount must be positive');
+
+    const newPaidAmount = Number(invoice.paidAmount) + paidAmount;
+    const totalAmount = Number(invoice.amount);
+
+    if (newPaidAmount > totalAmount) {
+      throw new BadRequestException('Paid amount exceeds invoice total');
+    }
+
+    // Определяем новый статус
+    let newStatus: InvoiceStatus;
+    if (newPaidAmount >= totalAmount) {
+      newStatus = 'paid';
+    } else {
+      newStatus = 'partially_paid';
+    }
+
+    return this.prisma.invoice.update({
+      where: { id },
+      data: {
+        paidAmount: newPaidAmount,
+        paidDate: paidDate ? new Date(paidDate) : new Date(),
+        status: newStatus,
+      },
+      include: {
+        client: { select: { id: true, companyName: true } },
+        shipment: { select: { id: true, referenceNumber: true } },
+        createdBy: { select: { id: true, name: true } },
+      },
     });
   }
 }

@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getShipment, getTimeline, updateShipmentStatus } from '@/lib/api/shipments';
-import type { Shipment, ShipmentStatusLog } from '@/types';
+import { listCustomStatuses, assignCustomStatus } from '@/lib/api/custom-statuses';
+import type { Shipment, ShipmentStatusLog, CustomStatus } from '@/types';
 import StatusBadge from '@/components/status-badge';
 import Loading from '@/components/loading';
 import { TRANSPORT_LABELS, STATUS_TRANSITIONS, STATUS_LABELS } from '@/lib/constants';
@@ -27,11 +28,18 @@ export default function ShipmentDetailPage() {
   const [statusComment, setStatusComment] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
+  // Кастомные статусы
+  const [customStatuses, setCustomStatuses] = useState<CustomStatus[]>([]);
+  const [selectedCustomStatus, setSelectedCustomStatus] = useState('');
+  const [customNote, setCustomNote] = useState('');
+  const [updatingCustom, setUpdatingCustom] = useState(false);
+
   useEffect(() => {
     Promise.all([getShipment(id), getTimeline(id)])
       .then(([s, t]) => { setShipment(s); setTimeline(t); })
       .catch(() => router.push('/shipments'))
       .finally(() => setLoading(false));
+    listCustomStatuses().then(setCustomStatuses).catch(() => {});
   }, [id, router]);
 
   async function handleStatusChange(newStatus: string) {
@@ -47,6 +55,21 @@ export default function ShipmentDetailPage() {
     setUpdatingStatus(false);
   }
 
+  async function handleCustomStatusAssign() {
+    if (!shipment) return;
+    setUpdatingCustom(true);
+    try {
+      await assignCustomStatus(id, {
+        customStatusId: selectedCustomStatus || undefined,
+        customStatusNote: customNote || undefined,
+      });
+      const updated = await getShipment(id);
+      setShipment(updated);
+      setCustomNote('');
+    } catch { /* ignore */ }
+    setUpdatingCustom(false);
+  }
+
   if (loading || !shipment) return <Loading />;
 
   const transitions = STATUS_TRANSITIONS[shipment.status] || [];
@@ -60,6 +83,13 @@ export default function ShipmentDetailPage() {
             <div className="flex items-center gap-3 mb-1">
               <h2 className="text-xl font-bold text-slate-900">{shipment.referenceNumber}</h2>
               <StatusBadge status={shipment.status} />
+              {shipment.customStatus && (
+                <StatusBadge
+                  status={shipment.customStatus.name}
+                  customColor={shipment.customStatus.color}
+                  customLabel={shipment.customStatus.name}
+                />
+              )}
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
                 {TRANSPORT_LABELS[shipment.transportType] || shipment.transportType}
               </span>
@@ -214,6 +244,48 @@ export default function ShipmentDetailPage() {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Custom Status */}
+      {customStatuses.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Custom Status</h3>
+          <div className="flex items-end gap-4">
+            <div className="flex-1">
+              <label className="label-field">Status</label>
+              <select
+                value={selectedCustomStatus || shipment.customStatusId || ''}
+                onChange={(e) => setSelectedCustomStatus(e.target.value)}
+                className="input-field"
+              >
+                <option value="">— None —</option>
+                {customStatuses.map((cs) => (
+                  <option key={cs.id} value={cs.id}>{cs.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="label-field">Note (optional)</label>
+              <input
+                type="text"
+                value={customNote}
+                onChange={(e) => setCustomNote(e.target.value)}
+                className="input-field"
+                placeholder="Status note..."
+              />
+            </div>
+            <button
+              onClick={handleCustomStatusAssign}
+              disabled={updatingCustom}
+              className="btn-primary disabled:opacity-50"
+            >
+              {updatingCustom ? 'Updating...' : 'Set Status'}
+            </button>
+          </div>
+          {shipment.customStatusNote && (
+            <p className="text-sm text-slate-500 mt-2">Note: {shipment.customStatusNote}</p>
+          )}
         </div>
       )}
 

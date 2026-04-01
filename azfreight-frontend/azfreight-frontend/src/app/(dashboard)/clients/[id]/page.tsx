@@ -17,7 +17,7 @@ export default function ClientDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
-    companyName: '', taxId: '', address: '', country: '', city: '',
+    companyName: '', taxId: '', voen: '', address: '', country: '', city: '',
     phone: '', email: '', website: '', paymentTermsDays: '', creditLimit: '', notes: '',
   });
 
@@ -28,6 +28,7 @@ export default function ClientDetailPage() {
         setForm({
           companyName: c.companyName || '',
           taxId: c.taxId || '',
+          voen: c.voen || '',
           address: c.address || '',
           country: c.country || '',
           city: c.city || '',
@@ -54,6 +55,7 @@ export default function ClientDetailPage() {
     try {
       const body: Record<string, unknown> = { companyName: form.companyName };
       if (form.taxId) body.taxId = form.taxId;
+      if (form.voen) body.voen = form.voen;
       if (form.address) body.address = form.address;
       if (form.country) body.country = form.country;
       if (form.city) body.city = form.city;
@@ -88,6 +90,7 @@ export default function ClientDetailPage() {
           </div>
           <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div><dt className="text-slate-500">Tax ID</dt><dd className="font-medium">{client.taxId || '—'}</dd></div>
+            <div><dt className="text-slate-500">VOEN</dt><dd className="font-medium">{client.voen || '—'}</dd></div>
             <div><dt className="text-slate-500">Email</dt><dd className="font-medium">{client.email || '—'}</dd></div>
             <div><dt className="text-slate-500">Phone</dt><dd className="font-medium">{client.phone || '—'}</dd></div>
             <div><dt className="text-slate-500">Website</dt><dd className="font-medium">{client.website || '—'}</dd></div>
@@ -116,6 +119,7 @@ export default function ClientDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2"><label className="label-field">Company Name *</label><input type="text" value={form.companyName} onChange={(e) => updateField('companyName', e.target.value)} className="input-field" required /></div>
             <div><label className="label-field">Tax ID</label><input type="text" value={form.taxId} onChange={(e) => updateField('taxId', e.target.value)} className="input-field" /></div>
+            <div><label className="label-field">VOEN (Vergi ödəyicisinin eyniləşdirmə nömrəsi)</label><input type="text" value={form.voen} onChange={(e) => updateField('voen', e.target.value)} className="input-field" placeholder="1234567890" maxLength={10} /></div>
             <div><label className="label-field">Email</label><input type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} className="input-field" /></div>
             <div><label className="label-field">Phone</label><input type="text" value={form.phone} onChange={(e) => updateField('phone', e.target.value)} className="input-field" /></div>
             <div><label className="label-field">Website</label><input type="text" value={form.website} onChange={(e) => updateField('website', e.target.value)} className="input-field" /></div>

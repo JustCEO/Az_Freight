@@ -8,6 +8,7 @@ datasource db {
 }
 
 enum UserRole {
+  superadmin
   admin
   manager
   accountant
@@ -127,6 +128,7 @@ model Tenant {
   auditLogs          AuditLog[]
   invitations        Invitation[]
   shipmentRequests   ShipmentRequest[]
+  customStatuses     CustomStatus[]
 
   @@map("tenants")
 }
@@ -165,6 +167,7 @@ model Client {
   tenantId           String    @map("tenant_id")
   companyName        String    @map("company_name") @db.VarChar(255)
   taxId              String?   @map("tax_id") @db.VarChar(50)
+  voen               String?   @db.VarChar(10)
   address            String?
   country            String?   @db.VarChar(3)
   city               String?   @db.VarChar(255)
@@ -206,6 +209,7 @@ model Carrier {
 
   tenant          Tenant    @relation(fields: [tenantId], references: [id])
   shipments       Shipment[]
+  shipmentRequests ShipmentRequest[]
 
   @@index([tenantId])
   @@map("carriers")
@@ -236,6 +240,8 @@ model Shipment {
   currency           String          @default("USD") @db.VarChar(3)
   profit             Decimal?        @db.Decimal(12, 2)
   customsStatus      CustomsStatus   @default(not_started) @map("customs_status")
+  customStatusId     String?         @map("custom_status_id")
+  customStatusNote   String?         @map("custom_status_note")
   vesselName         String?         @map("vessel_name") @db.VarChar(255)
   containerNumber    String?         @map("container_number") @db.VarChar(50)
   awbNumber          String?         @map("awb_number") @db.VarChar(50)
@@ -255,6 +261,7 @@ model Shipment {
   carrier            Carrier?        @relation(fields: [carrierId], references: [id])
   assignedTo         User?           @relation("AssignedTo", fields: [assignedToId], references: [id])
   createdBy          User            @relation("CreatedBy", fields: [createdById], references: [id])
+  customStatus       CustomStatus?   @relation(fields: [customStatusId], references: [id])
 
   statusLogs         ShipmentStatusLog[]
   invoices           Invoice[]
@@ -458,6 +465,7 @@ model ShipmentRequest {
   requesterEmail     String    @map("requester_email") @db.VarChar(255)
   requesterPhone     String?   @map("requester_phone") @db.VarChar(50)
   companyName        String?   @map("company_name") @db.VarChar(255)
+  voen               String?   @db.VarChar(10)
 
   originCountry      String    @map("origin_country") @db.VarChar(100)
   originCity         String    @map("origin_city") @db.VarChar(255)
@@ -465,6 +473,7 @@ model ShipmentRequest {
   destinationCity    String    @map("destination_city") @db.VarChar(255)
 
   cargoType          String    @map("cargo_type") @db.VarChar(50)
+  cargoSubtype       String?   @map("cargo_subtype") @db.VarChar(100)
   cargoDescription   String    @map("cargo_description")
   weightKg           Decimal?  @map("weight_kg") @db.Decimal(12, 2)
   volumeCbm          Decimal?  @map("volume_cbm") @db.Decimal(10, 3)
@@ -474,7 +483,8 @@ model ShipmentRequest {
   incoterms          String?   @db.VarChar(10)
   hsCode             String?   @map("hs_code") @db.VarChar(20)
 
-  transportType      String    @map("transport_type") @db.VarChar(20)
+  transportTypes     String[]  @map("transport_types")
+  transportOrder     String[]  @map("transport_order")
   preferredDate      DateTime? @map("preferred_date")
   isUrgent           Boolean   @default(false) @map("is_urgent")
 
@@ -483,6 +493,7 @@ model ShipmentRequest {
   status             String    @default("new") @db.VarChar(20)
   assignedToId       String?   @map("assigned_to_id")
   clientId           String?   @map("client_id")
+  carrierId          String?   @map("carrier_id")
   shipmentId         String?   @map("shipment_id")
 
   notes              String?
@@ -494,6 +505,7 @@ model ShipmentRequest {
   tenant             Tenant    @relation(fields: [tenantId], references: [id])
   assignedTo         User?     @relation("RequestAssignedTo", fields: [assignedToId], references: [id])
   client             Client?   @relation(fields: [clientId], references: [id])
+  carrier            Carrier?  @relation(fields: [carrierId], references: [id])
   documents          ShipmentRequestDocument[]
 
   @@index([tenantId])
@@ -514,4 +526,20 @@ model ShipmentRequestDocument {
   request      ShipmentRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
 
   @@map("shipment_request_documents")
+}
+
+model CustomStatus {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  name        String   @db.VarChar(100)
+  color       String   @default("#6B7280") @db.VarChar(7)
+  order       Int      @default(0)
+  isDefault   Boolean  @default(false) @map("is_default")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  shipments   Shipment[]
+
+  @@index([tenantId])
+  @@map("custom_statuses")
 }
