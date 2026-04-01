@@ -26,9 +26,10 @@ export class ShipmentRequestsService {
     if (!tenant.portalEnabled) throw new BadRequestException('Portal is disabled');
 
     // Поддержка мультимодальной доставки
-    const transportTypes = dto.transportTypes || (dto as Record<string, unknown>).transportType
-      ? [String((dto as Record<string, unknown>).transportType)]
-      : ['road_tir'];
+    const dtoAny = dto as unknown as Record<string, unknown>;
+    const transportTypes = dto.transportTypes || (dtoAny.transportType
+      ? [String(dtoAny.transportType)]
+      : ['road_tir']);
     const transportOrder = dto.transportOrder || transportTypes;
 
     const request = await this.prisma.shipmentRequest.create({
