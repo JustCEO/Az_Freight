@@ -311,7 +311,7 @@ export default function ShipmentDetailPage() {
                     </div>
                     <div className="mt-1 text-sm text-slate-500">
                       <span className="font-medium text-slate-700">{entry.changedBy?.name || 'System'}</span>
-                      {' · '}
+                      {' \u00b7 '}
                       {new Date(entry.createdAt).toLocaleString()}
                     </div>
                     {entry.comment && <p className="mt-1 text-sm text-slate-600">{entry.comment}</p>}
