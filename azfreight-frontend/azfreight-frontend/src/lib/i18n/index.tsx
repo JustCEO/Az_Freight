@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import en from './en';
 import ru from './ru';
 import az from './az';
@@ -20,7 +20,17 @@ function getNestedValue(obj: Record<string, unknown>, path: string): string {
   }, obj as unknown) as string;
 }
 
-export function useTranslation() {
+interface LocaleContextValue {
+  locale: Locale;
+  setLocale: (l: Locale) => void;
+}
+
+const LocaleContext = createContext<LocaleContextValue>({
+  locale: 'en',
+  setLocale: () => {},
+});
+
+export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('en');
 
   useEffect(() => {
@@ -28,12 +38,30 @@ export function useTranslation() {
     if (saved && translations[saved]) {
       setLocaleState(saved);
     }
+
+    const handler = () => {
+      const l = localStorage.getItem('locale') as Locale;
+      if (l && translations[l]) setLocaleState(l);
+    };
+    window.addEventListener('locale-changed', handler);
+    return () => window.removeEventListener('locale-changed', handler);
   }, []);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
     localStorage.setItem('locale', newLocale);
+    window.dispatchEvent(new Event('locale-changed'));
   }, []);
+
+  return (
+    <LocaleContext.Provider value={{ locale, setLocale }}>
+      {children}
+    </LocaleContext.Provider>
+  );
+}
+
+export function useTranslation() {
+  const { locale, setLocale } = useContext(LocaleContext);
 
   const t = useCallback(
     (key: string): string => {

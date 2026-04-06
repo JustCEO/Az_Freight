@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { submitShipmentRequest } from '@/lib/api/portal';
 import { CARGO_REQUIREMENTS, DOC_TYPE_LABELS, INCOTERMS_OPTIONS } from '@/lib/cargo-requirements';
 import { COUNTRIES, type CountryData } from '@/lib/countries-cities';
+import { useTranslation } from '@/lib/i18n';
 
 interface FileWithType { file: File; docType: string; }
 
@@ -44,15 +45,7 @@ export default function ShipmentRequestPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [locale, setLocale] = useState('en');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('locale');
-    if (saved) setLocale(saved);
-    const handler = () => { const l = localStorage.getItem('locale'); if (l) setLocale(l); };
-    window.addEventListener('locale-changed', handler);
-    return () => window.removeEventListener('locale-changed', handler);
-  }, []);
+  const { locale } = useTranslation();
 
   // Step 1: Contact
   const [requesterName, setRequesterName] = useState('');

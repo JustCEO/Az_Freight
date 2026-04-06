@@ -4,21 +4,21 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
-import { ROLE_LABELS } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 import { getNewRequestCount } from '@/lib/api/shipment-requests';
 
 interface NavItem {
   href: string;
-  label: string;
+  labelKey: string;
   icon: React.ReactNode;
   badge?: boolean;
-  roles?: string[]; // показывать только для этих ролей
+  roles?: string[];
 }
 
 const navItems: NavItem[] = [
   {
     href: '/dashboard',
-    label: 'Dashboard',
+    labelKey: 'nav.dashboard',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" />
@@ -27,7 +27,7 @@ const navItems: NavItem[] = [
   },
   {
     href: '/shipments',
-    label: 'Shipments',
+    labelKey: 'nav.shipments',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -36,7 +36,7 @@ const navItems: NavItem[] = [
   },
   {
     href: '/requests',
-    label: 'Requests',
+    labelKey: 'nav.requests',
     badge: true,
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -46,7 +46,7 @@ const navItems: NavItem[] = [
   },
   {
     href: '/clients',
-    label: 'Clients',
+    labelKey: 'nav.clients',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -55,7 +55,7 @@ const navItems: NavItem[] = [
   },
   {
     href: '/carriers',
-    label: 'Carriers',
+    labelKey: 'nav.carriers',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -64,7 +64,7 @@ const navItems: NavItem[] = [
   },
   {
     href: '/invoices',
-    label: 'Invoices',
+    labelKey: 'nav.invoices',
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
@@ -73,7 +73,7 @@ const navItems: NavItem[] = [
   },
   {
     href: '/users',
-    label: 'Users',
+    labelKey: 'nav.users',
     roles: ['admin'],
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -83,7 +83,7 @@ const navItems: NavItem[] = [
   },
   {
     href: '/invitations',
-    label: 'Invitations',
+    labelKey: 'nav.invitations',
     roles: ['admin'],
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -93,7 +93,7 @@ const navItems: NavItem[] = [
   },
   {
     href: '/settings/statuses',
-    label: 'Custom Statuses',
+    labelKey: 'nav.statusSettings',
     roles: ['admin'],
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -104,7 +104,7 @@ const navItems: NavItem[] = [
   },
   {
     href: '/settings/portal',
-    label: 'Portal Settings',
+    labelKey: 'nav.portalSettings',
     roles: ['admin'],
     icon: (
       <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -117,8 +117,8 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
+  const { t, locale, setLocale } = useTranslation();
   const [newCount, setNewCount] = useState(0);
-  const [locale, setLocale] = useState('en');
 
   useEffect(() => {
     getNewRequestCount().then(setNewCount).catch(() => {});
@@ -127,16 +127,6 @@ export default function Sidebar() {
     }, 60000);
     return () => clearInterval(interval);
   }, []);
-
-  useEffect(() => {
-    const saved = localStorage.getItem('locale');
-    if (saved) setLocale(saved);
-  }, []);
-
-  const changeLocale = (l: string) => {
-    setLocale(l);
-    localStorage.setItem('locale', l);
-  };
 
   const initials = user?.name
     ? user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
@@ -172,7 +162,7 @@ export default function Sidebar() {
               }`}
             >
               {item.icon}
-              <span className="flex-1">{item.label}</span>
+              <span className="flex-1">{t(item.labelKey)}</span>
               {item.badge && newCount > 0 && (
                 <span className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                   {newCount > 9 ? '9+' : newCount}
@@ -183,13 +173,13 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Переключатель языка */}
+      {/* Language switcher */}
       <div className="px-6 py-3 border-t border-slate-700">
         <div className="flex items-center gap-1">
-          {['en', 'ru'].map((l) => (
+          {(['en', 'ru', 'az'] as const).map((l) => (
             <button
               key={l}
-              onClick={() => changeLocale(l)}
+              onClick={() => setLocale(l)}
               className={`px-3 py-1 text-xs font-bold rounded transition-colors ${
                 locale === l ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700'
               }`}
@@ -206,8 +196,8 @@ export default function Sidebar() {
             {initials}
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-medium truncate">{user?.name || 'Loading...'}</div>
-            <div className="text-xs text-slate-400">{user ? ROLE_LABELS[user.role] || user.role : ''}</div>
+            <div className="text-sm font-medium truncate">{user?.name || t('common.loading')}</div>
+            <div className="text-xs text-slate-400">{user ? t(`roles.${user.role}`) : ''}</div>
           </div>
         </div>
       </div>
