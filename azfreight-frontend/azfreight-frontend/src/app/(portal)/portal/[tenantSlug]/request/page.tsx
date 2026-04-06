@@ -9,13 +9,8 @@ import { useTranslation } from '@/lib/i18n';
 
 interface FileWithType { file: File; docType: string; }
 
-const STEPS = ['Contact Info', 'Route & Transport', 'Cargo', 'Documents', 'Confirmation'];
-const TRANSPORT_OPTS = [
-  { value: 'road_tir', label: 'Road / TIR' },
-  { value: 'sea', label: 'Sea Freight' },
-  { value: 'air', label: 'Air Freight' },
-  { value: 'rail', label: 'Rail' },
-];
+const STEP_KEYS = ['requestForm.steps.contact', 'requestForm.steps.route', 'requestForm.steps.cargo', 'requestForm.steps.documents', 'requestForm.steps.confirmation'];
+const TRANSPORT_OPT_KEYS = ['road_tir', 'sea', 'air', 'rail'];
 
 // Двухуровневые типы груза
 const CARGO_TYPES: Record<string, { label: string; subcategories: string[] }> = {
@@ -45,7 +40,7 @@ export default function ShipmentRequestPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const { locale } = useTranslation();
+  const { t, locale } = useTranslation();
 
   // Step 1: Contact
   const [requesterName, setRequesterName] = useState('');
@@ -236,28 +231,28 @@ export default function ShipmentRequestPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Request Submitted!</h1>
-        <p className="text-slate-600 mb-4">Your request ID: <span className="font-mono font-semibold">{submitted.slice(0, 8)}</span></p>
-        <p className="text-slate-500">We will contact you within 24 hours.</p>
+        <h1 className="text-2xl font-bold text-slate-900 mb-2">{t('requestForm.requestSubmitted')}</h1>
+        <p className="text-slate-600 mb-4">{t('requestForm.requestId')}: <span className="font-mono font-semibold">{submitted.slice(0, 8)}</span></p>
+        <p className="text-slate-500">{t('requestForm.willContact')}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Shipment Request</h1>
+      <h1 className="text-2xl font-bold text-slate-900 mb-6">{t('requestForm.title')}</h1>
 
       {/* Stepper */}
       <div className="flex items-center mb-8 gap-1">
-        {STEPS.map((s, i) => (
+        {STEP_KEYS.map((s, i) => (
           <div key={s} className="flex items-center flex-1">
             <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-semibold shrink-0 ${
               i < step ? 'bg-green-500 text-white' : i === step ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'
             }`}>
               {i < step ? '\u2713' : i + 1}
             </div>
-            <span className={`ml-2 text-xs hidden sm:inline ${i === step ? 'font-semibold text-slate-900' : 'text-slate-400'}`}>{s}</span>
-            {i < STEPS.length - 1 && <div className="flex-1 h-px bg-slate-200 mx-2" />}
+            <span className={`ml-2 text-xs hidden sm:inline ${i === step ? 'font-semibold text-slate-900' : 'text-slate-400'}`}>{t(s)}</span>
+            {i < STEP_KEYS.length - 1 && <div className="flex-1 h-px bg-slate-200 mx-2" />}
           </div>
         ))}
       </div>
@@ -266,18 +261,18 @@ export default function ShipmentRequestPage() {
         {/* Step 1: Contact */}
         {step === 0 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold mb-4">Contact Information</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('requestForm.steps.contact')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">Full Name *</label>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.fullName')} *</label>
                 <input type="text" value={requesterName} onChange={(e) => setRequesterName(e.target.value)} className="input-field w-full" /></div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">Email *</label>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.emailAddress')} *</label>
                 <input type="email" value={requesterEmail} onChange={(e) => setRequesterEmail(e.target.value)} className="input-field w-full" /></div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.phoneNumber')}</label>
                 <input type="tel" value={requesterPhone} onChange={(e) => setRequesterPhone(e.target.value)} className="input-field w-full" /></div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">Company Name</label>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.companyName')}</label>
                 <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="input-field w-full" /></div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1">VOEN (Vergi ödəyicisinin eyniləşdirmə nömrəsi)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.voen')}</label>
                 <input type="text" value={voen} onChange={(e) => setVoen(e.target.value.replace(/\D/g, '').slice(0, 10))} className="input-field w-full sm:w-1/2" placeholder="1234567890" maxLength={10} />
               </div>
             </div>
@@ -287,11 +282,11 @@ export default function ShipmentRequestPage() {
         {/* Step 2: Route & Transport */}
         {step === 1 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold mb-4">Route & Transport</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('requestForm.steps.route')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Origin Country с автодополнением */}
               <div className="relative">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Origin Country *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.originCountry')} *</label>
                 <input type="text" value={originCountry} onChange={(e) => { setOriginCountry(e.target.value); setShowOriginCountries(true); setSelectedOriginCountry(null); }} onFocus={() => originCountry.length >= 2 && setShowOriginCountries(true)} onBlur={() => setTimeout(() => setShowOriginCountries(false), 200)} className="input-field w-full" placeholder="Start typing..." />
                 {showOriginCountries && filterCountries(originCountry).length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -305,7 +300,7 @@ export default function ShipmentRequestPage() {
               </div>
               {/* Origin City */}
               <div className="relative">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Origin City *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.originCity')} *</label>
                 <input type="text" value={originCity} onChange={(e) => { setOriginCity(e.target.value); setShowOriginCities(true); }} onFocus={() => setShowOriginCities(true)} onBlur={() => setTimeout(() => setShowOriginCities(false), 200)} className="input-field w-full" placeholder="Start typing..." />
                 {showOriginCities && selectedOriginCountry && filterCities(selectedOriginCountry, originCity).length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -319,7 +314,7 @@ export default function ShipmentRequestPage() {
               </div>
               {/* Destination Country */}
               <div className="relative">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Destination Country *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.destinationCountry')} *</label>
                 <input type="text" value={destCountry} onChange={(e) => { setDestCountry(e.target.value); setShowDestCountries(true); setSelectedDestCountry(null); }} onFocus={() => destCountry.length >= 2 && setShowDestCountries(true)} onBlur={() => setTimeout(() => setShowDestCountries(false), 200)} className="input-field w-full" placeholder="Start typing..." />
                 {showDestCountries && filterCountries(destCountry).length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -333,7 +328,7 @@ export default function ShipmentRequestPage() {
               </div>
               {/* Destination City */}
               <div className="relative">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Destination City *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.destinationCity')} *</label>
                 <input type="text" value={destCity} onChange={(e) => { setDestCity(e.target.value); setShowDestCities(true); }} onFocus={() => setShowDestCities(true)} onBlur={() => setTimeout(() => setShowDestCities(false), 200)} className="input-field w-full" placeholder="Start typing..." />
                 {showDestCities && selectedDestCountry && filterCities(selectedDestCountry, destCity).length > 0 && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
@@ -348,12 +343,12 @@ export default function ShipmentRequestPage() {
             </div>
             {/* Мультимодальная доставка — чекбоксы */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Transport Types *</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t('requestForm.transportTypes')} *</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {TRANSPORT_OPTS.map((t) => (
-                  <label key={t.value} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${transportTypes.includes(t.value) ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
-                    <input type="checkbox" checked={transportTypes.includes(t.value)} onChange={() => toggleTransport(t.value)} className="w-4 h-4 rounded" />
-                    <span className="text-sm font-medium">{t.label}</span>
+                {TRANSPORT_OPT_KEYS.map((val) => (
+                  <label key={val} className={`flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${transportTypes.includes(val) ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:border-slate-300'}`}>
+                    <input type="checkbox" checked={transportTypes.includes(val)} onChange={() => toggleTransport(val)} className="w-4 h-4 rounded" />
+                    <span className="text-sm font-medium">{t('transport.' + val)}</span>
                   </label>
                 ))}
               </div>
@@ -361,25 +356,25 @@ export default function ShipmentRequestPage() {
             {/* Порядок следования этапов (drag-and-drop) */}
             {transportTypes.length > 1 && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Transport Order (drag to reorder)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">{t('requestForm.transportOrder')}</label>
                 <div className="flex flex-wrap gap-2">
-                  {transportOrder.map((t, idx) => (
-                    <div key={t} draggable onDragStart={() => handleOrderDragStart(idx)} onDragOver={(e) => e.preventDefault()} onDrop={() => handleOrderDrop(idx)}
+                  {transportOrder.map((tp, idx) => (
+                    <div key={tp} draggable onDragStart={() => handleOrderDragStart(idx)} onDragOver={(e) => e.preventDefault()} onDrop={() => handleOrderDrop(idx)}
                       className="flex items-center gap-1 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg cursor-grab active:cursor-grabbing text-sm font-medium text-blue-700">
                       <span className="text-blue-400 mr-1">{idx + 1}.</span>
-                      {TRANSPORT_OPTS.find((o) => o.value === t)?.label || t}
+                      {t('transport.' + tp)}
                     </div>
                   ))}
                 </div>
               </div>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">Preferred Date</label>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.preferredDate')}</label>
                 <input type="date" value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} className="input-field w-full" /></div>
               <div className="flex items-end pb-2">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" checked={isUrgent} onChange={(e) => setIsUrgent(e.target.checked)} className="w-4 h-4 rounded border-slate-300" />
-                  <span className="text-sm font-medium text-red-600">Urgent Shipment</span>
+                  <span className="text-sm font-medium text-red-600">{t('requestForm.urgentShipment')}</span>
                 </label>
               </div>
             </div>
@@ -389,18 +384,18 @@ export default function ShipmentRequestPage() {
         {/* Step 3: Cargo */}
         {step === 2 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold mb-4">Cargo Details</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('requestForm.steps.cargo')}</h2>
             {/* Двухуровневый выбор типа */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Cargo Type *</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.cargoType')} *</label>
                 <select value={cargoType} onChange={(e) => { setCargoType(e.target.value); setCargoSubtype(''); }} className="input-field w-full">
                   {Object.entries(CARGO_TYPES).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
                 </select>
               </div>
               {CARGO_TYPES[cargoType]?.subcategories.length > 0 && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Subcategory</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.cargoSubtype')}</label>
                   <select value={cargoSubtype} onChange={(e) => setCargoSubtype(e.target.value)} className="input-field w-full">
                     <option value="">Select...</option>
                     {CARGO_TYPES[cargoType].subcategories.map((s) => (<option key={s} value={s}>{s}</option>))}
@@ -416,31 +411,31 @@ export default function ShipmentRequestPage() {
             {/* Special Requirements */}
             <div className="flex flex-wrap gap-3">
               {cargoReqs.hazmat && (
-                <label className="flex items-center gap-2"><input type="checkbox" checked={isHazmat} onChange={(e) => setIsHazmat(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Hazardous (ADR/IMDG)</span></label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={isHazmat} onChange={(e) => setIsHazmat(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">{t('requestForm.hazardous')}</span></label>
               )}
               {cargoReqs.needsRefrigeration && (
-                <label className="flex items-center gap-2"><input type="checkbox" checked={needsRefrigeration} onChange={(e) => setNeedsRefrigeration(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Temperature controlled</span></label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={needsRefrigeration} onChange={(e) => setNeedsRefrigeration(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">{t('requestForm.refrigeration')}</span></label>
               )}
-              <label className="flex items-center gap-2"><input type="checkbox" checked={isFragile} onChange={(e) => setIsFragile(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Fragile</span></label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={needsCustomsClearance} onChange={(e) => setNeedsCustomsClearance(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Customs Clearance</span></label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={isGroupage} onChange={(e) => setIsGroupage(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Groupage (LCL)</span></label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={isStackable} onChange={(e) => setIsStackable(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">Stackable</span></label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={isFragile} onChange={(e) => setIsFragile(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">{t('requestForm.fragile')}</span></label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={needsCustomsClearance} onChange={(e) => setNeedsCustomsClearance(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">{t('requestForm.customsClearance')}</span></label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={isGroupage} onChange={(e) => setIsGroupage(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">{t('requestForm.groupageLcl')}</span></label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={isStackable} onChange={(e) => setIsStackable(e.target.checked)} className="w-4 h-4" /><span className="text-sm text-slate-700">{t('requestForm.stackable')}</span></label>
             </div>
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Description *</label>
-              <textarea value={cargoDescription} onChange={(e) => setCargoDescription(e.target.value)} rows={3} className="input-field w-full" placeholder="Describe the cargo..." />
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.cargoDescription')} *</label>
+              <textarea value={cargoDescription} onChange={(e) => setCargoDescription(e.target.value)} rows={3} className="input-field w-full" />
             </div>
             {/* Weight & Packages */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">Weight (kg)</label>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.weight')}</label>
                 <input type="number" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} className="input-field w-full" /></div>
-              <div><label className="block text-sm font-medium text-slate-700 mb-1">Packages</label>
+              <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.packages')}</label>
                 <input type="number" value={packageCount} onChange={(e) => setPackageCount(e.target.value)} className="input-field w-full" /></div>
             </div>
             {/* CBM Calculator */}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Volume (CBM Calculator)</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">{t('requestForm.volume')}</label>
               <div className="grid grid-cols-4 gap-2">
                 <div><input type="number" value={dimLength} onChange={(e) => setDimLength(e.target.value)} className="input-field w-full" placeholder="L" /></div>
                 <div><input type="number" value={dimWidth} onChange={(e) => setDimWidth(e.target.value)} className="input-field w-full" placeholder="W" /></div>
@@ -456,21 +451,21 @@ export default function ShipmentRequestPage() {
             {/* Customs & Financial — collapsible */}
             <div className="border border-slate-200 rounded-lg overflow-hidden">
               <button type="button" onClick={() => setCustomsOpen(!customsOpen)} className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors">
-                <span>Customs & Financial Details (Optional)</span>
+                <span>{t('requestForm.customsFinancialDetails')}</span>
                 <svg className={`w-4 h-4 transition-transform ${customsOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
               </button>
               <div style={{ maxHeight: customsOpen ? '300px' : '0', overflow: 'hidden', transition: 'max-height 0.3s ease' }}>
                 <div className="p-4 space-y-4">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div><label className="block text-sm font-medium text-slate-700 mb-1">Declared Value</label>
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.declaredValue')}</label>
                       <input type="number" value={declaredValue} onChange={(e) => setDeclaredValue(e.target.value)} className="input-field w-full" /></div>
-                    <div><label className="block text-sm font-medium text-slate-700 mb-1">Currency</label>
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.currency')}</label>
                       <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="input-field w-full">
                         {['USD', 'EUR', 'GBP', 'AZN', 'TRY', 'CNY', 'RUB'].map((c) => (<option key={c} value={c}>{c}</option>))}
                       </select></div>
-                    <div><label className="block text-sm font-medium text-slate-700 mb-1">HS Code</label>
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.hsCode')}</label>
                       <input type="text" value={hsCode} onChange={(e) => setHsCode(e.target.value)} className="input-field w-full" placeholder="e.g. 8471.30" /></div>
-                    <div><label className="block text-sm font-medium text-slate-700 mb-1">Incoterms</label>
+                    <div><label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.incoterms')}</label>
                       <select value={incoterms} onChange={(e) => setIncoterms(e.target.value)} className="input-field w-full">
                         <option value="">Select...</option>
                         {INCOTERMS_OPTIONS.map((i) => (<option key={i} value={i}>{i}</option>))}
@@ -485,7 +480,7 @@ export default function ShipmentRequestPage() {
         {/* Step 4: Documents */}
         {step === 3 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold mb-4">Documents</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('requestForm.documentsTitle')}</h2>
             <div className="space-y-2 mb-4">
               {allDocTypes.map((dt) => {
                 const isRequired = cargoReqs.required.includes(dt);
@@ -517,8 +512,8 @@ export default function ShipmentRequestPage() {
               }`}
               onClick={() => document.getElementById('file-input')?.click()}
             >
-              <p className="text-sm text-slate-600">Drag & drop files here, or click to browse</p>
-              <p className="text-xs text-slate-400 mt-1">PDF, JPG, PNG — max 20MB per file, up to 10 files</p>
+              <p className="text-sm text-slate-600">{t('requestForm.dragDropFiles')}</p>
+              <p className="text-xs text-slate-400 mt-1">{t('requestForm.fileHint')}</p>
               <input
                 id="file-input"
                 type="file"
@@ -551,7 +546,7 @@ export default function ShipmentRequestPage() {
             )}
 
             {files.length === 0 && (
-              <p className="text-sm text-amber-600">You can submit without documents, but processing may take longer.</p>
+              <p className="text-sm text-amber-600">{t('requestForm.noDocumentsWarning')}</p>
             )}
           </div>
         )}
@@ -559,10 +554,10 @@ export default function ShipmentRequestPage() {
         {/* Step 5: Confirmation */}
         {step === 4 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold mb-4">Review & Submit</h2>
+            <h2 className="text-lg font-semibold mb-4">{t('requestForm.reviewSubmit')}</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div className="bg-slate-50 rounded-lg p-4">
-                <h3 className="font-medium text-slate-900 mb-2">Contact</h3>
+                <h3 className="font-medium text-slate-900 mb-2">{t('requestForm.steps.contact')}</h3>
                 <p>{requesterName}</p>
                 <p className="text-slate-500">{requesterEmail}</p>
                 {requesterPhone && <p className="text-slate-500">{requesterPhone}</p>}
@@ -570,16 +565,16 @@ export default function ShipmentRequestPage() {
                 {voen && <p className="text-slate-500">VOEN: {voen}</p>}
               </div>
               <div className="bg-slate-50 rounded-lg p-4">
-                <h3 className="font-medium text-slate-900 mb-2">Route</h3>
+                <h3 className="font-medium text-slate-900 mb-2">{t('requestForm.steps.route')}</h3>
                 <p>{originCity}, {originCountry} &rarr; {destCity}, {destCountry}</p>
                 <p className="text-slate-500">
-                  {transportOrder.map((t, i) => `${i + 1}. ${TRANSPORT_OPTS.find((o) => o.value === t)?.label || t}`).join(' → ')}
+                  {transportOrder.map((tp, i) => `${i + 1}. ${t('transport.' + tp)}`).join(' \u2192 ')}
                 </p>
                 {preferredDate && <p className="text-slate-500">Date: {preferredDate}</p>}
                 {isUrgent && <p className="text-red-600 font-medium">URGENT</p>}
               </div>
               <div className="bg-slate-50 rounded-lg p-4">
-                <h3 className="font-medium text-slate-900 mb-2">Cargo</h3>
+                <h3 className="font-medium text-slate-900 mb-2">{t('requestForm.steps.cargo')}</h3>
                 <p>{CARGO_TYPES[cargoType]?.label || cargoType}</p>
                 {cargoSubtype && <p className="text-slate-500">{cargoSubtype}</p>}
                 <p className="text-slate-500">{cargoDescription}</p>
@@ -588,7 +583,7 @@ export default function ShipmentRequestPage() {
                 {packageCount && <p className="text-slate-500">{packageCount} packages</p>}
               </div>
               <div className="bg-slate-50 rounded-lg p-4">
-                <h3 className="font-medium text-slate-900 mb-2">Documents</h3>
+                <h3 className="font-medium text-slate-900 mb-2">{t('requestForm.documentsTitle')}</h3>
                 <p>{files.length} file(s) attached</p>
                 {files.map((f, i) => (
                   <p key={i} className="text-slate-500 truncate">{f.file.name} ({DOC_TYPE_LABELS[f.docType]})</p>
@@ -597,7 +592,7 @@ export default function ShipmentRequestPage() {
             </div>
             <label className="flex items-start gap-2 mt-4 cursor-pointer">
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="w-4 h-4 mt-0.5" />
-              <span className="text-sm text-slate-600">I agree to the processing of my personal data for the purpose of handling this shipment request.</span>
+              <span className="text-sm text-slate-600">{t('requestForm.agreeText')}</span>
             </label>
             {error && <p className="text-sm text-red-600">{error}</p>}
           </div>
@@ -610,15 +605,15 @@ export default function ShipmentRequestPage() {
             disabled={step === 0}
             className="px-6 py-3 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:opacity-30 rounded-lg hover:bg-slate-50 transition-colors"
           >
-            &larr; Back
+            &larr; {t('common.back')}
           </button>
-          {step < STEPS.length - 1 ? (
+          {step < STEP_KEYS.length - 1 ? (
             <button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canNext()}
               className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
-              Next &rarr;
+              {t('common.next')} &rarr;
             </button>
           ) : (
             <button
@@ -626,7 +621,7 @@ export default function ShipmentRequestPage() {
               disabled={!agreed || submitting}
               className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
-              {submitting ? 'Submitting...' : 'Submit Request'}
+              {submitting ? t('requestForm.submitting') : t('requestForm.submitRequest')}
             </button>
           )}
         </div>
