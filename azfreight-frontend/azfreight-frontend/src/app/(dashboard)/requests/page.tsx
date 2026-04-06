@@ -103,7 +103,7 @@ export default function RequestsPage() {
                       <td className="px-6 py-4 text-sm text-slate-700">{r.companyName || '—'}</td>
                       <td className="px-6 py-4 text-sm text-slate-700">{r.originCity} &rarr; {r.destinationCity}</td>
                       <td className="px-6 py-4 text-sm text-slate-500">{CARGO_TYPE_LABELS[r.cargoType] || r.cargoType}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500">{TRANSPORT_LABELS[r.transportType] || r.transportType}</td>
+                      <td className="px-6 py-4 text-sm text-slate-500">{r.transportTypes.map(t => TRANSPORT_LABELS[t] || t).join(', ')}</td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${STATUS_COLORS[r.status] || 'bg-slate-100 text-slate-700'}`}>
                           {r.isUrgent && <span className="mr-1">!</span>}
