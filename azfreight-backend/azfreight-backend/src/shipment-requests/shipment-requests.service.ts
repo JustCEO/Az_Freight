@@ -26,8 +26,8 @@ export class ShipmentRequestsService {
     if (!tenant.portalEnabled) throw new BadRequestException('Portal is disabled');
 
     // Поддержка мультимодальной доставки
-    const transportTypes = dto.transportTypes || (dto as Record<string, unknown>).transportType
-      ? [String((dto as Record<string, unknown>).transportType)]
+    const transportTypes = dto.transportTypes || (dto as unknown as Record<string, unknown>).transportType
+      ? [String((dto as unknown as Record<string, unknown>).transportType)]
       : ['road_tir'];
     const transportOrder = dto.transportOrder || transportTypes;
 
