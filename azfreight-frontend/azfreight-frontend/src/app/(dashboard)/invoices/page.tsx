@@ -8,9 +8,11 @@ import type { Invoice } from '@/types';
 import StatusBadge from '@/components/status-badge';
 import Pagination from '@/components/pagination';
 import Loading from '@/components/loading';
+import { useTranslation } from '@/lib/i18n';
 
 export default function InvoicesPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -33,8 +35,8 @@ export default function InvoicesPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <input type="text" placeholder="Search invoices..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="input-field w-64" />
-        <Link href="/invoices/new" className="btn-primary">New Invoice</Link>
+        <input type="text" placeholder={t('invoicesList.searchPlaceholder')} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="input-field w-64" />
+        <Link href="/invoices/new" className="btn-primary">{t('invoicesList.newInvoice')}</Link>
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
@@ -44,13 +46,13 @@ export default function InvoicesPage() {
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Invoice #</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Client</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Currency</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Issued</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Due</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('invoicesList.invoiceNumber')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('invoicesList.client')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('invoicesList.amount')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('requestForm.currency')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.status')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('invoicesList.issued')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('invoicesList.due')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -66,7 +68,7 @@ export default function InvoicesPage() {
                     </tr>
                   ))}
                   {invoices.length === 0 && (
-                    <tr><td colSpan={7} className="px-6 py-8 text-center text-sm text-slate-500">No invoices found</td></tr>
+                    <tr><td colSpan={7} className="px-6 py-8 text-center text-sm text-slate-500">{t('invoicesList.noInvoicesFound')}</td></tr>
                   )}
                 </tbody>
               </table>

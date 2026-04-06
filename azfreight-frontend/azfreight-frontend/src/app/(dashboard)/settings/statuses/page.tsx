@@ -9,8 +9,10 @@ import {
 } from '@/lib/api/custom-statuses';
 import type { CustomStatus } from '@/types';
 import Loading from '@/components/loading';
+import { useTranslation } from '@/lib/i18n';
 
 export default function CustomStatusesPage() {
+  const { t } = useTranslation();
   const [statuses, setStatuses] = useState<CustomStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
@@ -71,25 +73,25 @@ export default function CustomStatusesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Custom Statuses</h1>
+      <h1 className="text-2xl font-bold text-slate-900 mb-6">{t('customStatuses.title')}</h1>
 
       {/* Форма создания */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">Create Status</h2>
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('customStatuses.create')}</h2>
         <form onSubmit={handleCreate} className="flex flex-wrap items-end gap-3">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('common.name')}</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="input-field w-64" placeholder="e.g. At warehouse" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Color</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('customStatuses.color')}</label>
             <div className="flex items-center gap-2">
               <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-10 h-10 rounded border border-slate-200 cursor-pointer" />
               <input type="text" value={color} onChange={(e) => setColor(e.target.value)} className="input-field w-24 text-sm" />
             </div>
           </div>
           <button type="submit" disabled={creating} className="btn-primary disabled:opacity-50">
-            {creating ? 'Creating...' : 'Create'}
+            {creating ? t('common.loading') : t('common.create')}
           </button>
         </form>
         {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
@@ -100,7 +102,7 @@ export default function CustomStatusesPage() {
         {loading ? (
           <Loading />
         ) : statuses.length === 0 ? (
-          <div className="p-8 text-center text-sm text-slate-500">No custom statuses yet</div>
+          <div className="p-8 text-center text-sm text-slate-500">{t('customStatuses.noStatuses')}</div>
         ) : (
           <div className="divide-y divide-slate-200">
             {statuses.map((s) => (
@@ -109,8 +111,8 @@ export default function CustomStatusesPage() {
                   <>
                     <input type="color" value={editColor} onChange={(e) => setEditColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" />
                     <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="input-field flex-1" />
-                    <button onClick={handleUpdate} className="text-blue-600 text-sm font-medium hover:text-blue-800">Save</button>
-                    <button onClick={() => setEditingId(null)} className="text-slate-400 text-sm hover:text-slate-600">Cancel</button>
+                    <button onClick={handleUpdate} className="text-blue-600 text-sm font-medium hover:text-blue-800">{t('common.save')}</button>
+                    <button onClick={() => setEditingId(null)} className="text-slate-400 text-sm hover:text-slate-600">{t('common.cancel')}</button>
                   </>
                 ) : (
                   <>
@@ -122,8 +124,8 @@ export default function CustomStatusesPage() {
                     >
                       {s.name}
                     </span>
-                    <button onClick={() => startEdit(s)} className="text-blue-600 text-xs font-medium hover:text-blue-800">Edit</button>
-                    <button onClick={() => handleDelete(s.id)} className="text-red-500 text-xs font-medium hover:text-red-700">Delete</button>
+                    <button onClick={() => startEdit(s)} className="text-blue-600 text-xs font-medium hover:text-blue-800">{t('common.edit')}</button>
+                    <button onClick={() => handleDelete(s.id)} className="text-red-500 text-xs font-medium hover:text-red-700">{t('common.delete')}</button>
                   </>
                 )}
               </div>

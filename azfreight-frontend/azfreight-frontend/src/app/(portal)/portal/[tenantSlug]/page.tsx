@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getTenantInfo, type TenantInfo } from '@/lib/api/portal';
+import { useTranslation } from '@/lib/i18n';
 
 export default function TenantLandingPage() {
   const params = useParams();
   const tenantSlug = params.tenantSlug as string;
   const [tenant, setTenant] = useState<TenantInfo | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     getTenantInfo(tenantSlug).then(setTenant).catch(() => {});
@@ -49,10 +51,10 @@ export default function TenantLandingPage() {
           )}
 
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 drop-shadow-sm">
-            {tenant?.name || 'Loading...'}
+            {tenant?.name || t('common.loading')}
           </h1>
           <p className="text-lg sm:text-xl text-white/90 mb-12 leading-relaxed">
-            {tenant?.portalWelcomeText || 'Your trusted logistics partner. Submit a shipment request to get started.'}
+            {tenant?.portalWelcomeText || t('portal.welcomeDefault')}
           </p>
 
           {/* Кнопки */}
@@ -65,7 +67,7 @@ export default function TenantLandingPage() {
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
-              Submit Shipment Request
+              {t('portal.submitRequest')}
             </Link>
             <Link
               href={`/portal/${tenantSlug}/track`}
@@ -74,7 +76,7 @@ export default function TenantLandingPage() {
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
-              Track My Shipment
+              {t('portal.trackShipment')}
             </Link>
           </div>
         </div>

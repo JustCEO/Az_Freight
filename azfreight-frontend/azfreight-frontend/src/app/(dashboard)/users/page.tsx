@@ -6,11 +6,13 @@ import { useAuth } from '@/context/auth-context';
 import type { User, PaginatedResponse } from '@/types';
 import { ROLE_LABELS } from '@/lib/constants';
 import Loading from '@/components/loading';
+import { useTranslation } from '@/lib/i18n';
 
 const EDITABLE_ROLES = ['admin', 'manager', 'accountant'];
 
 export default function UsersPage() {
   const { user: currentUser } = useAuth();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
@@ -55,19 +57,19 @@ export default function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Users</h1>
+      <h1 className="text-2xl font-bold text-slate-900 mb-6">{t('users.title')}</h1>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Name</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.name')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.email')}</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Last Login</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('usersPage.lastLogin')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -77,7 +79,7 @@ export default function UsersPage() {
                   <tr key={u.id} className={!u.isActive ? 'opacity-50' : ''}>
                     <td className="px-6 py-4 text-sm font-medium text-slate-900">
                       {u.name}
-                      {isSelf && <span className="ml-2 text-xs text-blue-600">(you)</span>}
+                      {isSelf && <span className="ml-2 text-xs text-blue-600">{t('usersPage.you')}</span>}
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-600">{u.email}</td>
                     <td className="px-6 py-4 text-sm">
@@ -92,8 +94,8 @@ export default function UsersPage() {
                               <option key={r} value={r}>{ROLE_LABELS[r]}</option>
                             ))}
                           </select>
-                          <button onClick={() => handleRoleChange(u.id)} className="text-blue-600 text-xs font-medium">Save</button>
-                          <button onClick={() => setEditingRoleId(null)} className="text-slate-400 text-xs">Cancel</button>
+                          <button onClick={() => handleRoleChange(u.id)} className="text-blue-600 text-xs font-medium">{t('common.save')}</button>
+                          <button onClick={() => setEditingRoleId(null)} className="text-slate-400 text-xs">{t('common.cancel')}</button>
                         </div>
                       ) : (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
@@ -103,7 +105,7 @@ export default function UsersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${u.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                        {u.isActive ? 'Active' : 'Inactive'}
+                        {u.isActive ? t('clientsList.active') : t('clientsList.inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-500">
@@ -116,28 +118,28 @@ export default function UsersPage() {
                             onClick={() => { setEditingRoleId(u.id); setNewRole(u.role); }}
                             className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                           >
-                            Edit Role
+                            {t('users.editRole')}
                           </button>
                           {u.isActive ? (
                             <button
                               onClick={() => handleToggleActive(u.id, false)}
                               className="text-amber-600 hover:text-amber-800 text-xs font-medium"
                             >
-                              Deactivate
+                              {t('users.deactivate')}
                             </button>
                           ) : (
                             <button
                               onClick={() => handleToggleActive(u.id, true)}
                               className="text-emerald-600 hover:text-emerald-800 text-xs font-medium"
                             >
-                              Activate
+                              {t('users.activate')}
                             </button>
                           )}
                           <button
                             onClick={() => handleDelete(u.id)}
                             className="text-red-500 hover:text-red-700 text-xs font-medium"
                           >
-                            Delete
+                            {t('common.delete')}
                           </button>
                         </div>
                       )}
@@ -146,7 +148,7 @@ export default function UsersPage() {
                 );
               })}
               {users.length === 0 && (
-                <tr><td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">No users found</td></tr>
+                <tr><td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">{t('usersPage.noUsersFound')}</td></tr>
               )}
             </tbody>
           </table>

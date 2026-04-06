@@ -7,6 +7,7 @@ import type { Shipment, ShipmentStatus } from '@/types';
 import StatusBadge from '@/components/status-badge';
 import { TRANSPORT_LABELS } from '@/lib/constants';
 import Loading from '@/components/loading';
+import { useTranslation } from '@/lib/i18n';
 
 const STATUS_CARD_STYLES: Record<string, { bg: string; text: string; border: string }> = {
   request: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
@@ -18,17 +19,10 @@ const STATUS_CARD_STYLES: Record<string, { bg: string; text: string; border: str
 };
 
 const STATUS_ORDER: ShipmentStatus[] = ['request', 'confirmed', 'in_transit', 'customs', 'delivered', 'cancelled'];
-const STATUS_LABELS_DASH: Record<string, string> = {
-  request: 'Requests',
-  confirmed: 'Confirmed',
-  in_transit: 'In Transit',
-  customs: 'Customs',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
-};
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -59,7 +53,7 @@ export default function DashboardPage() {
           return (
             <div key={status} className={`rounded-xl border p-4 ${style.bg} ${style.border}`}>
               <div className={`text-2xl font-bold ${style.text}`}>{counts[status]}</div>
-              <div className="text-sm text-slate-500 mt-1">{STATUS_LABELS_DASH[status]}</div>
+              <div className="text-sm text-slate-500 mt-1">{t('statuses.' + status)}</div>
             </div>
           );
         })}
@@ -67,18 +61,18 @@ export default function DashboardPage() {
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
         <div className="px-6 py-4 border-b border-slate-200">
-          <h2 className="text-lg font-semibold text-slate-900">Recent Shipments</h2>
+          <h2 className="text-lg font-semibold text-slate-900">{t('dashboard.recentShipments')}</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Ref #</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Client</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Route</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Transport</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Created</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('dashboard.refNumber')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('shipmentsList.client')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('shipmentsList.route')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('requestsList.transport')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.status')}</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('shipmentsList.created')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
@@ -101,7 +95,7 @@ export default function DashboardPage() {
               {recent.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">
-                    No shipments yet
+                    {t('dashboard.noShipmentsYet')}
                   </td>
                 </tr>
               )}

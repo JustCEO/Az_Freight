@@ -7,16 +7,11 @@ import { listClients } from '@/lib/api/clients';
 import { listCarriers } from '@/lib/api/carriers';
 import type { Client, Carrier } from '@/types';
 import Loading from '@/components/loading';
-
-const TRANSPORT_OPTIONS = [
-  { value: 'road_tir', label: 'Road/TIR' },
-  { value: 'sea', label: 'Sea' },
-  { value: 'air', label: 'Air' },
-  { value: 'rail', label: 'Rail' },
-];
+import { useTranslation } from '@/lib/i18n';
 
 export default function NewShipmentPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [clients, setClients] = useState<Client[]>([]);
   const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -103,7 +98,7 @@ export default function NewShipmentPage() {
       const shipment = await createShipment(body);
       router.push(`/shipments/${shipment.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create shipment');
+      setError(err instanceof Error ? err.message : t('newShipment.failedToCreate'));
     } finally {
       setSubmitting(false);
     }
@@ -119,29 +114,34 @@ export default function NewShipmentPage() {
         )}
 
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Transport & Parties</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('newShipment.transportAndParties')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="label-field">Transport Type *</label>
+              <label className="label-field">{t('newShipment.transportTypeRequired')}</label>
               <select value={form.transportType} onChange={(e) => updateField('transportType', e.target.value)} className="input-field" required>
-                {TRANSPORT_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+                {[
+                  { value: 'road_tir', key: 'transport.road_tir' },
+                  { value: 'sea', key: 'transport.sea' },
+                  { value: 'air', key: 'transport.air' },
+                  { value: 'rail', key: 'transport.rail' },
+                ].map((o) => <option key={o.value} value={o.value}>{t(o.key)}</option>)}
               </select>
             </div>
             <div>
-              <label className="label-field">Currency</label>
+              <label className="label-field">{t('newShipment.currency')}</label>
               <input type="text" value={form.currency} onChange={(e) => updateField('currency', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">Client *</label>
+              <label className="label-field">{t('newShipment.clientRequired')}</label>
               <select value={form.clientId} onChange={(e) => updateField('clientId', e.target.value)} className="input-field" required>
-                <option value="">Select client</option>
+                <option value="">{t('newShipment.selectClient')}</option>
                 {clients.map((c) => <option key={c.id} value={c.id}>{c.companyName}</option>)}
               </select>
             </div>
             <div>
-              <label className="label-field">Carrier</label>
+              <label className="label-field">{t('newShipment.carrier')}</label>
               <select value={form.carrierId} onChange={(e) => updateField('carrierId', e.target.value)} className="input-field">
-                <option value="">Select carrier</option>
+                <option value="">{t('newShipment.selectCarrier')}</option>
                 {carriers.map((c) => <option key={c.id} value={c.id}>{c.companyName}</option>)}
               </select>
             </div>
@@ -149,124 +149,124 @@ export default function NewShipmentPage() {
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Route</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('newShipment.route')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="label-field">Origin Country *</label>
+              <label className="label-field">{t('newShipment.originCountryRequired')}</label>
               <input type="text" value={form.originCountry} onChange={(e) => updateField('originCountry', e.target.value)} className="input-field" required />
             </div>
             <div>
-              <label className="label-field">Origin City *</label>
+              <label className="label-field">{t('newShipment.originCityRequired')}</label>
               <input type="text" value={form.originCity} onChange={(e) => updateField('originCity', e.target.value)} className="input-field" required />
             </div>
             <div>
-              <label className="label-field">Origin Address</label>
+              <label className="label-field">{t('newShipment.originAddress')}</label>
               <input type="text" value={form.originAddress} onChange={(e) => updateField('originAddress', e.target.value)} className="input-field" />
             </div>
             <div className="hidden md:block" />
             <div>
-              <label className="label-field">Destination Country *</label>
+              <label className="label-field">{t('newShipment.destinationCountryRequired')}</label>
               <input type="text" value={form.destinationCountry} onChange={(e) => updateField('destinationCountry', e.target.value)} className="input-field" required />
             </div>
             <div>
-              <label className="label-field">Destination City *</label>
+              <label className="label-field">{t('newShipment.destinationCityRequired')}</label>
               <input type="text" value={form.destinationCity} onChange={(e) => updateField('destinationCity', e.target.value)} className="input-field" required />
             </div>
             <div>
-              <label className="label-field">Destination Address</label>
+              <label className="label-field">{t('newShipment.destinationAddress')}</label>
               <input type="text" value={form.destinationAddress} onChange={(e) => updateField('destinationAddress', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">ETA</label>
+              <label className="label-field">{t('newShipment.eta')}</label>
               <input type="datetime-local" value={form.eta} onChange={(e) => updateField('eta', e.target.value)} className="input-field" />
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Cargo</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('newShipment.cargo')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
-              <label className="label-field">Description</label>
+              <label className="label-field">{t('common.description')}</label>
               <input type="text" value={form.cargoDescription} onChange={(e) => updateField('cargoDescription', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">Weight (kg)</label>
+              <label className="label-field">{t('newShipment.weight')}</label>
               <input type="number" step="0.01" value={form.cargoWeight} onChange={(e) => updateField('cargoWeight', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">Volume (m³)</label>
+              <label className="label-field">{t('newShipment.volume')}</label>
               <input type="number" step="0.01" value={form.cargoVolume} onChange={(e) => updateField('cargoVolume', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">Package Count</label>
+              <label className="label-field">{t('newShipment.packageCount')}</label>
               <input type="number" value={form.packageCount} onChange={(e) => updateField('packageCount', e.target.value)} className="input-field" />
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Financials</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('newShipment.financials')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="label-field">Client Rate</label>
+              <label className="label-field">{t('newShipment.clientRate')}</label>
               <input type="number" step="0.01" value={form.clientRate} onChange={(e) => updateField('clientRate', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">Carrier Rate</label>
+              <label className="label-field">{t('newShipment.carrierRate')}</label>
               <input type="number" step="0.01" value={form.carrierRate} onChange={(e) => updateField('carrierRate', e.target.value)} className="input-field" />
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Transport Details</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('newShipment.transportDetails')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="label-field">Container Number</label>
+              <label className="label-field">{t('newShipment.containerNumber')}</label>
               <input type="text" value={form.containerNumber} onChange={(e) => updateField('containerNumber', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">B/L Number</label>
+              <label className="label-field">{t('newShipment.blNumber')}</label>
               <input type="text" value={form.blNumber} onChange={(e) => updateField('blNumber', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">Vessel Name</label>
+              <label className="label-field">{t('newShipment.vesselName')}</label>
               <input type="text" value={form.vesselName} onChange={(e) => updateField('vesselName', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">AWB Number</label>
+              <label className="label-field">{t('newShipment.awbNumber')}</label>
               <input type="text" value={form.awbNumber} onChange={(e) => updateField('awbNumber', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">Flight Number</label>
+              <label className="label-field">{t('newShipment.flightNumber')}</label>
               <input type="text" value={form.flightNumber} onChange={(e) => updateField('flightNumber', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">Truck Plate</label>
+              <label className="label-field">{t('newShipment.truckPlate')}</label>
               <input type="text" value={form.truckPlate} onChange={(e) => updateField('truckPlate', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">TIR Number</label>
+              <label className="label-field">{t('newShipment.tirNumber')}</label>
               <input type="text" value={form.tirNumber} onChange={(e) => updateField('tirNumber', e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="label-field">Wagon Numbers</label>
+              <label className="label-field">{t('newShipment.wagonNumbers')}</label>
               <input type="text" value={form.wagonNumbers} onChange={(e) => updateField('wagonNumbers', e.target.value)} className="input-field" />
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Notes</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('common.notes')}</h2>
           <textarea value={form.notes} onChange={(e) => updateField('notes', e.target.value)} className="input-field" rows={3} />
         </div>
 
         <div className="flex gap-4">
           <button type="submit" disabled={submitting} className="btn-primary">
-            {submitting ? 'Creating...' : 'Create Shipment'}
+            {submitting ? t('newShipment.creating') : t('newShipment.createShipment')}
           </button>
-          <button type="button" onClick={() => router.back()} className="btn-secondary">Cancel</button>
+          <button type="button" onClick={() => router.back()} className="btn-secondary">{t('common.cancel')}</button>
         </div>
       </form>
     </div>

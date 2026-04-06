@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { get, patch } from '@/lib/api-client';
 import Loading from '@/components/loading';
+import { useTranslation } from '@/lib/i18n';
 
 interface TenantSettings {
   id: string;
@@ -17,6 +18,7 @@ interface TenantSettings {
 
 export default function PortalSettingsPage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [portalEnabled, setPortalEnabled] = useState(true);
@@ -60,14 +62,14 @@ export default function PortalSettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Portal Settings</h1>
+      <h1 className="text-2xl font-bold text-slate-900 mb-6">{t('portalSettingsPage.title')}</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900">Configuration</h2>
+            <h2 className="text-lg font-semibold text-slate-900">{t('portalSettingsPage.configuration')}</h2>
             <label className="flex items-center gap-2 cursor-pointer">
-              <span className="text-sm text-slate-600">Portal Active</span>
+              <span className="text-sm text-slate-600">{t('portalSettingsPage.portalActive')}</span>
               <input
                 type="checkbox"
                 checked={portalEnabled}
@@ -79,7 +81,7 @@ export default function PortalSettingsPage() {
 
           {portalUrl && (
             <div className="bg-slate-50 rounded-lg p-3">
-              <p className="text-xs text-slate-500 mb-1">Portal URL</p>
+              <p className="text-xs text-slate-500 mb-1">{t('portalSettingsPage.portalUrl')}</p>
               <a href={portalUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline break-all">
                 {portalUrl}
               </a>
@@ -87,7 +89,7 @@ export default function PortalSettingsPage() {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Brand Color</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('portalSettingsPage.brandColor')}</label>
             <div className="flex items-center gap-3">
               <input
                 type="color"
@@ -106,7 +108,7 @@ export default function PortalSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Logo URL</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('portalSettingsPage.logoUrl')}</label>
             <input
               type="text"
               value={logoUrl}
@@ -117,27 +119,27 @@ export default function PortalSettingsPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Welcome Text</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('portalSettingsPage.welcomeText')}</label>
             <textarea
               value={welcomeText}
               onChange={(e) => setWelcomeText(e.target.value)}
               rows={3}
               className="input-field w-full"
-              placeholder="Welcome message for your clients..."
+              placeholder={t('portalSettingsPage.welcomePlaceholder')}
             />
           </div>
 
           <div className="flex items-center gap-3">
             <button onClick={handleSave} disabled={saving} className="btn-primary disabled:opacity-50">
-              {saving ? 'Saving...' : 'Save Settings'}
+              {saving ? t('portalSettingsPage.saving') : t('portalSettingsPage.saveSettings')}
             </button>
-            {saved && <span className="text-sm text-green-600">Saved!</span>}
+            {saved && <span className="text-sm text-green-600">{t('portalSettingsPage.saved')}</span>}
           </div>
         </div>
 
         {/* Preview */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Preview</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('portalSettingsPage.preview')}</h2>
           <div className="border border-slate-200 rounded-lg overflow-hidden">
             <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-2">
               {logoUrl ? (
@@ -147,17 +149,17 @@ export default function PortalSettingsPage() {
                   A
                 </div>
               )}
-              <span className="text-sm font-semibold">Your Company</span>
+              <span className="text-sm font-semibold">{t('portalSettingsPage.yourCompany')}</span>
             </div>
             <div className="p-6 text-center bg-slate-50">
               <p className="text-sm text-slate-600 mb-4">
-                {welcomeText || 'Your trusted logistics partner.'}
+                {welcomeText || t('portalSettingsPage.defaultWelcome')}
               </p>
               <div
                 className="inline-block px-4 py-2 rounded-lg text-white text-sm font-medium"
                 style={{ backgroundColor: themeColor }}
               >
-                Submit Request
+                {t('portal.submitRequest')}
               </div>
             </div>
           </div>

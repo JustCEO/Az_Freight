@@ -4,10 +4,12 @@ import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
+import { useTranslation } from '@/lib/i18n';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,7 +23,7 @@ export default function LoginPage() {
       await login(email, password);
       router.push('/dashboard');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : t('auth.loginFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -35,8 +37,8 @@ export default function LoginPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 3C6.5 3 2 6.5 2 6.5L5 18h14l3-11.5S17.5 3 12 3zM2 21h20M7 18v3M17 18v3" />
           </svg>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">Sign in to AzFreight</h1>
-        <p className="text-sm text-slate-500 mt-1">Freight logistics management</p>
+        <h1 className="text-2xl font-bold text-slate-900">{t('auth.signInTitle')}</h1>
+        <p className="text-sm text-slate-500 mt-1">{t('auth.signInSubtitle')}</p>
       </div>
 
       {error && (
@@ -47,36 +49,36 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="label-field">Email</label>
+          <label className="label-field">{t('common.email')}</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="input-field"
-            placeholder="you@company.com"
+            placeholder={t('auth.emailPlaceholder')}
             required
           />
         </div>
         <div>
-          <label className="label-field">Password</label>
+          <label className="label-field">{t('auth.password')}</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="input-field"
-            placeholder="••••••••"
+            placeholder={t('auth.passwordPlaceholder')}
             required
           />
         </div>
         <button type="submit" disabled={submitting} className="btn-primary w-full">
-          {submitting ? 'Signing in...' : 'Sign in'}
+          {submitting ? t('auth.signingIn') : t('auth.signIn')}
         </button>
       </form>
 
       <p className="text-center text-sm text-slate-500 mt-6">
-        Don&apos;t have an account?{' '}
+        {t('auth.noAccount')}{' '}
         <Link href="/register" className="text-blue-600 hover:text-blue-700 font-medium">
-          Register
+          {t('auth.register')}
         </Link>
       </p>
     </div>

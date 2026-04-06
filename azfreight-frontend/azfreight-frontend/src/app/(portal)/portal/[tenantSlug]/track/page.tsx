@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
@@ -14,21 +15,6 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: 'bg-red-100 text-red-700',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  request: 'Request',
-  confirmed: 'Confirmed',
-  in_transit: 'In Transit',
-  customs: 'Customs',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
-};
-
-const TRANSPORT_LABELS: Record<string, string> = {
-  road_tir: 'Road/TIR',
-  sea: 'Sea Freight',
-  air: 'Air Freight',
-  rail: 'Rail',
-};
 
 interface TrackResult {
   id: string;
@@ -55,6 +41,7 @@ interface TrackResult {
 export default function TrackPage() {
   const params = useParams();
   const tenantSlug = params.tenantSlug as string;
+  const { t } = useTranslation();
   const [trackingNumber, setTrackingNumber] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -62,7 +49,7 @@ export default function TrackPage() {
 
   const handleTrack = async () => {
     if (!trackingNumber.trim()) {
-      setError('Please enter a tracking number');
+      setError(t('tracking.enterNumber'));
       return;
     }
     setLoading(true);
@@ -71,35 +58,35 @@ export default function TrackPage() {
     try {
       const res = await fetch(`${API_URL}/public/${tenantSlug}/track?ref=${encodeURIComponent(trackingNumber.trim())}`);
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ message: 'Shipment not found' }));
+        const err = await res.json().catch(() => ({ message: t('tracking.notFound') }));
         throw new Error(err.message);
       }
       const data = await res.json();
       setResult(data);
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Shipment not found. Please check the reference number.');
+      setError(e instanceof Error ? e.message : t('tracking.notFound'));
     }
     setLoading(false);
   };
 
   return (
     <div className="max-w-2xl mx-auto py-8">
-      <h1 className="text-2xl font-bold text-slate-900 mb-6 text-center">Track Shipment</h1>
+      <h1 className="text-2xl font-bold text-slate-900 mb-6 text-center">{t('tracking.title')}</h1>
 
       {/* Форма поиска */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-        <label className="block text-sm font-medium text-slate-700 mb-1">Reference Number</label>
+        <label className="block text-sm font-medium text-slate-700 mb-1">{t('tracking.referenceNumber')}</label>
         <div className="flex gap-2">
           <input
             type="text"
             value={trackingNumber}
             onChange={(e) => { setTrackingNumber(e.target.value); setError(''); }}
             onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
-            placeholder="e.g. SHP-20260317-0001"
+            placeholder={t('tracking.placeholder')}
             className="input-field flex-1"
           />
           <button onClick={handleTrack} disabled={loading} className="btn-primary whitespace-nowrap disabled:opacity-50">
-            {loading ? 'Searching...' : 'Track'}
+            {loading ? t('common.loading') : t('tracking.trackButton')}
           </button>
         </div>
         {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
@@ -122,7 +109,7 @@ export default function TrackPage() {
                   </span>
                 ) : (
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${STATUS_COLORS[result.status] || 'bg-slate-100 text-slate-600'}`}>
-                    {STATUS_LABELS[result.status] || result.status}
+                    {t('statuses.' + result.status)}
                   </span>
                 )}
               </div>
@@ -131,7 +118,7 @@ export default function TrackPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               {/* Маршрут */}
               <div>
-                <dt className="text-slate-500 mb-1">Route</dt>
+                <dt className="text-slate-500 mb-1">{t('tracking.route')}</dt>
                 <dd className="font-medium text-slate-900">
                   {result.originCity}, {result.originCountry} → {result.destinationCity}, {result.destinationCountry}
                 </dd>
@@ -139,23 +126,23 @@ export default function TrackPage() {
 
               {/* Тип транспорта */}
               <div>
-                <dt className="text-slate-500 mb-1">Transport Type</dt>
+                <dt className="text-slate-500 mb-1">{t('tracking.type')}</dt>
                 <dd className="font-medium text-slate-900">
-                  {TRANSPORT_LABELS[result.transportType] || result.transportType}
+                  {t('transport.' + result.transportType)}
                 </dd>
               </div>
 
               {/* ETA */}
               {result.eta && (
                 <div>
-                  <dt className="text-slate-500 mb-1">ETA</dt>
+                  <dt className="text-slate-500 mb-1">{t('tracking.eta')}</dt>
                   <dd className="font-medium text-slate-900">{new Date(result.eta).toLocaleDateString()}</dd>
                 </div>
               )}
 
               {/* Дата создания */}
               <div>
-                <dt className="text-slate-500 mb-1">Created</dt>
+                <dt className="text-slate-500 mb-1">{t('shipmentsList.created')}</dt>
                 <dd className="font-medium text-slate-900">{new Date(result.createdAt).toLocaleDateString()}</dd>
               </div>
             </div>
@@ -170,7 +157,7 @@ export default function TrackPage() {
           {/* Timeline */}
           {result.statusLogs.length > 0 && (
             <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Timeline</h3>
+              <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('tracking.timeline')}</h3>
               <div className="relative">
                 <div className="absolute left-3 top-2 bottom-2 w-0.5 bg-slate-200" />
                 <div className="space-y-4">
@@ -180,13 +167,13 @@ export default function TrackPage() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[entry.oldStatus] || 'bg-slate-100 text-slate-600'}`}>
-                            {STATUS_LABELS[entry.oldStatus] || entry.oldStatus}
+                            {t('statuses.' + entry.oldStatus)}
                           </span>
                           <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                           </svg>
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[entry.newStatus] || 'bg-slate-100 text-slate-600'}`}>
-                            {STATUS_LABELS[entry.newStatus] || entry.newStatus}
+                            {t('statuses.' + entry.newStatus)}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500 mt-1">

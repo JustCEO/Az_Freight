@@ -8,9 +8,11 @@ import type { Carrier } from '@/types';
 import Pagination from '@/components/pagination';
 import Loading from '@/components/loading';
 import { TRANSPORT_LABELS } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 export default function CarriersPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -33,8 +35,8 @@ export default function CarriersPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <input type="text" placeholder="Search carriers..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="input-field w-64" />
-        <Link href="/carriers/new" className="btn-primary">New Carrier</Link>
+        <input type="text" placeholder={t('carriersList.searchPlaceholder')} value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="input-field w-64" />
+        <Link href="/carriers/new" className="btn-primary">{t('carriersList.newCarrier')}</Link>
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
@@ -44,12 +46,12 @@ export default function CarriersPage() {
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Company Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Transport Types</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Country</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Phone</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Rating</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Shipments</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('carriersList.companyName')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('carriersList.transportTypes')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('carriersList.country')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.phone')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('carriersList.rating')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('carriersList.shipments')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
@@ -72,7 +74,7 @@ export default function CarriersPage() {
                     </tr>
                   ))}
                   {carriers.length === 0 && (
-                    <tr><td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">No carriers found</td></tr>
+                    <tr><td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">{t('carriersList.noCarriersFound')}</td></tr>
                   )}
                 </tbody>
               </table>
