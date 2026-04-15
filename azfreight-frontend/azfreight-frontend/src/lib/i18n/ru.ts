@@ -399,6 +399,7 @@ const ru = {
     sendInvitation: 'Отправить приглашение',
     role: 'Роль',
     expiresDays: 'Истекает (дни)',
+    invalidEmail: 'Введите корректный email',
     sending: 'Отправка...',
     invitedBy: 'Пригласил',
     expires: 'Истекает',

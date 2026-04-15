@@ -399,6 +399,7 @@ const az = {
     sendInvitation: 'Dəvətnamə göndər',
     role: 'Rol',
     expiresDays: 'Bitmə müddəti (gün)',
+    invalidEmail: 'Düzgün e-poçt daxil edin',
     sending: 'Göndərilir...',
     invitedBy: 'Dəvət edən',
     expires: 'Bitmə tarixi',

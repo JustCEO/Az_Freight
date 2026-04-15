@@ -29,10 +29,21 @@ export default function InvitationsPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCreating(true);
     setError('');
+
+    const trimmedEmail = email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      setError(t('invitationsPage.invalidEmail'));
+      return;
+    }
+
+    const days = Math.min(30, Math.max(1, Math.floor(Number(expiresInDays) || 0)));
+    if (days !== expiresInDays) setExpiresInDays(days);
+
+    setCreating(true);
     try {
-      const inv = await createInvitation({ email, role, expiresInDays });
+      const inv = await createInvitation({ email: trimmedEmail, role, expiresInDays: days });
       setInvitations((prev) => [inv, ...prev]);
       setEmail('');
     } catch (err) {
@@ -84,7 +95,18 @@ export default function InvitationsPage() {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">{t('invitationsPage.expiresDays')}</label>
-            <input type="number" value={expiresInDays} onChange={(e) => setExpiresInDays(Number(e.target.value))} min={1} max={30} className="input-field w-24" />
+            <input
+              type="number"
+              value={expiresInDays}
+              onChange={(e) => {
+                const n = Number(e.target.value);
+                if (Number.isNaN(n)) return;
+                setExpiresInDays(Math.min(30, Math.max(1, Math.floor(n))));
+              }}
+              min={1}
+              max={30}
+              className="input-field w-24"
+            />
           </div>
           <button type="submit" disabled={creating} className="btn-primary disabled:opacity-50">
             {creating ? t('invitationsPage.sending') : t('invitationsPage.sendInvitation')}

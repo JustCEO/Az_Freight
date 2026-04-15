@@ -399,6 +399,7 @@ const en = {
     sendInvitation: 'Send Invitation',
     role: 'Role',
     expiresDays: 'Expires (days)',
+    invalidEmail: 'Please enter a valid email address',
     sending: 'Sending...',
     invitedBy: 'Invited By',
     expires: 'Expires',
