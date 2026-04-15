@@ -255,6 +255,8 @@ const az = {
     noStatuses: 'Hələ fərdi status yaradılmayıb',
     assignStatus: 'Fərdi status',
     statusNote: 'Status qeydi',
+    builtIn: 'Əsas statuslar',
+    builtInHint: 'Bu standart statuslar həmişə mövcuddur. Aşağıdakı fərdi statuslar bu siyahını genişləndirir.',
   },
 
   // Daşıyıcılar

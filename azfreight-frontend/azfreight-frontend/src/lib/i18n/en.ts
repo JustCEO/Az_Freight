@@ -255,6 +255,8 @@ const en = {
     noStatuses: 'No custom statuses yet',
     assignStatus: 'Custom Status',
     statusNote: 'Status Note',
+    builtIn: 'Built-in Statuses',
+    builtInHint: 'These default statuses are always available. Custom statuses below extend this list.',
   },
 
   // Carriers

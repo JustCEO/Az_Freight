@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import {
   listCustomStatuses,
   createCustomStatus,
@@ -10,6 +11,15 @@ import {
 import type { CustomStatus } from '@/types';
 import Loading from '@/components/loading';
 import { useTranslation } from '@/lib/i18n';
+
+const DEFAULT_STATUSES: { key: string; color: string }[] = [
+  { key: 'request', color: '#64748B' },
+  { key: 'confirmed', color: '#3B82F6' },
+  { key: 'in_transit', color: '#F59E0B' },
+  { key: 'customs', color: '#EA580C' },
+  { key: 'delivered', color: '#10B981' },
+  { key: 'cancelled', color: '#EF4444' },
+];
 
 export default function CustomStatusesPage() {
   const { t } = useTranslation();
@@ -73,7 +83,27 @@ export default function CustomStatusesPage() {
 
   return (
     <div>
+      <Link href="/shipments" className="text-sm text-blue-600 hover:text-blue-800 mb-4 inline-block">
+        &larr; {t('nav.shipments')}
+      </Link>
       <h1 className="text-2xl font-bold text-slate-900 mb-6">{t('customStatuses.title')}</h1>
+
+      {/* Built-in statuses */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-1">{t('customStatuses.builtIn')}</h2>
+        <p className="text-xs text-slate-500 mb-4">{t('customStatuses.builtInHint')}</p>
+        <div className="flex flex-wrap gap-2">
+          {DEFAULT_STATUSES.map((s) => (
+            <span
+              key={s.key}
+              className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium text-white"
+              style={{ backgroundColor: s.color }}
+            >
+              {t('statuses.' + s.key)}
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* Форма создания */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">

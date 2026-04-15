@@ -10,12 +10,14 @@ import Pagination from '@/components/pagination';
 import { TRANSPORT_LABELS } from '@/lib/constants';
 import Loading from '@/components/loading';
 import { useTranslation } from '@/lib/i18n';
+import { useAuth } from '@/context/auth-context';
 
 const ALL_STATUSES = ['', 'request', 'confirmed', 'in_transit', 'customs', 'delivered', 'cancelled'];
 
 export default function ShipmentsPage() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -58,9 +60,16 @@ export default function ShipmentsPage() {
             ))}
           </select>
         </div>
-        <Link href="/shipments/new" className="btn-primary">
-          {t('shipmentsList.newShipment')}
-        </Link>
+        <div className="flex items-center gap-2">
+          {user?.role === 'admin' && (
+            <Link href="/shipments/settings/statuses" className="px-4 py-2 text-sm font-medium text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50">
+              {t('nav.statusSettings')}
+            </Link>
+          )}
+          <Link href="/shipments/new" className="btn-primary">
+            {t('shipmentsList.newShipment')}
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
