@@ -85,14 +85,18 @@ export default function NewShipmentPage() {
       if (form.clientRate) body.clientRate = parseFloat(form.clientRate);
       if (form.carrierRate) body.carrierRate = parseFloat(form.carrierRate);
       if (form.eta) body.eta = form.eta;
-      if (form.containerNumber) body.containerNumber = form.containerNumber;
-      if (form.blNumber) body.blNumber = form.blNumber;
-      if (form.vesselName) body.vesselName = form.vesselName;
-      if (form.awbNumber) body.awbNumber = form.awbNumber;
-      if (form.flightNumber) body.flightNumber = form.flightNumber;
-      if (form.truckPlate) body.truckPlate = form.truckPlate;
-      if (form.tirNumber) body.tirNumber = form.tirNumber;
-      if (form.wagonNumbers) body.wagonNumbers = form.wagonNumbers;
+      // Only submit transport details relevant to the selected transport type
+      const relevantFields: Record<string, string[]> = {
+        road_tir: ['truckPlate', 'tirNumber'],
+        sea: ['containerNumber', 'blNumber', 'vesselName'],
+        air: ['awbNumber', 'flightNumber'],
+        rail: ['wagonNumbers', 'containerNumber'],
+      };
+      const allowed = relevantFields[form.transportType] || [];
+      for (const field of allowed) {
+        const val = (form as Record<string, string>)[field];
+        if (val) body[field] = val;
+      }
       if (form.notes) body.notes = form.notes;
 
       const shipment = await createShipment(body);
@@ -222,38 +226,58 @@ export default function NewShipmentPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('newShipment.transportDetails')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="label-field">{t('newShipment.containerNumber')}</label>
-              <input type="text" value={form.containerNumber} onChange={(e) => updateField('containerNumber', e.target.value)} className="input-field" />
-            </div>
-            <div>
-              <label className="label-field">{t('newShipment.blNumber')}</label>
-              <input type="text" value={form.blNumber} onChange={(e) => updateField('blNumber', e.target.value)} className="input-field" />
-            </div>
-            <div>
-              <label className="label-field">{t('newShipment.vesselName')}</label>
-              <input type="text" value={form.vesselName} onChange={(e) => updateField('vesselName', e.target.value)} className="input-field" />
-            </div>
-            <div>
-              <label className="label-field">{t('newShipment.awbNumber')}</label>
-              <input type="text" value={form.awbNumber} onChange={(e) => updateField('awbNumber', e.target.value)} className="input-field" />
-            </div>
-            <div>
-              <label className="label-field">{t('newShipment.flightNumber')}</label>
-              <input type="text" value={form.flightNumber} onChange={(e) => updateField('flightNumber', e.target.value)} className="input-field" />
-            </div>
-            <div>
-              <label className="label-field">{t('newShipment.truckPlate')}</label>
-              <input type="text" value={form.truckPlate} onChange={(e) => updateField('truckPlate', e.target.value)} className="input-field" />
-            </div>
-            <div>
-              <label className="label-field">{t('newShipment.tirNumber')}</label>
-              <input type="text" value={form.tirNumber} onChange={(e) => updateField('tirNumber', e.target.value)} className="input-field" />
-            </div>
-            <div>
-              <label className="label-field">{t('newShipment.wagonNumbers')}</label>
-              <input type="text" value={form.wagonNumbers} onChange={(e) => updateField('wagonNumbers', e.target.value)} className="input-field" />
-            </div>
+            {(form.transportType === 'road_tir') && (
+              <>
+                <div>
+                  <label className="label-field">{t('newShipment.truckPlate')}</label>
+                  <input type="text" value={form.truckPlate} onChange={(e) => updateField('truckPlate', e.target.value)} className="input-field" />
+                </div>
+                <div>
+                  <label className="label-field">{t('newShipment.tirNumber')}</label>
+                  <input type="text" value={form.tirNumber} onChange={(e) => updateField('tirNumber', e.target.value)} className="input-field" />
+                </div>
+              </>
+            )}
+            {(form.transportType === 'sea') && (
+              <>
+                <div>
+                  <label className="label-field">{t('newShipment.containerNumber')}</label>
+                  <input type="text" value={form.containerNumber} onChange={(e) => updateField('containerNumber', e.target.value)} className="input-field" />
+                </div>
+                <div>
+                  <label className="label-field">{t('newShipment.blNumber')}</label>
+                  <input type="text" value={form.blNumber} onChange={(e) => updateField('blNumber', e.target.value)} className="input-field" />
+                </div>
+                <div>
+                  <label className="label-field">{t('newShipment.vesselName')}</label>
+                  <input type="text" value={form.vesselName} onChange={(e) => updateField('vesselName', e.target.value)} className="input-field" />
+                </div>
+              </>
+            )}
+            {(form.transportType === 'air') && (
+              <>
+                <div>
+                  <label className="label-field">{t('newShipment.awbNumber')}</label>
+                  <input type="text" value={form.awbNumber} onChange={(e) => updateField('awbNumber', e.target.value)} className="input-field" />
+                </div>
+                <div>
+                  <label className="label-field">{t('newShipment.flightNumber')}</label>
+                  <input type="text" value={form.flightNumber} onChange={(e) => updateField('flightNumber', e.target.value)} className="input-field" />
+                </div>
+              </>
+            )}
+            {(form.transportType === 'rail') && (
+              <>
+                <div>
+                  <label className="label-field">{t('newShipment.wagonNumbers')}</label>
+                  <input type="text" value={form.wagonNumbers} onChange={(e) => updateField('wagonNumbers', e.target.value)} className="input-field" />
+                </div>
+                <div>
+                  <label className="label-field">{t('newShipment.containerNumber')}</label>
+                  <input type="text" value={form.containerNumber} onChange={(e) => updateField('containerNumber', e.target.value)} className="input-field" />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
