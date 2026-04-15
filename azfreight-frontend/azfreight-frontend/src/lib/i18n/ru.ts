@@ -349,6 +349,19 @@ const ru = {
     noClientsFound: 'Клиенты не найдены',
   },
 
+  newClient: {
+    clientInformation: 'Информация о клиенте',
+    companyNameRequired: 'Название компании *',
+    taxId: 'ИНН',
+    website: 'Веб-сайт',
+    address: 'Адрес',
+    paymentTermsDays: 'Срок оплаты (дни)',
+    creditLimit: 'Кредитный лимит',
+    creating: 'Создание...',
+    createClient: 'Создать клиента',
+    failedToCreate: 'Не удалось создать клиента',
+  },
+
   // Список перевозчиков
   carriersList: {
     searchPlaceholder: 'Поиск перевозчиков...',
@@ -384,6 +397,7 @@ const ru = {
   invitationsPage: {
     title: 'Приглашения',
     sendInvitation: 'Отправить приглашение',
+    role: 'Роль',
     expiresDays: 'Истекает (дни)',
     sending: 'Отправка...',
     invitedBy: 'Пригласил',

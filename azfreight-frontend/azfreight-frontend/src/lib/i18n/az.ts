@@ -349,6 +349,19 @@ const az = {
     noClientsFound: 'Müştəri tapılmadı',
   },
 
+  newClient: {
+    clientInformation: 'Müştəri məlumatları',
+    companyNameRequired: 'Şirkət adı *',
+    taxId: 'Vergi ID',
+    website: 'Veb-sayt',
+    address: 'Ünvan',
+    paymentTermsDays: 'Ödəniş şərtləri (gün)',
+    creditLimit: 'Kredit limiti',
+    creating: 'Yaradılır...',
+    createClient: 'Müştəri yarat',
+    failedToCreate: 'Müştəri yaradıla bilmədi',
+  },
+
   // Daşıyıcılar siyahısı
   carriersList: {
     searchPlaceholder: 'Daşıyıcılarda axtar...',
@@ -384,6 +397,7 @@ const az = {
   invitationsPage: {
     title: 'Dəvətnamələr',
     sendInvitation: 'Dəvətnamə göndər',
+    role: 'Rol',
     expiresDays: 'Bitmə müddəti (gün)',
     sending: 'Göndərilir...',
     invitedBy: 'Dəvət edən',

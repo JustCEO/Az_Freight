@@ -390,7 +390,7 @@ export default function ShipmentRequestPage() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">{t('requestForm.cargoType')} *</label>
                 <select value={cargoType} onChange={(e) => { setCargoType(e.target.value); setCargoSubtype(''); }} className="input-field w-full">
-                  {Object.entries(CARGO_TYPES).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
+                  {Object.keys(CARGO_TYPES).map((k) => (<option key={k} value={k}>{t('cargoTypes.' + k)}</option>))}
                 </select>
               </div>
               {CARGO_TYPES[cargoType]?.subcategories.length > 0 && (
@@ -575,7 +575,7 @@ export default function ShipmentRequestPage() {
               </div>
               <div className="bg-slate-50 rounded-lg p-4">
                 <h3 className="font-medium text-slate-900 mb-2">{t('requestForm.steps.cargo')}</h3>
-                <p>{CARGO_TYPES[cargoType]?.label || cargoType}</p>
+                <p>{t('cargoTypes.' + cargoType)}</p>
                 {cargoSubtype && <p className="text-slate-500">{cargoSubtype}</p>}
                 <p className="text-slate-500">{cargoDescription}</p>
                 {weightKg && <p className="text-slate-500">{weightKg} kg</p>}

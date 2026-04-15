@@ -349,6 +349,19 @@ const en = {
     noClientsFound: 'No clients found',
   },
 
+  newClient: {
+    clientInformation: 'Client Information',
+    companyNameRequired: 'Company Name *',
+    taxId: 'Tax ID',
+    website: 'Website',
+    address: 'Address',
+    paymentTermsDays: 'Payment Terms (days)',
+    creditLimit: 'Credit Limit',
+    creating: 'Creating...',
+    createClient: 'Create Client',
+    failedToCreate: 'Failed to create client',
+  },
+
   // Carriers list
   carriersList: {
     searchPlaceholder: 'Search carriers...',
@@ -384,6 +397,7 @@ const en = {
   invitationsPage: {
     title: 'Invitations',
     sendInvitation: 'Send Invitation',
+    role: 'Role',
     expiresDays: 'Expires (days)',
     sending: 'Sending...',
     invitedBy: 'Invited By',

@@ -73,7 +73,7 @@ export default function InvitationsPage() {
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="input-field w-64" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('invitationsPage.role')}</label>
             <select value={role} onChange={(e) => setRole(e.target.value)} className="input-field">
               {Object.entries(ROLE_LABELS)
                 .filter(([k]) => k !== 'superadmin')
