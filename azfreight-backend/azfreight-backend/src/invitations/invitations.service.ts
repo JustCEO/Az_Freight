@@ -14,6 +14,10 @@ export class InvitationsService {
   constructor(private prisma: PrismaService) {}
 
   async create(tenantId: string, invitedById: string, dto: CreateInvitationDto) {
+    if (dto.role === 'superadmin') {
+      throw new BadRequestException('Superadmin role cannot be granted via invitations');
+    }
+
     const tenant = await this.prisma.tenant.findUnique({ where: { id: tenantId } });
     if (!tenant) throw new NotFoundException('Tenant not found');
 

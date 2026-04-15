@@ -75,9 +75,11 @@ export default function InvitationsPage() {
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
             <select value={role} onChange={(e) => setRole(e.target.value)} className="input-field">
-              {Object.entries(ROLE_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
+              {Object.entries(ROLE_LABELS)
+                .filter(([k]) => k !== 'superadmin')
+                .map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
             </select>
           </div>
           <div>
