@@ -5,11 +5,11 @@ export function listCustomStatuses() {
   return get<CustomStatus[]>('/custom-statuses');
 }
 
-export function createCustomStatus(data: { name: string; color?: string; order?: number }) {
+export function createCustomStatus(data: { name: string; color?: string; order?: number; parentStatus?: string }) {
   return post<CustomStatus>('/custom-statuses', data);
 }
 
-export function updateCustomStatus(id: string, data: { name?: string; color?: string; order?: number }) {
+export function updateCustomStatus(id: string, data: { name?: string; color?: string; order?: number; parentStatus?: string | null }) {
   return put<CustomStatus>(`/custom-statuses/${id}`, data);
 }
 

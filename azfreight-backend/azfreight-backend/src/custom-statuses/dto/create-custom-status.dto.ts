@@ -1,4 +1,6 @@
-import { IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
+
+const BUILT_IN_STATUSES = ['request', 'confirmed', 'in_transit', 'customs', 'delivered', 'cancelled'];
 
 export class CreateCustomStatusDto {
   /** Название статуса */
@@ -22,4 +24,10 @@ export class CreateCustomStatusDto {
   @IsOptional()
   @IsBoolean()
   isDefault?: boolean = false;
+
+  /** Встроенный жизненный цикл, который расширяет этот кастомный статус */
+  @IsOptional()
+  @IsString()
+  @IsIn(BUILT_IN_STATUSES)
+  parentStatus?: string;
 }

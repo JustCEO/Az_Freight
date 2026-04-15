@@ -72,6 +72,7 @@ export interface CustomStatus {
   color: string;
   order: number;
   isDefault: boolean;
+  parentStatus: string | null;
   tenantId: string;
   createdAt: string;
 }

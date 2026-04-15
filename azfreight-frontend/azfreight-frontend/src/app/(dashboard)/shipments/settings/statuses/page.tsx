@@ -21,17 +21,21 @@ const DEFAULT_STATUSES: { key: string; color: string }[] = [
   { key: 'cancelled', color: '#EF4444' },
 ];
 
+const PARENT_KEYS = DEFAULT_STATUSES.map((s) => s.key);
+
 export default function CustomStatusesPage() {
   const { t } = useTranslation();
   const [statuses, setStatuses] = useState<CustomStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState('');
   const [color, setColor] = useState('#6B7280');
+  const [parentStatus, setParentStatus] = useState('');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
+  const [editParent, setEditParent] = useState('');
 
   const fetchData = useCallback(async () => {
     try {
@@ -49,10 +53,16 @@ export default function CustomStatusesPage() {
     setCreating(true);
     setError('');
     try {
-      const status = await createCustomStatus({ name, color, order: statuses.length });
+      const status = await createCustomStatus({
+        name,
+        color,
+        order: statuses.length,
+        parentStatus: parentStatus || undefined,
+      });
       setStatuses((prev) => [...prev, status]);
       setName('');
       setColor('#6B7280');
+      setParentStatus('');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed');
     }
@@ -70,12 +80,17 @@ export default function CustomStatusesPage() {
     setEditingId(s.id);
     setEditName(s.name);
     setEditColor(s.color);
+    setEditParent(s.parentStatus || '');
   };
 
   const handleUpdate = async () => {
     if (!editingId || !editName.trim()) return;
     try {
-      const updated = await updateCustomStatus(editingId, { name: editName, color: editColor });
+      const updated = await updateCustomStatus(editingId, {
+        name: editName,
+        color: editColor,
+        parentStatus: editParent || null,
+      });
       setStatuses((prev) => prev.map((s) => s.id === editingId ? updated : s));
       setEditingId(null);
     } catch { /* ignore */ }
@@ -120,10 +135,20 @@ export default function CustomStatusesPage() {
               <input type="text" value={color} onChange={(e) => setColor(e.target.value)} className="input-field w-24 text-sm" />
             </div>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">{t('customStatuses.parentStatus')}</label>
+            <select value={parentStatus} onChange={(e) => setParentStatus(e.target.value)} className="input-field w-44">
+              <option value="">{t('customStatuses.parentNone')}</option>
+              {PARENT_KEYS.map((k) => (
+                <option key={k} value={k}>{t('statuses.' + k)}</option>
+              ))}
+            </select>
+          </div>
           <button type="submit" disabled={creating} className="btn-primary disabled:opacity-50">
             {creating ? t('common.loading') : t('common.create')}
           </button>
         </form>
+        <p className="text-xs text-slate-500 mt-2">{t('customStatuses.parentHint')}</p>
         {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
       </div>
 
@@ -141,6 +166,12 @@ export default function CustomStatusesPage() {
                   <>
                     <input type="color" value={editColor} onChange={(e) => setEditColor(e.target.value)} className="w-8 h-8 rounded cursor-pointer" />
                     <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="input-field flex-1" />
+                    <select value={editParent} onChange={(e) => setEditParent(e.target.value)} className="input-field w-44 text-sm">
+                      <option value="">{t('customStatuses.parentNone')}</option>
+                      {PARENT_KEYS.map((k) => (
+                        <option key={k} value={k}>{t('statuses.' + k)}</option>
+                      ))}
+                    </select>
                     <button onClick={handleUpdate} className="text-blue-600 text-sm font-medium hover:text-blue-800">{t('common.save')}</button>
                     <button onClick={() => setEditingId(null)} className="text-slate-400 text-sm hover:text-slate-600">{t('common.cancel')}</button>
                   </>
@@ -148,6 +179,11 @@ export default function CustomStatusesPage() {
                   <>
                     <div className="w-6 h-6 rounded-full" style={{ backgroundColor: s.color }} />
                     <span className="flex-1 text-sm font-medium text-slate-900">{s.name}</span>
+                    {s.parentStatus && (
+                      <span className="text-xs text-slate-500">
+                        &rarr; {t('statuses.' + s.parentStatus)}
+                      </span>
+                    )}
                     <span
                       className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
                       style={{ backgroundColor: s.color }}

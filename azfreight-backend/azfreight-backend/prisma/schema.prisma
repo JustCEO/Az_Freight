@@ -529,13 +529,14 @@ model ShipmentRequestDocument {
 }
 
 model CustomStatus {
-  id          String   @id @default(uuid())
-  tenantId    String   @map("tenant_id")
-  name        String   @db.VarChar(100)
-  color       String   @default("#6B7280") @db.VarChar(7)
-  order       Int      @default(0)
-  isDefault   Boolean  @default(false) @map("is_default")
-  createdAt   DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid())
+  tenantId     String   @map("tenant_id")
+  name         String   @db.VarChar(100)
+  color        String   @default("#6B7280") @db.VarChar(7)
+  order        Int      @default(0)
+  isDefault    Boolean  @default(false) @map("is_default")
+  parentStatus String?  @map("parent_status") @db.VarChar(30)
+  createdAt    DateTime @default(now()) @map("created_at")
 
   tenant      Tenant   @relation(fields: [tenantId], references: [id])
   shipments   Shipment[]

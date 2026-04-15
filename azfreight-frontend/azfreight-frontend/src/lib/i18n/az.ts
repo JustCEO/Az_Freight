@@ -257,6 +257,9 @@ const az = {
     statusNote: 'Status qeydi',
     builtIn: 'Əsas statuslar',
     builtInHint: 'Bu standart statuslar həmişə mövcuddur. Aşağıdakı fərdi statuslar bu siyahını genişləndirir.',
+    parentStatus: 'Genişləndirir',
+    parentNone: '— Müstəqil —',
+    parentHint: 'İstəyə bağlı: fərdi statusu əsas həyat dövrü mərhələsinə bağlayın ki, düzgün mərhələdə görünsün.',
   },
 
   // Daşıyıcılar

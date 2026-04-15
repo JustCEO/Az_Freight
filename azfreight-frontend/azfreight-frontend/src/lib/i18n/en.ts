@@ -257,6 +257,9 @@ const en = {
     statusNote: 'Status Note',
     builtIn: 'Built-in Statuses',
     builtInHint: 'These default statuses are always available. Custom statuses below extend this list.',
+    parentStatus: 'Extends',
+    parentNone: '— Standalone —',
+    parentHint: 'Optionally tie a custom status to a built-in lifecycle state so it appears at the right stage.',
   },
 
   // Carriers
