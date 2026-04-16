@@ -24,7 +24,7 @@ export class StorageService implements OnModuleInit {
         accessKeyId: this.configService.get<string>('s3.accessKeyId') || 'minioadmin',
         secretAccessKey: this.configService.get<string>('s3.secretAccessKey') || 'minioadmin',
       },
-      forcePathStyle: true,
+      forcePathStyle: this.configService.get<boolean>('s3.forcePathStyle'),
     });
   }
 
@@ -35,7 +35,7 @@ export class StorageService implements OnModuleInit {
       try {
         await this.s3.send(new CreateBucketCommand({ Bucket: this.bucket }));
       } catch {
-        // Bucket creation may fail if MinIO isn't running — non-blocking
+        // Bucket may already exist or creation not supported — non-blocking
       }
     }
   }
