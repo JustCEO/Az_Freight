@@ -14,6 +14,6 @@ export default () => ({
     bucket: process.env.S3_BUCKET || 'azfreight',
     accessKeyId: process.env.S3_ACCESS_KEY || 'minioadmin',
     secretAccessKey: process.env.S3_SECRET_KEY || 'minioadmin',
-    forcePathStyle: true,
+    forcePathStyle: process.env.S3_USE_PATH_STYLE === 'true',
   },
 });
