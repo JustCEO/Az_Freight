@@ -442,6 +442,19 @@ const az = {
   },
 
   // Autentifikasiya
+  settings: {
+    title: 'Parametrlər',
+    language: 'İnterfeys dili',
+    languageHint: 'Seçilmiş dil saxlanılır və növbəti girişdə bərpa olunacaq.',
+    theme: 'Mövzu',
+    light: 'Açıq',
+    dark: 'Tünd',
+    system: 'Sistem',
+    timezone: 'Saat qurşağı',
+    currency: 'Standart valyuta',
+    adminSection: 'Administrasiya',
+  },
+
   auth: {
     signInTitle: 'AzFreight-ə daxil olun',
     signInSubtitle: 'Yük logistikası idarəetməsi',

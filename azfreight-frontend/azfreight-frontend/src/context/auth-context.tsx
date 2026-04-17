@@ -25,7 +25,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     getMe()
-      .then(setUser)
+      .then((u) => {
+        setUser(u);
+        if (u.preferredLocale) {
+          localStorage.setItem('locale', u.preferredLocale);
+          window.dispatchEvent(new Event('locale-changed'));
+        }
+      })
       .catch(() => clearTokens())
       .finally(() => setLoading(false));
   }, []);
@@ -33,6 +39,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     const res = await apiLogin(email, password);
     setUser(res.user);
+    if (res.user.preferredLocale) {
+      localStorage.setItem('locale', res.user.preferredLocale);
+      window.dispatchEvent(new Event('locale-changed'));
+    }
   }, []);
 
   const register = useCallback(async (data: { tenantName: string; tenantSlug: string; name: string; email: string; password: string }) => {

@@ -442,6 +442,19 @@ const en = {
   },
 
   // Auth
+  settings: {
+    title: 'Settings',
+    language: 'Interface Language',
+    languageHint: 'Your language preference is saved and will be restored on next login.',
+    theme: 'Theme',
+    light: 'Light',
+    dark: 'Dark',
+    system: 'System',
+    timezone: 'Timezone',
+    currency: 'Default Currency',
+    adminSection: 'Administration',
+  },
+
   auth: {
     signInTitle: 'Sign in to AzFreight',
     signInSubtitle: 'Freight logistics management',

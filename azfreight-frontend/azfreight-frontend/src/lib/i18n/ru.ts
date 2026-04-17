@@ -442,6 +442,19 @@ const ru = {
   },
 
   // Авторизация
+  settings: {
+    title: 'Настройки',
+    language: 'Язык интерфейса',
+    languageHint: 'Выбранный язык сохраняется и будет восстановлен при следующем входе.',
+    theme: 'Тема',
+    light: 'Светлая',
+    dark: 'Тёмная',
+    system: 'Системная',
+    timezone: 'Часовой пояс',
+    currency: 'Валюта по умолчанию',
+    adminSection: 'Администрирование',
+  },
+
   auth: {
     signInTitle: 'Вход в AzFreight',
     signInSubtitle: 'Управление грузовой логистикой',
