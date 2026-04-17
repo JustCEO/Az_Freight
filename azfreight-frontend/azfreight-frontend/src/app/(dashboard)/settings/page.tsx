@@ -71,8 +71,9 @@ export default function SettingsPage() {
     setTenantError('');
     setTenantSaving(true);
     try {
-      const created = await createTenant(newTenant);
-      setTenants((prev) => [created, ...prev]);
+      await createTenant(newTenant);
+      const refreshed = await listTenants();
+      setTenants(refreshed);
       setNewTenant({ name: '', slug: '', plan: 'starter', adminName: '', adminEmail: '', adminPassword: '' });
       setShowCreateTenant(false);
     } catch (err) {
@@ -227,7 +228,7 @@ export default function SettingsPage() {
               >
                 <div>
                   <div className="font-medium text-slate-900">{tenant.name}</div>
-                  <div className="text-xs text-slate-500">{tenant.slug} · {tenant.plan} · {tenant._count.users} users</div>
+                  <div className="text-xs text-slate-500">{tenant.slug} · {tenant.plan} · {tenant._count?.users ?? 0} users</div>
                 </div>
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${tenant.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                   {tenant.isActive ? t('clientsList.active') : t('clientsList.inactive')}
