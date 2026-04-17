@@ -41,14 +41,20 @@ export class ClientsService {
   }
 
   async update(tenantId: string, id: string, dto: UpdateClientDto) {
-    const client = await this.prisma.client.findFirst({ where: { id, tenantId } });
-    if (!client) throw new NotFoundException('Client not found');
-    return this.prisma.client.update({ where: { id }, data: dto });
+    const result = await this.prisma.client.updateMany({
+      where: { id, tenantId },
+      data: dto,
+    });
+    if (result.count === 0) throw new NotFoundException('Client not found');
+    return this.prisma.client.findUnique({ where: { id } });
   }
 
   async remove(tenantId: string, id: string) {
-    const client = await this.prisma.client.findFirst({ where: { id, tenantId } });
-    if (!client) throw new NotFoundException('Client not found');
-    return this.prisma.client.update({ where: { id }, data: { isActive: false } });
+    const result = await this.prisma.client.updateMany({
+      where: { id, tenantId },
+      data: { isActive: false },
+    });
+    if (result.count === 0) throw new NotFoundException('Client not found');
+    return this.prisma.client.findUnique({ where: { id } });
   }
 }

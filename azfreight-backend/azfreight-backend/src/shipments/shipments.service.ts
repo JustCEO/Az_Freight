@@ -138,9 +138,13 @@ export class ShipmentsService {
       data.profit = clientRate - carrierRate;
     }
 
-    return this.prisma.shipment.update({
-      where: { id },
+    const result = await this.prisma.shipment.updateMany({
+      where: { id, tenantId },
       data,
+    });
+    if (result.count === 0) throw new NotFoundException('Shipment not found');
+    return this.prisma.shipment.findUnique({
+      where: { id },
       include: {
         client: { select: { id: true, companyName: true } },
         carrier: { select: { id: true, companyName: true } },

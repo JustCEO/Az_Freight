@@ -45,21 +45,25 @@ export class VehiclesService {
   }
 
   async update(tenantId: string, id: string, dto: UpdateVehicleDto) {
-    const vehicle = await this.prisma.vehicle.findFirst({ where: { id, tenantId } });
-    if (!vehicle) throw new NotFoundException('Vehicle not found');
-
     const data: Record<string, unknown> = { ...dto };
     if (dto.status) data.status = dto.status as VehicleStatus;
     if (dto.insuranceExpiry) data.insuranceExpiry = new Date(dto.insuranceExpiry);
     if (dto.inspectionExpiry) data.inspectionExpiry = new Date(dto.inspectionExpiry);
     if (dto.tirCarnetExpiry) data.tirCarnetExpiry = new Date(dto.tirCarnetExpiry);
 
-    return this.prisma.vehicle.update({ where: { id }, data });
+    const result = await this.prisma.vehicle.updateMany({
+      where: { id, tenantId },
+      data,
+    });
+    if (result.count === 0) throw new NotFoundException('Vehicle not found');
+    return this.prisma.vehicle.findUnique({ where: { id } });
   }
 
   async remove(tenantId: string, id: string) {
-    const vehicle = await this.prisma.vehicle.findFirst({ where: { id, tenantId } });
-    if (!vehicle) throw new NotFoundException('Vehicle not found');
-    return this.prisma.vehicle.delete({ where: { id } });
+    const result = await this.prisma.vehicle.deleteMany({
+      where: { id, tenantId },
+    });
+    if (result.count === 0) throw new NotFoundException('Vehicle not found');
+    return { success: true };
   }
 }

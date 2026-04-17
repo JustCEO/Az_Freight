@@ -61,7 +61,7 @@ export default function ShipmentsPage() {
           </select>
         </div>
         <div className="flex items-center gap-2">
-          {user?.role === 'admin' && (
+          {(user?.role === 'admin' || user?.role === 'superadmin') && (
             <Link href="/shipments/settings/statuses" className="px-4 py-2 text-sm font-medium text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50">
               {t('nav.statusSettings')}
             </Link>

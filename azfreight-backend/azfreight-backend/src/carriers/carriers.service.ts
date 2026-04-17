@@ -41,14 +41,20 @@ export class CarriersService {
   }
 
   async update(tenantId: string, id: string, dto: UpdateCarrierDto) {
-    const carrier = await this.prisma.carrier.findFirst({ where: { id, tenantId } });
-    if (!carrier) throw new NotFoundException('Carrier not found');
-    return this.prisma.carrier.update({ where: { id }, data: dto });
+    const result = await this.prisma.carrier.updateMany({
+      where: { id, tenantId },
+      data: dto,
+    });
+    if (result.count === 0) throw new NotFoundException('Carrier not found');
+    return this.prisma.carrier.findUnique({ where: { id } });
   }
 
   async remove(tenantId: string, id: string) {
-    const carrier = await this.prisma.carrier.findFirst({ where: { id, tenantId } });
-    if (!carrier) throw new NotFoundException('Carrier not found');
-    return this.prisma.carrier.update({ where: { id }, data: { isActive: false } });
+    const result = await this.prisma.carrier.updateMany({
+      where: { id, tenantId },
+      data: { isActive: false },
+    });
+    if (result.count === 0) throw new NotFoundException('Carrier not found');
+    return this.prisma.carrier.findUnique({ where: { id } });
   }
 }
