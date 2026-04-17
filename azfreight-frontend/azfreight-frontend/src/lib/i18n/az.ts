@@ -399,6 +399,10 @@ const az = {
     lastLogin: 'Son giriş',
     you: '(siz)',
     noUsersFound: 'İstifadəçi tapılmadı',
+    createUser: 'İstifadəçi yarat',
+    sendInvitationLink: 'Şifrə əvəzinə dəvət linki göndər',
+    userCreated: 'İstifadəçi yaradıldı! Bu dəvət linkini paylaşın:',
+    createAnother: 'Daha bir istifadəçi yarat',
   },
 
   // Dəvətnamələr səhifəsi

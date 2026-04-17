@@ -399,6 +399,10 @@ const en = {
     lastLogin: 'Last Login',
     you: '(you)',
     noUsersFound: 'No users found',
+    createUser: 'Create User',
+    sendInvitationLink: 'Send invitation link instead of setting a password',
+    userCreated: 'User created! Share this invitation link:',
+    createAnother: 'Create another user',
   },
 
   // Invitations page

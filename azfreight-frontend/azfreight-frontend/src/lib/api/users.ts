@@ -1,5 +1,5 @@
-import { get, put, patch, del } from '@/lib/api-client';
-import type { User, PaginatedResponse } from '@/types';
+import { get, post, put, patch, del } from '@/lib/api-client';
+import type { User, PaginatedResponse, UserPreferences } from '@/types';
 
 export function listUsers(params?: { page?: number; limit?: number; search?: string }) {
   const query = new URLSearchParams();
@@ -14,6 +14,18 @@ export function getUser(id: string) {
   return get<User>(`/users/${id}`);
 }
 
+export function createUser(data: {
+  name: string;
+  email: string;
+  password?: string;
+  role: string;
+  phone?: string;
+  sendInvitation?: boolean;
+  invitationExpiresInDays?: number;
+}) {
+  return post<User & { inviteUrl?: string }>('/users', data);
+}
+
 export function updateUser(id: string, data: Record<string, unknown>) {
   return put<User>(`/users/${id}`, data);
 }
@@ -24,4 +36,12 @@ export function toggleUserActive(id: string, isActive: boolean) {
 
 export function deleteUser(id: string) {
   return del<User>(`/users/${id}`);
+}
+
+export function getPreferences() {
+  return get<UserPreferences>('/users/me/preferences');
+}
+
+export function updatePreferences(data: { locale?: string; theme?: string; timezone?: string; currency?: string }) {
+  return patch<UserPreferences>('/users/me/preferences', data);
 }
