@@ -41,7 +41,7 @@ export class SuperAdminService {
           email: dto.adminEmail,
           passwordHash,
           name: dto.adminName,
-          role: 'admin',
+          role: 'director',
         },
       });
 
@@ -117,6 +117,25 @@ export class SuperAdminService {
         isActive: true,
         lastLogin: true,
         createdAt: true,
+      },
+    });
+  }
+
+  // Все пользователи платформы, сгруппированные по тенанту
+  async getAllUsers() {
+    return this.prisma.user.findMany({
+      orderBy: [{ tenant: { name: 'asc' } }, { createdAt: 'desc' }],
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        phone: true,
+        isActive: true,
+        lastLogin: true,
+        createdAt: true,
+        tenantId: true,
+        tenant: { select: { id: true, name: true, slug: true } },
       },
     });
   }

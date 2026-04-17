@@ -96,7 +96,7 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { user } = useAuth();
-  const { t, locale, setLocale } = useTranslation();
+  const { t } = useTranslation();
   const [newCount, setNewCount] = useState(0);
 
   useEffect(() => {
@@ -151,23 +151,6 @@ export default function Sidebar() {
           );
         })}
       </nav>
-
-      {/* Language switcher */}
-      <div className="px-6 py-3 border-t border-slate-700">
-        <div className="flex items-center gap-1">
-          {(['en', 'ru', 'az'] as const).map((l) => (
-            <button
-              key={l}
-              onClick={() => setLocale(l)}
-              className={`px-3 py-1 text-xs font-bold rounded transition-colors ${
-                locale === l ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700'
-              }`}
-            >
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      </div>
 
       <div className="p-4 border-t border-slate-700">
         <div className="flex items-center gap-3">

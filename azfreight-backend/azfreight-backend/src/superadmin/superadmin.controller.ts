@@ -51,6 +51,12 @@ export class SuperAdminController {
     return this.superAdminService.getTenantUsers(id);
   }
 
+  // Все пользователи всей платформы (для группировки по тенанту)
+  @Get('users')
+  getAllUsers() {
+    return this.superAdminService.getAllUsers();
+  }
+
   // Создание приглашения для тенанта
   @Post('tenants/:id/invite')
   inviteToTenant(

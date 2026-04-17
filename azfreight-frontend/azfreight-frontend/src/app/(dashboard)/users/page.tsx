@@ -3,8 +3,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { listUsers, createUser, updateUser, toggleUserActive, deleteUser } from '@/lib/api/users';
 import { listInvitations, deleteInvitation, type Invitation } from '@/lib/api/invitations';
+import { getAllUsers, type PlatformUser } from '@/lib/api/superadmin';
 import { useAuth } from '@/context/auth-context';
-import type { User, PaginatedResponse } from '@/types';
+import type { User } from '@/types';
 import { ROLE_LABELS } from '@/lib/constants';
 import Loading from '@/components/loading';
 import { useTranslation } from '@/lib/i18n';
@@ -22,16 +23,24 @@ function getCreatableRoles(actorRole: string): string[] {
     .map(([r]) => r);
 }
 
+interface TenantGroup { id: string; name: string; users: PlatformUser[]; }
+
 export default function UsersPage() {
   const { user: currentUser } = useAuth();
   const { t } = useTranslation();
+  const isSuperAdmin = currentUser?.role === 'superadmin';
+
   const [users, setUsers] = useState<User[]>([]);
+  const [platformUsers, setPlatformUsers] = useState<PlatformUser[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
   const [newRole, setNewRole] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [showInvitations, setShowInvitations] = useState(false);
+
+  // Active tenant group for superadmin view (null = all users)
+  const [activeTenant, setActiveTenant] = useState<string | null>(null);
 
   // Create user form
   const [createName, setCreateName] = useState('');
@@ -50,15 +59,20 @@ export default function UsersPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const [usersRes, invRes] = await Promise.all([
-        listUsers({ limit: 100 }),
-        canManageUsers ? listInvitations().catch(() => []) : Promise.resolve([]),
-      ]);
-      setUsers(usersRes.data);
-      setInvitations(invRes as Invitation[]);
+      if (isSuperAdmin) {
+        const all = await getAllUsers();
+        setPlatformUsers(all);
+      } else {
+        const [usersRes, invRes] = await Promise.all([
+          listUsers({ limit: 100 }),
+          canManageUsers ? listInvitations().catch(() => []) : Promise.resolve([]),
+        ]);
+        setUsers(usersRes.data);
+        setInvitations(invRes as Invitation[]);
+      }
     } catch { /* ignore */ }
     setLoading(false);
-  }, [canManageUsers]);
+  }, [canManageUsers, isSuperAdmin]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -75,11 +89,9 @@ export default function UsersPage() {
     setInviteUrl('');
     try {
       const result = await createUser({
-        name: createName,
-        email: createEmail,
+        name: createName, email: createEmail,
         password: sendInvitation ? undefined : createPassword,
-        role: createRole,
-        phone: createPhone || undefined,
+        role: createRole, phone: createPhone || undefined,
         sendInvitation,
       });
       setUsers((prev) => [result, ...prev]);
@@ -129,8 +141,116 @@ export default function UsersPage() {
 
   const activeInvitations = invitations.filter((i) => !i.usedAt && new Date(i.expiresAt) > new Date());
 
+  // Group users by tenant for superadmin view
+  const tenantGroups: TenantGroup[] = isSuperAdmin
+    ? Object.values(
+        platformUsers.reduce<Record<string, TenantGroup>>((acc, u) => {
+          const key = u.tenant.id;
+          if (!acc[key]) acc[key] = { id: u.tenant.id, name: u.tenant.name, users: [] };
+          acc[key].users.push(u);
+          return acc;
+        }, {})
+      )
+    : [];
+
+  const displayedUsers = isSuperAdmin
+    ? (activeTenant ? platformUsers.filter((u) => u.tenantId === activeTenant) : platformUsers)
+    : users;
+
   if (loading) return <Loading />;
 
+  // SuperAdmin view: tenant-grouped layout
+  if (isSuperAdmin) {
+    return (
+      <div className="flex gap-6">
+        {/* Left sidebar: tenant groups */}
+        <aside className="w-56 shrink-0">
+          <div className="bg-white rounded-xl border border-slate-200 p-3 sticky top-4">
+            <button
+              onClick={() => setActiveTenant(null)}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-1 ${
+                activeTenant === null ? 'bg-blue-50 text-blue-700' : 'text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span>{t('usersPage.allUsers')}</span>
+                <span className="text-xs text-slate-400">({platformUsers.length})</span>
+              </div>
+            </button>
+            <div className="border-t border-slate-100 my-2" />
+            {tenantGroups.map((g) => (
+              <button
+                key={g.id}
+                onClick={() => setActiveTenant(g.id)}
+                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                  activeTenant === g.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="truncate">{g.name}</span>
+                  <span className="text-xs text-slate-400 shrink-0 ml-2">({g.users.length})</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </aside>
+
+        {/* Main content */}
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-slate-900 mb-6">
+            {activeTenant ? tenantGroups.find((g) => g.id === activeTenant)?.name : t('usersPage.allUsers')}
+          </h1>
+
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.name')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.email')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('invitationsPage.role')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('usersPage.company')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.status')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('usersPage.lastLogin')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {displayedUsers.map((u) => {
+                    const pu = u as PlatformUser;
+                    return (
+                      <tr key={pu.id} className={!pu.isActive ? 'opacity-50' : ''}>
+                        <td className="px-6 py-4 text-sm font-medium text-slate-900">{pu.name}</td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{pu.email}</td>
+                        <td className="px-6 py-4 text-sm">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                            {ROLE_LABELS[pu.role] || pu.role}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-600">{pu.tenant.name}</td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${pu.isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                            {pu.isActive ? t('clientsList.active') : t('clientsList.inactive')}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-500">
+                          {pu.lastLogin ? new Date(pu.lastLogin).toLocaleDateString() : '—'}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {displayedUsers.length === 0 && (
+                    <tr><td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">{t('usersPage.noUsersFound')}</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular tenant view
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -152,7 +272,6 @@ export default function UsersPage() {
         </div>
       </div>
 
-      {/* Create User Form */}
       {showCreate && canManageUsers && (
         <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('usersPage.createUser')}</h2>
@@ -219,7 +338,6 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Pending Invitations */}
       {showInvitations && activeInvitations.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
           <h3 className="text-sm font-semibold text-amber-900 mb-2">{t('invitationsPage.title')}</h3>
@@ -240,7 +358,6 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Users Table */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200">
@@ -255,7 +372,7 @@ export default function UsersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {users.map((u) => {
+              {(users as User[]).map((u) => {
                 const isSelf = u.id === currentUser?.id;
                 return (
                   <tr key={u.id} className={!u.isActive ? 'opacity-50' : ''}>

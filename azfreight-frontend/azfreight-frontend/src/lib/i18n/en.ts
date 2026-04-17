@@ -251,6 +251,8 @@ const en = {
     switchTenant: 'Switch Company',
     viewingAs: 'Viewing as',
     exitTenantView: 'Return to Super Admin',
+    firstDirector: 'First user (Director) of this company:',
+    noTenants: 'No companies yet',
   },
 
   // Custom statuses
@@ -406,6 +408,8 @@ const en = {
     sendInvitationLink: 'Send invitation link instead of setting a password',
     userCreated: 'User created! Share this invitation link:',
     createAnother: 'Create another user',
+    allUsers: 'All Users',
+    company: 'Company',
   },
 
   // Invitations page

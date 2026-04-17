@@ -70,6 +70,16 @@ export function getTenantUsers(id: string) {
   return get<TenantUser[]>(`/superadmin/tenants/${id}/users`);
 }
 
+// Все пользователи с привязкой к тенанту
+export interface PlatformUser extends TenantUser {
+  tenantId: string;
+  tenant: { id: string; name: string; slug: string };
+}
+
+export function getAllUsers() {
+  return get<PlatformUser[]>('/superadmin/users');
+}
+
 // Пригласить пользователя в тенант
 export function inviteToTenant(id: string, data: { email: string; role: string }) {
   return post<void>(`/superadmin/tenants/${id}/invite`, data);

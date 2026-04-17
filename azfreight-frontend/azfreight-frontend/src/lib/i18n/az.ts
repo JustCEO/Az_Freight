@@ -251,6 +251,8 @@ const az = {
     switchTenant: 'Şirkəti dəyiş',
     viewingAs: 'Baxılır',
     exitTenantView: 'Baş Adminə qayıt',
+    firstDirector: 'Bu şirkətin ilk istifadəçisi (Direktor):',
+    noTenants: 'Hələ şirkət yoxdur',
   },
 
   // Fərdi statuslar
@@ -406,6 +408,8 @@ const az = {
     sendInvitationLink: 'Şifrə əvəzinə dəvət linki göndər',
     userCreated: 'İstifadəçi yaradıldı! Bu dəvət linkini paylaşın:',
     createAnother: 'Daha bir istifadəçi yarat',
+    allUsers: 'Bütün istifadəçilər',
+    company: 'Şirkət',
   },
 
   // Dəvətnamələr səhifəsi
