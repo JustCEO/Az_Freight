@@ -248,6 +248,9 @@ const az = {
     overview: 'İcmal',
     usersTab: 'İstifadəçilər',
     settingsTab: 'Parametrlər',
+    switchTenant: 'Şirkəti dəyiş',
+    viewingAs: 'Baxılır',
+    exitTenantView: 'Baş Adminə qayıt',
   },
 
   // Fərdi statuslar

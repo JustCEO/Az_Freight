@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import configuration from './config/configuration';
@@ -18,6 +18,7 @@ import { ShipmentRequestsModule } from './shipment-requests/shipment-requests.mo
 import { PortalModule } from './portal/portal.module';
 import { CustomStatusesModule } from './custom-statuses/custom-statuses.module';
 import { SuperAdminModule } from './superadmin/superadmin.module';
+import { TenantOverrideMiddleware } from './common/middleware/tenant-override.middleware';
 
 @Module({
   imports: [
@@ -44,4 +45,8 @@ import { SuperAdminModule } from './superadmin/superadmin.module';
     CustomStatusesModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TenantOverrideMiddleware).forRoutes('*');
+  }
+}

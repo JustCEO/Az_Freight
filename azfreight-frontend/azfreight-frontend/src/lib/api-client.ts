@@ -52,6 +52,8 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   const token = getToken();
   if (token) headers['Authorization'] = `Bearer ${token}`;
+  const activeTenantId = typeof window !== 'undefined' ? localStorage.getItem('activeTenantId') : null;
+  if (activeTenantId) headers['X-Tenant-Id'] = activeTenantId;
 
   const opts: RequestInit = { method, headers };
   if (body !== undefined) opts.body = JSON.stringify(body);

@@ -248,6 +248,9 @@ const ru = {
     overview: 'Обзор',
     usersTab: 'Пользователи',
     settingsTab: 'Настройки',
+    switchTenant: 'Переключить компанию',
+    viewingAs: 'Просмотр от лица',
+    exitTenantView: 'Вернуться в Суперадмин',
   },
 
   // Пользовательские статусы

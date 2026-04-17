@@ -248,6 +248,9 @@ const en = {
     overview: 'Overview',
     usersTab: 'Users',
     settingsTab: 'Settings',
+    switchTenant: 'Switch Company',
+    viewingAs: 'Viewing as',
+    exitTenantView: 'Return to Super Admin',
   },
 
   // Custom statuses
