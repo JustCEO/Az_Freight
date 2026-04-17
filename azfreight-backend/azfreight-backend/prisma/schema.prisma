@@ -9,15 +9,15 @@ datasource db {
 
 enum UserRole {
   superadmin
-  director
   admin
-  hr
   manager
+  accountant
+  client
+  director
+  hr
   logistics_agent
   dispatcher
   warehouse_manager
-  accountant
-  client
 }
 
 enum TenantPlan {
