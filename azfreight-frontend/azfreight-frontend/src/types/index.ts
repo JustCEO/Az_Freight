@@ -1,4 +1,4 @@
-export type UserRole = 'superadmin' | 'admin' | 'manager' | 'accountant' | 'client';
+export type UserRole = 'superadmin' | 'director' | 'admin' | 'hr' | 'manager' | 'logistics_agent' | 'dispatcher' | 'warehouse_manager' | 'accountant' | 'client';
 export type ShipmentStatus = 'request' | 'confirmed' | 'in_transit' | 'customs' | 'delivered' | 'cancelled';
 export type TransportType = 'road_tir' | 'sea' | 'air' | 'rail';
 export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'partially_paid' | 'overdue' | 'cancelled';
@@ -26,6 +26,10 @@ export interface User {
   lastLogin: string | null;
   createdAt: string;
   updatedAt: string;
+  preferredLocale?: string | null;
+  preferredTheme?: string | null;
+  preferredTimezone?: string | null;
+  preferredCurrency?: string | null;
 }
 
 export interface Client {
@@ -75,6 +79,13 @@ export interface CustomStatus {
   parentStatus: string | null;
   tenantId: string;
   createdAt: string;
+}
+
+export interface UserPreferences {
+  preferredLocale: string | null;
+  preferredTheme: string | null;
+  preferredTimezone: string | null;
+  preferredCurrency: string | null;
 }
 
 export interface Shipment {

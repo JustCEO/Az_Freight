@@ -15,7 +15,7 @@ export class InvitationsController {
   @Roles('admin', 'manager')
   @Post()
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreateInvitationDto) {
-    return this.invitationsService.create(user.tenantId, user.sub, dto);
+    return this.invitationsService.create(user.tenantId, user.sub, dto, user.role);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

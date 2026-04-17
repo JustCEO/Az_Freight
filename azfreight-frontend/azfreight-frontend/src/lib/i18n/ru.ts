@@ -159,8 +159,13 @@ const ru = {
   // Роли
   roles: {
     superadmin: 'Суперадмин',
+    director: 'Директор',
     admin: 'Администратор',
+    hr: 'HR',
     manager: 'Менеджер',
+    logistics_agent: 'Логист',
+    dispatcher: 'Диспетчер',
+    warehouse_manager: 'Заведующий складом',
     accountant: 'Бухгалтер',
     client: 'Клиент',
   },

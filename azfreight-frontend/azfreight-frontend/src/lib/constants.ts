@@ -34,8 +34,13 @@ export const INVOICE_STATUS_LABELS: Record<string, string> = {
 
 export const ROLE_LABELS: Record<string, string> = {
   superadmin: 'Super Admin',
+  director: 'Director',
   admin: 'Admin',
+  hr: 'HR',
   manager: 'Manager',
+  logistics_agent: 'Logistics Agent',
+  dispatcher: 'Dispatcher',
+  warehouse_manager: 'Warehouse Manager',
   accountant: 'Accountant',
   client: 'Client',
 };

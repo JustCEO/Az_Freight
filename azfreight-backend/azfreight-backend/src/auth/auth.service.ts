@@ -78,7 +78,11 @@ export class AuthService {
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     return {
-      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      user: {
+        id: user.id, email: user.email, name: user.name, role: user.role,
+        preferredLocale: user.preferredLocale, preferredTheme: user.preferredTheme,
+        preferredTimezone: user.preferredTimezone, preferredCurrency: user.preferredCurrency,
+      },
       ...tokens,
     };
   }
@@ -123,6 +127,10 @@ export class AuthService {
         isActive: true,
         lastLogin: true,
         createdAt: true,
+        preferredLocale: true,
+        preferredTheme: true,
+        preferredTimezone: true,
+        preferredCurrency: true,
       },
     });
     if (!user) {

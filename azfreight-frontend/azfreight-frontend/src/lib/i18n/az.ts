@@ -159,8 +159,13 @@ const az = {
   // Rollar
   roles: {
     superadmin: 'Baş admin',
+    director: 'Direktor',
     admin: 'Admin',
+    hr: 'HR',
     manager: 'Menecer',
+    logistics_agent: 'Logistik agent',
+    dispatcher: 'Dispetçer',
+    warehouse_manager: 'Anbar müdiri',
     accountant: 'Mühasib',
     client: 'Müştəri',
   },

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Query, UseGuard
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdatePreferencesDto } from './dto/update-preferences.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -18,10 +19,20 @@ export class UsersController {
     return this.usersService.findAll(user.tenantId, query);
   }
 
+  @Get('me/preferences')
+  getPreferences(@CurrentUser() user: JwtPayload) {
+    return this.usersService.getPreferences(user.sub);
+  }
+
+  @Patch('me/preferences')
+  updatePreferences(@CurrentUser() user: JwtPayload, @Body() dto: UpdatePreferencesDto) {
+    return this.usersService.updatePreferences(user.sub, dto);
+  }
+
   @Post()
   @Roles('admin')
   create(@CurrentUser() user: JwtPayload, @Body() dto: CreateUserDto) {
-    return this.usersService.create(user.tenantId, dto);
+    return this.usersService.create(user.tenantId, dto, user.role);
   }
 
   @Get(':id')
@@ -32,10 +43,9 @@ export class UsersController {
   @Put(':id')
   @Roles('admin')
   update(@CurrentUser() user: JwtPayload, @Param('id') id: string, @Body() dto: UpdateUserDto) {
-    return this.usersService.update(user.tenantId, id, dto);
+    return this.usersService.update(user.tenantId, id, dto, user.role);
   }
 
-  // Активация/деактивация пользователя
   @Patch(':id/toggle-active')
   @Roles('admin')
   toggleActive(@CurrentUser() user: JwtPayload, @Param('id') id: string, @Body() body: { isActive: boolean }) {

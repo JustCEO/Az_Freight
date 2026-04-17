@@ -1,5 +1,7 @@
 import { IsBoolean, IsEmail, IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 
+const ASSIGNABLE_ROLES = ['admin', 'director', 'hr', 'manager', 'logistics_agent', 'dispatcher', 'warehouse_manager', 'accountant', 'client'];
+
 export class UpdateUserDto {
   @IsOptional()
   @IsString()
@@ -15,7 +17,7 @@ export class UpdateUserDto {
   password?: string;
 
   @IsOptional()
-  @IsEnum(['admin', 'manager', 'accountant', 'client'])
+  @IsEnum(ASSIGNABLE_ROLES)
   role?: string;
 
   @IsOptional()
