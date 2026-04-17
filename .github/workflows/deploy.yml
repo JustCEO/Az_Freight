@@ -40,6 +40,8 @@ jobs:
           context: ./azfreight-frontend/azfreight-frontend
           push: true
           tags: ${{ env.FRONTEND_IMAGE }}:latest
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1
