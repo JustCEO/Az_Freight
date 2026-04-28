@@ -449,6 +449,28 @@ const az = {
   },
 
   // Autentifikasiya
+  reports: {
+    title: 'Hesabatlar',
+    totalShipments: 'Ümumi göndərmələr',
+    active: 'aktiv',
+    revenue: 'Gəlir',
+    cost: 'Xərc',
+    profit: 'Mənfəət',
+    margin: 'Marja',
+    clients: 'Müştərilər',
+    invoices: 'faktura',
+    shipments: 'Göndərmələr',
+    monthlyRevenue: 'Aylıq gəlir',
+    monthlyVolume: 'Aylıq göndərmə həcmi',
+    byStatus: 'Status üzrə göndərmələr',
+    topRoutes: 'Ən populyar marşrutlar',
+    topClients: 'Top müştərilər',
+    carrierPerformance: 'Daşıyıcı performansı',
+    carrier: 'Daşıyıcı',
+    totalCost: 'Ümumi xərc',
+    rating: 'Reytinq',
+  },
+
   settings: {
     title: 'Parametrlər',
     language: 'İnterfeys dili',

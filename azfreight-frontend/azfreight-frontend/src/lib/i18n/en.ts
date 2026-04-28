@@ -449,6 +449,28 @@ const en = {
   },
 
   // Auth
+  reports: {
+    title: 'Reports',
+    totalShipments: 'Total Shipments',
+    active: 'active',
+    revenue: 'Revenue',
+    cost: 'Cost',
+    profit: 'Profit',
+    margin: 'Margin',
+    clients: 'Clients',
+    invoices: 'invoices',
+    shipments: 'Shipments',
+    monthlyRevenue: 'Monthly Revenue',
+    monthlyVolume: 'Monthly Volume',
+    byStatus: 'Shipments by Status',
+    topRoutes: 'Top Routes',
+    topClients: 'Top Clients',
+    carrierPerformance: 'Carrier Performance',
+    carrier: 'Carrier',
+    totalCost: 'Total Cost',
+    rating: 'Rating',
+  },
+
   settings: {
     title: 'Settings',
     language: 'Interface Language',

@@ -449,6 +449,28 @@ const ru = {
   },
 
   // Авторизация
+  reports: {
+    title: 'Отчёты',
+    totalShipments: 'Всего отправлений',
+    active: 'активных',
+    revenue: 'Выручка',
+    cost: 'Расходы',
+    profit: 'Прибыль',
+    margin: 'Маржа',
+    clients: 'Клиенты',
+    invoices: 'счетов',
+    shipments: 'Отправления',
+    monthlyRevenue: 'Выручка по месяцам',
+    monthlyVolume: 'Объём отправлений по месяцам',
+    byStatus: 'Отправления по статусам',
+    topRoutes: 'Популярные маршруты',
+    topClients: 'Топ клиенты',
+    carrierPerformance: 'Перевозчики',
+    carrier: 'Перевозчик',
+    totalCost: 'Общие расходы',
+    rating: 'Рейтинг',
+  },
+
   settings: {
     title: 'Настройки',
     language: 'Язык интерфейса',

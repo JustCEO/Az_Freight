@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Patch, Body, Param, Query, Res, UseGuards } from '@nestjs/common';
+import { Response } from 'express';
 import { ShipmentsService } from './shipments.service';
 import { CreateShipmentDto } from './dto/create-shipment.dto';
 import { UpdateShipmentDto } from './dto/update-shipment.dto';
@@ -8,6 +9,7 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser, JwtPayload } from '../common/decorators/current-user.decorator';
+import { generateCMR, generateBL } from '../documents/generators/document-generator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('shipments')
@@ -28,6 +30,30 @@ export class ShipmentsController {
   @Get(':id')
   findOne(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.shipmentsService.findOne(user.tenantId, id);
+  }
+
+  @Get(':id/cmr')
+  async downloadCMR(@CurrentUser() user: JwtPayload, @Param('id') id: string, @Res() res: Response) {
+    const shipment = await this.shipmentsService.findOneForDocument(user.tenantId, id);
+    const pdf = await generateCMR(shipment as any);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="CMR-${shipment.referenceNumber}.pdf"`,
+      'Content-Length': pdf.length,
+    });
+    res.end(pdf);
+  }
+
+  @Get(':id/bl')
+  async downloadBL(@CurrentUser() user: JwtPayload, @Param('id') id: string, @Res() res: Response) {
+    const shipment = await this.shipmentsService.findOneForDocument(user.tenantId, id);
+    const pdf = await generateBL(shipment as any);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="BL-${shipment.referenceNumber}.pdf"`,
+      'Content-Length': pdf.length,
+    });
+    res.end(pdf);
   }
 
   @Put(':id')

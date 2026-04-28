@@ -96,9 +96,51 @@ export default function ShipmentDetailPage() {
             </div>
             <p className="text-sm text-slate-500">Created {new Date(shipment.createdAt).toLocaleString()}</p>
           </div>
-          <button onClick={() => router.push('/shipments')} className="btn-secondary text-sm">
-            Back to list
-          </button>
+          <div className="flex gap-2">
+            <a
+              href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'}/shipments/${id}/cmr`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+              onClick={(e) => {
+                e.preventDefault();
+                const token = localStorage.getItem('accessToken');
+                fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'}/shipments/${id}/cmr`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                }).then(r => r.blob()).then(b => {
+                  const url = URL.createObjectURL(b);
+                  const a = document.createElement('a');
+                  a.href = url; a.download = `CMR-${shipment.referenceNumber}.pdf`; a.click();
+                  URL.revokeObjectURL(url);
+                });
+              }}
+            >
+              CMR
+            </a>
+            {shipment.transportType === 'sea' && (
+              <a
+                href="#"
+                className="px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const token = localStorage.getItem('accessToken');
+                  fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1'}/shipments/${id}/bl`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  }).then(r => r.blob()).then(b => {
+                    const url = URL.createObjectURL(b);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = `BL-${shipment.referenceNumber}.pdf`; a.click();
+                    URL.revokeObjectURL(url);
+                  });
+                }}
+              >
+                Bill of Lading
+              </a>
+            )}
+            <button onClick={() => router.push('/shipments')} className="btn-secondary text-sm">
+              Back to list
+            </button>
+          </div>
         </div>
       </div>
 
