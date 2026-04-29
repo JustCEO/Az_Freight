@@ -218,7 +218,7 @@ export default function InvoiceDetailPage() {
       {/* Status Transition */}
       {transitions.length > 0 && (
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Update Status</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('invoiceDetail.updateStatus')}</h3>
           <div className="flex gap-2">
             {transitions.map((s) => (
               <button
