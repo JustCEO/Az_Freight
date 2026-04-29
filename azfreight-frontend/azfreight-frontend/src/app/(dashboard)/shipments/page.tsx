@@ -11,6 +11,7 @@ import { TRANSPORT_LABELS } from '@/lib/constants';
 import Loading from '@/components/loading';
 import { useTranslation } from '@/lib/i18n';
 import { useAuth } from '@/context/auth-context';
+import { exportToCSV } from '@/lib/export';
 
 const ALL_STATUSES = ['', 'request', 'confirmed', 'in_transit', 'customs', 'delivered', 'cancelled'];
 
@@ -66,6 +67,16 @@ export default function ShipmentsPage() {
               {t('nav.statusSettings')}
             </Link>
           )}
+          <button
+            onClick={() => exportToCSV(shipments.map((s) => ({
+              referenceNumber: s.referenceNumber, client: s.client?.companyName || '', carrier: s.carrier?.companyName || '',
+              transport: s.transportType, origin: `${s.originCity}, ${s.originCountry}`, destination: `${s.destinationCity}, ${s.destinationCountry}`,
+              status: s.status, created: new Date(s.createdAt).toLocaleDateString(),
+            })), 'shipments')}
+            className="px-3 py-2 text-sm font-medium text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50"
+          >
+            CSV
+          </button>
           <Link href="/shipments/new" className="btn-primary">
             {t('shipmentsList.newShipment')}
           </Link>

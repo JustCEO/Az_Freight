@@ -157,6 +157,9 @@ model Tenant {
   shipmentRequests   ShipmentRequest[]
   customStatuses     CustomStatus[]
   leads              Lead[]
+  expenses           Expense[]
+  quotes             Quote[]
+  notifications      Notification[]
 
   @@map("tenants")
 }
@@ -188,6 +191,9 @@ model User {
   auditLogs              AuditLog[]
   sentInvitations        Invitation[]
   assignedRequests       ShipmentRequest[] @relation("RequestAssignedTo")
+  createdExpenses        Expense[]         @relation("ExpenseCreatedBy")
+  createdQuotes          Quote[]           @relation("QuoteCreatedBy")
+  notifications          Notification[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -218,6 +224,7 @@ model Client {
   invoices           Invoice[]
   shipmentRequests   ShipmentRequest[]
   portalSessions     ClientPortalSession[]
+  quotes             Quote[]
 
   @@index([tenantId])
   @@map("clients")
@@ -299,6 +306,7 @@ model Shipment {
   statusLogs         ShipmentStatusLog[]
   invoices           Invoice[]
   customsDeclarations CustomsDeclaration[]
+  expenses           Expense[]
 
   @@unique([tenantId, referenceNumber])
   @@index([tenantId])
@@ -617,4 +625,123 @@ model ClientPortalSession {
 
   @@index([token])
   @@map("client_portal_sessions")
+}
+
+// ── Financial ──
+
+enum ExpenseCategory {
+  customs_duty
+  storage
+  insurance
+  port_charges
+  bank_fee
+  transport
+  documentation
+  vat
+  other
+}
+
+model Expense {
+  id           String          @id @default(uuid())
+  tenantId     String          @map("tenant_id")
+  shipmentId   String          @map("shipment_id")
+  category     ExpenseCategory @default(other)
+  description  String?
+  amount       Decimal         @db.Decimal(12, 2)
+  currency     String          @default("USD") @db.VarChar(3)
+  vatRate      Decimal?        @map("vat_rate") @db.Decimal(5, 2)
+  vatAmount    Decimal?        @map("vat_amount") @db.Decimal(12, 2)
+  date         DateTime        @default(now())
+  createdById  String          @map("created_by_id")
+  createdAt    DateTime        @default(now()) @map("created_at")
+
+  tenant       Tenant          @relation(fields: [tenantId], references: [id])
+  shipment     Shipment        @relation(fields: [shipmentId], references: [id])
+  createdBy    User            @relation("ExpenseCreatedBy", fields: [createdById], references: [id])
+
+  @@index([tenantId])
+  @@index([shipmentId])
+  @@map("expenses")
+}
+
+// ── Quotations ──
+
+enum QuoteStatus {
+  draft
+  sent
+  accepted
+  rejected
+  expired
+}
+
+model Quote {
+  id             String      @id @default(uuid())
+  tenantId       String      @map("tenant_id")
+  quoteNumber    String      @map("quote_number") @db.VarChar(50)
+  clientId       String?     @map("client_id")
+  leadId         String?     @map("lead_id")
+  originCountry  String      @map("origin_country") @db.VarChar(100)
+  originCity     String      @map("origin_city") @db.VarChar(255)
+  destCountry    String      @map("dest_country") @db.VarChar(100)
+  destCity       String      @map("dest_city") @db.VarChar(255)
+  transportType  String      @map("transport_type") @db.VarChar(20)
+  cargoType      String?     @map("cargo_type") @db.VarChar(50)
+  weightKg       Decimal?    @map("weight_kg") @db.Decimal(12, 2)
+  volumeCbm      Decimal?    @map("volume_cbm") @db.Decimal(10, 3)
+  currency       String      @default("USD") @db.VarChar(3)
+  subtotal       Decimal     @default(0) @db.Decimal(12, 2)
+  vatRate        Decimal     @default(18) @map("vat_rate") @db.Decimal(5, 2)
+  vatAmount      Decimal     @default(0) @map("vat_amount") @db.Decimal(12, 2)
+  total          Decimal     @default(0) @db.Decimal(12, 2)
+  margin         Decimal?    @db.Decimal(5, 2)
+  status         QuoteStatus @default(draft)
+  validUntil     DateTime    @map("valid_until")
+  notes          String?
+  createdById    String      @map("created_by_id")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  tenant         Tenant      @relation(fields: [tenantId], references: [id])
+  client         Client?     @relation(fields: [clientId], references: [id])
+  createdBy      User        @relation("QuoteCreatedBy", fields: [createdById], references: [id])
+  lines          QuoteLine[]
+
+  @@unique([tenantId, quoteNumber])
+  @@index([tenantId])
+  @@map("quotes")
+}
+
+model QuoteLine {
+  id          String  @id @default(uuid())
+  quoteId     String  @map("quote_id")
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Decimal @map("unit_price") @db.Decimal(12, 2)
+  total       Decimal @db.Decimal(12, 2)
+
+  quote       Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@map("quote_lines")
+}
+
+// ── Notifications ──
+
+model Notification {
+  id        String   @id @default(uuid())
+  tenantId  String   @map("tenant_id")
+  userId    String   @map("user_id")
+  type      String   @db.VarChar(50)
+  title     String   @db.VarChar(255)
+  message   String?
+  entityType String? @map("entity_type") @db.VarChar(50)
+  entityId  String?  @map("entity_id")
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead])
+  @@index([tenantId])
+  @@map("notifications")
 }

@@ -8,6 +8,7 @@ import type { Client } from '@/types';
 import Pagination from '@/components/pagination';
 import Loading from '@/components/loading';
 import { useTranslation } from '@/lib/i18n';
+import { exportToCSV } from '@/lib/export';
 
 export default function ClientsPage() {
   const router = useRouter();
@@ -41,6 +42,7 @@ export default function ClientsPage() {
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           className="input-field w-64"
         />
+        <button onClick={() => exportToCSV(clients.map((c) => ({ companyName: c.companyName, email: c.email || '', phone: c.phone || '', country: c.country || '', city: c.city || '', status: c.isActive ? 'Active' : 'Inactive' })), 'clients')} className="px-3 py-2 text-sm font-medium text-slate-700 border border-slate-300 rounded-lg hover:bg-slate-50">CSV</button>
         <Link href="/clients/new" className="btn-primary">{t('clientsList.newClient')}</Link>
       </div>
 
