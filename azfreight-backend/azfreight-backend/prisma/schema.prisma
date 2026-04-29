@@ -93,6 +93,27 @@ enum DeclarationType {
   transit
 }
 
+enum LeadSource {
+  PORTAL
+  MANUAL
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  LOST
+}
+
+enum RequestStatus {
+  OPEN
+  QUOTATION
+  REPLIED
+  CONVERTED
+  CLOSED
+}
+
 enum DeclarationStatus {
   preparing
   filed
@@ -135,6 +156,7 @@ model Tenant {
   invitations        Invitation[]
   shipmentRequests   ShipmentRequest[]
   customStatuses     CustomStatus[]
+  leads              Lead[]
 
   @@map("tenants")
 }
@@ -195,6 +217,7 @@ model Client {
   shipments          Shipment[]
   invoices           Invoice[]
   shipmentRequests   ShipmentRequest[]
+  portalSessions     ClientPortalSession[]
 
   @@index([tenantId])
   @@map("clients")
@@ -500,11 +523,13 @@ model ShipmentRequest {
 
   specialRequirements Json?    @map("special_requirements")
 
-  status             String    @default("new") @db.VarChar(20)
-  assignedToId       String?   @map("assigned_to_id")
-  clientId           String?   @map("client_id")
-  carrierId          String?   @map("carrier_id")
-  shipmentId         String?   @map("shipment_id")
+  status             String         @default("new") @db.VarChar(20)
+  requestStatus      RequestStatus  @default(OPEN) @map("request_status")
+  assignedToId       String?        @map("assigned_to_id")
+  clientId           String?        @map("client_id")
+  carrierId          String?        @map("carrier_id")
+  shipmentId         String?        @map("shipment_id")
+  leadId             String?        @map("lead_id")
 
   notes              String?
   rejectionReason    String?   @map("rejection_reason")
@@ -516,6 +541,7 @@ model ShipmentRequest {
   assignedTo         User?     @relation("RequestAssignedTo", fields: [assignedToId], references: [id])
   client             Client?   @relation(fields: [clientId], references: [id])
   carrier            Carrier?  @relation(fields: [carrierId], references: [id])
+  lead               Lead?     @relation(fields: [leadId], references: [id])
   documents          ShipmentRequestDocument[]
 
   @@index([tenantId])
@@ -553,4 +579,42 @@ model CustomStatus {
 
   @@index([tenantId])
   @@map("custom_statuses")
+}
+
+model Lead {
+  id                  String     @id @default(uuid())
+  tenantId            String     @map("tenant_id")
+  companyName         String?    @map("company_name") @db.VarChar(255)
+  contactName         String     @map("contact_name") @db.VarChar(255)
+  email               String     @db.VarChar(255)
+  phone               String?    @db.VarChar(50)
+  source              LeadSource @default(PORTAL)
+  status              LeadStatus @default(NEW)
+  notes               String?
+  convertedToClientId String?    @map("converted_to_client_id")
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
+
+  tenant              Tenant     @relation(fields: [tenantId], references: [id])
+  requests            ShipmentRequest[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@map("leads")
+}
+
+model ClientPortalSession {
+  id        String    @id @default(uuid())
+  email     String    @db.VarChar(255)
+  token     String    @unique @db.VarChar(255)
+  clientId  String    @map("client_id")
+  tenantId  String    @map("tenant_id")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  client    Client    @relation(fields: [clientId], references: [id])
+
+  @@index([token])
+  @@map("client_portal_sessions")
 }
