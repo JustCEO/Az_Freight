@@ -126,6 +126,7 @@ export default function UsersPage() {
 
   const handleDelete = async (userId: string) => {
     if (userId === currentUser?.id) return;
+    if (!window.confirm(t('common.confirm') + '?')) return;
     try {
       await deleteUser(userId);
       setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, isActive: false } : u));

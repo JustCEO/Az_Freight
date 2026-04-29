@@ -7,6 +7,7 @@ import type { Invoice } from '@/types';
 import StatusBadge from '@/components/status-badge';
 import Loading from '@/components/loading';
 import { INVOICE_STATUS_LABELS } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 const INVOICE_STATUS_TRANSITIONS: Record<string, string[]> = {
   draft: ['sent', 'cancelled'],
@@ -28,6 +29,7 @@ const INV_BTN_STYLES: Record<string, string> = {
 export default function InvoiceDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { t } = useTranslation();
   const id = params.id as string;
 
   const [invoice, setInvoice] = useState<Invoice | null>(null);
@@ -61,7 +63,7 @@ export default function InvoiceDetailPage() {
     if (!invoice || !paymentAmount) return;
     const amount = parseFloat(paymentAmount);
     if (isNaN(amount) || amount <= 0) {
-      setPaymentError('Enter a valid amount');
+      setPaymentError(t('invoiceDetail.enterValidAmount'));
       return;
     }
     setPaymentLoading(true);
@@ -71,7 +73,7 @@ export default function InvoiceDetailPage() {
       setInvoice(updated);
       setPaymentAmount('');
     } catch (e) {
-      setPaymentError(e instanceof Error ? e.message : 'Failed to record payment');
+      setPaymentError(e instanceof Error ? e.message : t('invoiceDetail.failedToRecordPayment'));
     }
     setPaymentLoading(false);
   }
@@ -94,10 +96,10 @@ export default function InvoiceDetailPage() {
               <h2 className="text-xl font-bold text-slate-900">{invoice.invoiceNumber}</h2>
               <StatusBadge status={invoice.status} />
             </div>
-            <p className="text-sm text-slate-500">Created {new Date(invoice.createdAt).toLocaleString()}</p>
+            <p className="text-sm text-slate-500">{t('invoiceDetail.created')} {new Date(invoice.createdAt).toLocaleString()}</p>
           </div>
           <button onClick={() => router.push('/invoices')} className="btn-secondary text-sm">
-            Back to list
+            {t('invoiceDetail.backToList')}
           </button>
         </div>
       </div>
@@ -105,22 +107,22 @@ export default function InvoiceDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Invoice Details */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Details</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('invoiceDetail.details')}</h3>
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <dt className="text-slate-500">Client</dt>
+              <dt className="text-slate-500">{t('invoiceDetail.client')}</dt>
               <dd className="font-medium">{invoice.client?.companyName || '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Shipment</dt>
+              <dt className="text-slate-500">{t('invoiceDetail.shipment')}</dt>
               <dd className="font-medium">{invoice.shipment?.referenceNumber || '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Amount</dt>
+              <dt className="text-slate-500">{t('invoiceDetail.amount')}</dt>
               <dd className="font-medium text-lg">{totalAmount.toLocaleString()} {invoice.currency}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Currency</dt>
+              <dt className="text-slate-500">{t('invoiceDetail.currency')}</dt>
               <dd className="font-medium">{invoice.currency}</dd>
             </div>
           </dl>
@@ -128,22 +130,22 @@ export default function InvoiceDetailPage() {
 
         {/* Dates */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Dates</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('invoiceDetail.dates')}</h3>
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <dt className="text-slate-500">Issued</dt>
+              <dt className="text-slate-500">{t('invoiceDetail.issued')}</dt>
               <dd className="font-medium">{new Date(invoice.issuedDate).toLocaleDateString()}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Due</dt>
+              <dt className="text-slate-500">{t('invoiceDetail.due')}</dt>
               <dd className="font-medium">{new Date(invoice.dueDate).toLocaleDateString()}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Paid</dt>
+              <dt className="text-slate-500">{t('invoiceDetail.paid')}</dt>
               <dd className="font-medium">{invoice.paidDate ? new Date(invoice.paidDate).toLocaleDateString() : '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Created</dt>
+              <dt className="text-slate-500">{t('invoiceDetail.created')}</dt>
               <dd className="font-medium">{new Date(invoice.createdAt).toLocaleString()}</dd>
             </div>
           </dl>
@@ -151,10 +153,10 @@ export default function InvoiceDetailPage() {
 
         {/* Прогресс оплаты */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 lg:col-span-2">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Payment Progress</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('invoiceDetail.paymentProgress')}</h3>
           <div className="flex items-center justify-between text-sm mb-2">
-            <span className="text-slate-500">Paid: <span className="font-medium text-slate-900">{paidAmount.toLocaleString()} {invoice.currency}</span></span>
-            <span className="text-slate-500">Remaining: <span className="font-medium text-slate-900">{remaining.toLocaleString()} {invoice.currency}</span></span>
+            <span className="text-slate-500">{t('invoiceDetail.paidLabel')}: <span className="font-medium text-slate-900">{paidAmount.toLocaleString()} {invoice.currency}</span></span>
+            <span className="text-slate-500">{t('invoiceDetail.remaining')}: <span className="font-medium text-slate-900">{remaining.toLocaleString()} {invoice.currency}</span></span>
           </div>
           <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
             <div

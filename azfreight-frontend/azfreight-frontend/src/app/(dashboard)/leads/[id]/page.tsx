@@ -48,6 +48,7 @@ export default function LeadDetailPage() {
   };
 
   const handleDelete = async () => {
+    if (!window.confirm(t('common.confirm') + '?')) return;
     try {
       await deleteLead(id);
       router.push('/leads');

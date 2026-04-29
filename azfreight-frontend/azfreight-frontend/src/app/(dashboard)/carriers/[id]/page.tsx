@@ -6,17 +6,14 @@ import { getCarrier, updateCarrier } from '@/lib/api/carriers';
 import type { Carrier } from '@/types';
 import Loading from '@/components/loading';
 import { TRANSPORT_LABELS } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
-const TRANSPORT_OPTIONS = [
-  { value: 'road_tir', label: 'Road/TIR' },
-  { value: 'sea', label: 'Sea' },
-  { value: 'air', label: 'Air' },
-  { value: 'rail', label: 'Rail' },
-];
+const TRANSPORT_KEYS = ['road_tir', 'sea', 'air', 'rail'] as const;
 
 export default function CarrierDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { t } = useTranslation();
   const id = params.id as string;
 
   const [carrier, setCarrier] = useState<Carrier | null>(null);
@@ -79,7 +76,7 @@ export default function CarrierDetailPage() {
       setCarrier(updated);
       setEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update');
+      setError(err instanceof Error ? err.message : t('carrierDetail.failedToUpdate'));
     } finally {
       setSubmitting(false);
     }
@@ -94,13 +91,13 @@ export default function CarrierDetailPage() {
           <div className="flex items-start justify-between mb-6">
             <h2 className="text-xl font-bold text-slate-900">{carrier.companyName}</h2>
             <div className="flex gap-2">
-              <button onClick={() => setEditing(true)} className="btn-primary text-sm">Edit</button>
-              <button onClick={() => router.push('/carriers')} className="btn-secondary text-sm">Back</button>
+              <button onClick={() => setEditing(true)} className="btn-primary text-sm">{t('common.edit')}</button>
+              <button onClick={() => router.push('/carriers')} className="btn-secondary text-sm">{t('common.back')}</button>
             </div>
           </div>
           <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="md:col-span-2">
-              <dt className="text-slate-500">Transport Types</dt>
+              <dt className="text-slate-500">{t('carrierDetail.transportTypes')}</dt>
               <dd className="flex gap-1 mt-1">
                 {(carrier.transportTypes || []).map((t) => (
                   <span key={t} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">
@@ -109,14 +106,14 @@ export default function CarrierDetailPage() {
                 ))}
               </dd>
             </div>
-            <div><dt className="text-slate-500">Tax ID</dt><dd className="font-medium">{carrier.taxId || '—'}</dd></div>
-            <div><dt className="text-slate-500">Email</dt><dd className="font-medium">{carrier.email || '—'}</dd></div>
-            <div><dt className="text-slate-500">Phone</dt><dd className="font-medium">{carrier.phone || '—'}</dd></div>
-            <div><dt className="text-slate-500">Country</dt><dd className="font-medium">{carrier.country || '—'}</dd></div>
-            <div><dt className="text-slate-500">City</dt><dd className="font-medium">{carrier.city || '—'}</dd></div>
-            <div><dt className="text-slate-500">Rating</dt><dd className="font-medium">{carrier.rating ?? '—'}</dd></div>
-            <div><dt className="text-slate-500">Total Shipments</dt><dd className="font-medium">{carrier.totalShipments}</dd></div>
-            <div className="md:col-span-2"><dt className="text-slate-500">Notes</dt><dd className="font-medium">{carrier.notes || '—'}</dd></div>
+            <div><dt className="text-slate-500">{t('carrierDetail.taxId')}</dt><dd className="font-medium">{carrier.taxId || '—'}</dd></div>
+            <div><dt className="text-slate-500">{t('common.email')}</dt><dd className="font-medium">{carrier.email || '—'}</dd></div>
+            <div><dt className="text-slate-500">{t('common.phone')}</dt><dd className="font-medium">{carrier.phone || '—'}</dd></div>
+            <div><dt className="text-slate-500">{t('carrierDetail.country')}</dt><dd className="font-medium">{carrier.country || '—'}</dd></div>
+            <div><dt className="text-slate-500">{t('carrierDetail.city')}</dt><dd className="font-medium">{carrier.city || '—'}</dd></div>
+            <div><dt className="text-slate-500">{t('carrierDetail.rating')}</dt><dd className="font-medium">{carrier.rating ?? '—'}</dd></div>
+            <div><dt className="text-slate-500">{t('carrierDetail.totalShipments')}</dt><dd className="font-medium">{carrier.totalShipments}</dd></div>
+            <div className="md:col-span-2"><dt className="text-slate-500">{t('common.notes')}</dt><dd className="font-medium">{carrier.notes || '—'}</dd></div>
           </dl>
         </div>
       </div>
@@ -128,31 +125,31 @@ export default function CarrierDetailPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {error && <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg">{error}</div>}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Edit Carrier</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">{t('carrierDetail.editCarrier')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2"><label className="label-field">Company Name *</label><input type="text" value={form.companyName} onChange={(e) => updateField('companyName', e.target.value)} className="input-field" required /></div>
+            <div className="md:col-span-2"><label className="label-field">{t('carrierDetail.companyNameRequired')}</label><input type="text" value={form.companyName} onChange={(e) => updateField('companyName', e.target.value)} className="input-field" required /></div>
             <div className="md:col-span-2">
-              <label className="label-field">Transport Types</label>
+              <label className="label-field">{t('carrierDetail.transportTypes')}</label>
               <div className="flex gap-4 mt-1">
-                {TRANSPORT_OPTIONS.map((o) => (
-                  <label key={o.value} className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked={form.transportTypes.includes(o.value)} onChange={() => toggleTransport(o.value)} className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                    <span className="text-sm text-slate-700">{o.label}</span>
+                {TRANSPORT_KEYS.map((key) => (
+                  <label key={key} className="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" checked={form.transportTypes.includes(key)} onChange={() => toggleTransport(key)} className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                    <span className="text-sm text-slate-700">{t(`transport.${key}`)}</span>
                   </label>
                 ))}
               </div>
             </div>
-            <div><label className="label-field">Tax ID</label><input type="text" value={form.taxId} onChange={(e) => updateField('taxId', e.target.value)} className="input-field" /></div>
-            <div><label className="label-field">Email</label><input type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} className="input-field" /></div>
-            <div><label className="label-field">Phone</label><input type="text" value={form.phone} onChange={(e) => updateField('phone', e.target.value)} className="input-field" /></div>
-            <div><label className="label-field">Country</label><input type="text" value={form.country} onChange={(e) => updateField('country', e.target.value)} className="input-field" /></div>
-            <div><label className="label-field">City</label><input type="text" value={form.city} onChange={(e) => updateField('city', e.target.value)} className="input-field" /></div>
-            <div className="md:col-span-2"><label className="label-field">Notes</label><textarea value={form.notes} onChange={(e) => updateField('notes', e.target.value)} className="input-field" rows={3} /></div>
+            <div><label className="label-field">{t('carrierDetail.taxId')}</label><input type="text" value={form.taxId} onChange={(e) => updateField('taxId', e.target.value)} className="input-field" /></div>
+            <div><label className="label-field">{t('common.email')}</label><input type="email" value={form.email} onChange={(e) => updateField('email', e.target.value)} className="input-field" /></div>
+            <div><label className="label-field">{t('common.phone')}</label><input type="text" value={form.phone} onChange={(e) => updateField('phone', e.target.value)} className="input-field" /></div>
+            <div><label className="label-field">{t('carrierDetail.country')}</label><input type="text" value={form.country} onChange={(e) => updateField('country', e.target.value)} className="input-field" /></div>
+            <div><label className="label-field">{t('carrierDetail.city')}</label><input type="text" value={form.city} onChange={(e) => updateField('city', e.target.value)} className="input-field" /></div>
+            <div className="md:col-span-2"><label className="label-field">{t('common.notes')}</label><textarea value={form.notes} onChange={(e) => updateField('notes', e.target.value)} className="input-field" rows={3} /></div>
           </div>
         </div>
         <div className="flex gap-4">
-          <button type="submit" disabled={submitting} className="btn-primary">{submitting ? 'Saving...' : 'Save Changes'}</button>
-          <button type="button" onClick={() => setEditing(false)} className="btn-secondary">Cancel</button>
+          <button type="submit" disabled={submitting} className="btn-primary">{submitting ? t('carrierDetail.saving') : t('carrierDetail.saveChanges')}</button>
+          <button type="button" onClick={() => setEditing(false)} className="btn-secondary">{t('common.cancel')}</button>
         </div>
       </form>
     </div>
