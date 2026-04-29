@@ -57,28 +57,46 @@ export default function TenantLandingPage() {
             {tenant?.portalWelcomeText || t('portal.welcomeDefault')}
           </p>
 
-          {/* Кнопки */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href={`/portal/${tenantSlug}/request`}
-              className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-white font-bold text-lg transition-all hover:scale-105 hover:shadow-xl shadow-lg"
-              style={{ color: themeColor }}
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-              {t('portal.submitRequest')}
-            </Link>
-            <Link
-              href={`/portal/${tenantSlug}/track`}
-              className="inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-white/15 backdrop-blur-sm text-white font-bold text-lg border-2 border-white/30 transition-all hover:bg-white/25 hover:scale-105"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-              </svg>
-              {t('portal.trackShipment')}
-            </Link>
+          {/* Two paths: new request + existing client login */}
+          <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto mb-8">
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+              <h2 className="text-xl font-bold text-white mb-2">{t('portalAuth.submitRequest')}</h2>
+              <p className="text-sm text-white/70 mb-4">{t('portalAuth.submitRequestDesc')}</p>
+              <Link
+                href={`/portal/${tenantSlug}/request`}
+                className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-white font-bold text-sm transition-all hover:scale-105 shadow-lg"
+                style={{ color: themeColor }}
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                {t('portal.submitRequest')}
+              </Link>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+              <h2 className="text-xl font-bold text-white mb-2">{t('portalAuth.clientLogin')}</h2>
+              <p className="text-sm text-white/70 mb-4">{t('portalAuth.clientLoginDesc')}</p>
+              <Link
+                href={`/portal/${tenantSlug}/login`}
+                className="inline-flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl bg-white/20 text-white font-bold text-sm border border-white/30 transition-all hover:bg-white/30 hover:scale-105"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                </svg>
+                {t('portalAuth.clientLogin')}
+              </Link>
+            </div>
           </div>
+
+          <Link
+            href={`/portal/${tenantSlug}/track`}
+            className="inline-flex items-center justify-center gap-3 px-8 py-3 rounded-xl bg-white/15 backdrop-blur-sm text-white font-medium text-sm border border-white/30 transition-all hover:bg-white/25"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            {t('portal.trackShipment')}
+          </Link>
         </div>
       </div>
     </div>
