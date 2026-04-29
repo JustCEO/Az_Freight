@@ -31,6 +31,30 @@ export class ShipmentRequestsService {
       : ['road_tir'];
     const transportOrder = dto.transportOrder || transportTypes;
 
+    // Check if existing client, otherwise create a Lead
+    let clientId: string | undefined;
+    let leadId: string | undefined;
+
+    const existingClient = await this.prisma.client.findFirst({
+      where: { tenantId: tenant.id, email: dto.requesterEmail, isActive: true },
+    });
+
+    if (existingClient) {
+      clientId = existingClient.id;
+    } else {
+      const lead = await this.prisma.lead.create({
+        data: {
+          tenantId: tenant.id,
+          contactName: dto.requesterName,
+          email: dto.requesterEmail,
+          phone: dto.requesterPhone,
+          companyName: dto.companyName,
+          source: 'PORTAL',
+        },
+      });
+      leadId = lead.id;
+    }
+
     const request = await this.prisma.shipmentRequest.create({
       data: {
         tenantId: tenant.id,
@@ -58,6 +82,8 @@ export class ShipmentRequestsService {
         preferredDate: dto.preferredDate ? new Date(dto.preferredDate) : undefined,
         isUrgent: dto.isUrgent || false,
         specialRequirements: dto.specialRequirements ? JSON.parse(JSON.stringify(dto.specialRequirements)) : undefined,
+        clientId,
+        leadId,
       },
     });
 
@@ -114,6 +140,7 @@ export class ShipmentRequestsService {
         include: {
           assignedTo: { select: { id: true, name: true } },
           carrier: { select: { id: true, companyName: true } },
+          lead: { select: { id: true, contactName: true, status: true } },
           _count: { select: { documents: true } },
         },
       }),
@@ -130,6 +157,7 @@ export class ShipmentRequestsService {
         assignedTo: { select: { id: true, name: true } },
         client: { select: { id: true, companyName: true } },
         carrier: { select: { id: true, companyName: true } },
+        lead: { select: { id: true, contactName: true, status: true } },
         documents: true,
       },
     });
@@ -141,15 +169,14 @@ export class ShipmentRequestsService {
     const request = await this.prisma.shipmentRequest.findFirst({ where: { id, tenantId } });
     if (!request) throw new NotFoundException('Request not found');
 
-    return this.prisma.shipmentRequest.update({
-      where: { id },
-      data: {
-        status: dto.status,
-        assignedToId: dto.assignedToId,
-        notes: dto.notes,
-        rejectionReason: dto.rejectionReason,
-      },
-    });
+    const data: Record<string, unknown> = {};
+    if (dto.status) data.status = dto.status;
+    if (dto.requestStatus) data.requestStatus = dto.requestStatus;
+    if (dto.assignedToId !== undefined) data.assignedToId = dto.assignedToId;
+    if (dto.notes !== undefined) data.notes = dto.notes;
+    if (dto.rejectionReason !== undefined) data.rejectionReason = dto.rejectionReason;
+
+    return this.prisma.shipmentRequest.update({ where: { id }, data });
   }
 
   // Назначить перевозчика на запрос
