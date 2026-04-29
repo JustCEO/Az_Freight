@@ -55,8 +55,15 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       await updatePreferences({ theme, timezone, currency });
+      localStorage.setItem('theme', theme);
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
+      } else if (theme === 'system') {
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
       } else {
         document.documentElement.classList.remove('dark');
       }
