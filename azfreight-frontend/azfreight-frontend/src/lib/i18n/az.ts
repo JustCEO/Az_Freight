@@ -449,6 +449,46 @@ const az = {
   },
 
   // Autentifikasiya
+  leads: {
+    title: 'Lidlər',
+    addLead: 'Lid əlavə et',
+    contactName: 'Əlaqə şəxsi',
+    source: 'Mənbə',
+    requests: 'Sorğular',
+    noLeads: 'Hələ lid yoxdur',
+    contactInfo: 'Əlaqə məlumatları',
+    associatedRequests: 'Əlaqəli sorğular',
+    noRequests: 'Bu lidə bağlı sorğu yoxdur',
+    convertToClient: 'Müştəriyə çevir',
+    NEW: 'Yeni',
+    CONTACTED: 'Əlaqə saxlanıldı',
+    QUALIFIED: 'Təsdiqləndi',
+    CONVERTED: 'Çevrildi',
+    LOST: 'İtirildi',
+    PORTAL: 'Portal',
+    MANUAL: 'Əl ilə',
+  },
+
+  requestStatus: {
+    OPEN: 'Açıq',
+    QUOTATION: 'Qiymət təklifi',
+    REPLIED: 'Cavab verildi',
+    CONVERTED: 'Çevrildi',
+    CLOSED: 'Bağlandı',
+  },
+
+  portalAuth: {
+    loginTitle: 'Müştəri girişi',
+    enterEmail: 'Giriş linki almaq üçün e-poçtunuzu daxil edin',
+    sendLink: 'Link göndər',
+    linkSent: 'E-poçtunuzu yoxlayın — giriş linki göndərildi',
+    linkExpired: 'Bu link artıq keçərli deyil. Yenisini tələb edin.',
+    submitRequest: 'Daşıma sorğusu göndər',
+    submitRequestDesc: 'Yeni müştəri? Birbaşa sorğu göndərin — hesab lazım deyil.',
+    clientLogin: 'Müştəri girişi',
+    clientLoginDesc: 'Mövcud müştəri? Yüklərinizi izləmək üçün daxil olun.',
+  },
+
   reports: {
     title: 'Hesabatlar',
     totalShipments: 'Ümumi göndərmələr',

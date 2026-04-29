@@ -449,6 +449,46 @@ const ru = {
   },
 
   // Авторизация
+  leads: {
+    title: 'Лиды',
+    addLead: 'Добавить лид',
+    contactName: 'Контактное лицо',
+    source: 'Источник',
+    requests: 'Заявки',
+    noLeads: 'Лидов пока нет',
+    contactInfo: 'Контактные данные',
+    associatedRequests: 'Связанные заявки',
+    noRequests: 'Нет заявок, привязанных к этому лиду',
+    convertToClient: 'Конвертировать в клиента',
+    NEW: 'Новый',
+    CONTACTED: 'Связались',
+    QUALIFIED: 'Квалифицирован',
+    CONVERTED: 'Конвертирован',
+    LOST: 'Потерян',
+    PORTAL: 'Портал',
+    MANUAL: 'Вручную',
+  },
+
+  requestStatus: {
+    OPEN: 'Открыта',
+    QUOTATION: 'Котировка',
+    REPLIED: 'Ответ отправлен',
+    CONVERTED: 'Конвертирована',
+    CLOSED: 'Закрыта',
+  },
+
+  portalAuth: {
+    loginTitle: 'Вход для клиентов',
+    enterEmail: 'Введите email для получения ссылки для входа',
+    sendLink: 'Отправить ссылку',
+    linkSent: 'Проверьте почту — ссылка для входа отправлена',
+    linkExpired: 'Ссылка устарела. Запросите новую.',
+    submitRequest: 'Подать заявку на перевозку',
+    submitRequestDesc: 'Новый клиент? Подайте заявку напрямую — аккаунт не нужен.',
+    clientLogin: 'Вход для клиентов',
+    clientLoginDesc: 'Уже клиент? Войдите чтобы отслеживать ваши грузы.',
+  },
+
   reports: {
     title: 'Отчёты',
     totalShipments: 'Всего отправлений',

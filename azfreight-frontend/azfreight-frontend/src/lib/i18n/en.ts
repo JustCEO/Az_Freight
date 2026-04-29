@@ -449,6 +449,46 @@ const en = {
   },
 
   // Auth
+  leads: {
+    title: 'Leads',
+    addLead: 'Add Lead',
+    contactName: 'Contact Name',
+    source: 'Source',
+    requests: 'Requests',
+    noLeads: 'No leads yet',
+    contactInfo: 'Contact Info',
+    associatedRequests: 'Associated Requests',
+    noRequests: 'No requests linked to this lead',
+    convertToClient: 'Convert to Client',
+    NEW: 'New',
+    CONTACTED: 'Contacted',
+    QUALIFIED: 'Qualified',
+    CONVERTED: 'Converted',
+    LOST: 'Lost',
+    PORTAL: 'Portal',
+    MANUAL: 'Manual',
+  },
+
+  requestStatus: {
+    OPEN: 'Open',
+    QUOTATION: 'Quotation',
+    REPLIED: 'Replied',
+    CONVERTED: 'Converted',
+    CLOSED: 'Closed',
+  },
+
+  portalAuth: {
+    loginTitle: 'Client Login',
+    enterEmail: 'Enter your email to receive a login link',
+    sendLink: 'Send Login Link',
+    linkSent: 'Check your email for a login link',
+    linkExpired: 'This link has expired. Please request a new one.',
+    submitRequest: 'Submit a Freight Request',
+    submitRequestDesc: 'New client? Submit a request directly — no account needed.',
+    clientLogin: 'Client Login',
+    clientLoginDesc: 'Existing client? Login to track your shipments.',
+  },
+
   reports: {
     title: 'Reports',
     totalShipments: 'Total Shipments',
