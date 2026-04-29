@@ -19,6 +19,7 @@ import { PortalModule } from './portal/portal.module';
 import { CustomStatusesModule } from './custom-statuses/custom-statuses.module';
 import { SuperAdminModule } from './superadmin/superadmin.module';
 import { ReportsModule } from './reports/reports.module';
+import { LeadsModule } from './leads/leads.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ReportsModule } from './reports/reports.module';
     SuperAdminModule,
     CustomStatusesModule,
     ReportsModule,
+    LeadsModule,
   ],
 })
 export class AppModule {}
