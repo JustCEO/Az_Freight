@@ -8,6 +8,7 @@ import type { Shipment, ShipmentStatusLog, CustomStatus } from '@/types';
 import StatusBadge from '@/components/status-badge';
 import Loading from '@/components/loading';
 import { TRANSPORT_LABELS, STATUS_TRANSITIONS, STATUS_LABELS } from '@/lib/constants';
+import { useTranslation } from '@/lib/i18n';
 
 const STATUS_BTN_STYLES: Record<string, string> = {
   confirmed: 'bg-blue-600 hover:bg-blue-700 text-white',
@@ -20,6 +21,7 @@ const STATUS_BTN_STYLES: Record<string, string> = {
 export default function ShipmentDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { t } = useTranslation();
   const id = params.id as string;
 
   const [shipment, setShipment] = useState<Shipment | null>(null);
@@ -36,7 +38,7 @@ export default function ShipmentDetailPage() {
 
   useEffect(() => {
     Promise.all([getShipment(id), getTimeline(id)])
-      .then(([s, t]) => { setShipment(s); setTimeline(t); })
+      .then(([s, tl]) => { setShipment(s); setTimeline(tl); })
       .catch(() => router.push('/shipments'))
       .finally(() => setLoading(false));
     listCustomStatuses().then(setCustomStatuses).catch(() => {});
@@ -49,8 +51,8 @@ export default function ShipmentDetailPage() {
       const updated = await updateShipmentStatus(id, newStatus, statusComment || undefined);
       setShipment(updated);
       setStatusComment('');
-      const t = await getTimeline(id);
-      setTimeline(t);
+      const tl = await getTimeline(id);
+      setTimeline(tl);
     } catch { /* ignore */ }
     setUpdatingStatus(false);
   }
@@ -94,7 +96,7 @@ export default function ShipmentDetailPage() {
                 {TRANSPORT_LABELS[shipment.transportType] || shipment.transportType}
               </span>
             </div>
-            <p className="text-sm text-slate-500">Created {new Date(shipment.createdAt).toLocaleString()}</p>
+            <p className="text-sm text-slate-500">{t('shipmentsList.created')} {new Date(shipment.createdAt).toLocaleString()}</p>
           </div>
           <div className="flex gap-2">
             <a
@@ -134,11 +136,11 @@ export default function ShipmentDetailPage() {
                   });
                 }}
               >
-                Bill of Lading
+                {t('shipmentDetail.billOfLading')}
               </a>
             )}
             <button onClick={() => router.push('/shipments')} className="btn-secondary text-sm">
-              Back to list
+              {t('common.back')}
             </button>
           </div>
         </div>
@@ -147,7 +149,7 @@ export default function ShipmentDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Route */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Route</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('requestsList.route')}</h3>
           <div className="flex items-center gap-4">
             <div className="text-center">
               <div className="text-lg font-bold text-slate-900">{shipment.originCountry}</div>
@@ -169,22 +171,22 @@ export default function ShipmentDetailPage() {
 
         {/* Cargo */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Cargo</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('requestForm.steps.cargo')}</h3>
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <dt className="text-slate-500">Description</dt>
+              <dt className="text-slate-500">{t('common.description')}</dt>
               <dd className="font-medium">{shipment.cargoDescription || '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Weight</dt>
+              <dt className="text-slate-500">{t('requestForm.weight')}</dt>
               <dd className="font-medium">{shipment.cargoWeight ? `${shipment.cargoWeight} kg` : '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Volume</dt>
+              <dt className="text-slate-500">{t('requestForm.volume')}</dt>
               <dd className="font-medium">{shipment.cargoVolume ? `${shipment.cargoVolume} m³` : '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Packages</dt>
+              <dt className="text-slate-500">{t('requestForm.packages')}</dt>
               <dd className="font-medium">{shipment.packageCount ?? '—'}</dd>
             </div>
           </dl>
@@ -192,24 +194,24 @@ export default function ShipmentDetailPage() {
 
         {/* Financials */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Financials</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('newShipment.financials')}</h3>
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <dt className="text-slate-500">Client Rate</dt>
+              <dt className="text-slate-500">{t('newShipment.clientRate')}</dt>
               <dd className="font-medium">{shipment.clientRate != null ? `${shipment.clientRate} ${shipment.currency}` : '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Carrier Rate</dt>
+              <dt className="text-slate-500">{t('newShipment.carrierRate')}</dt>
               <dd className="font-medium">{shipment.carrierRate != null ? `${shipment.carrierRate} ${shipment.currency}` : '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Profit</dt>
+              <dt className="text-slate-500">{t('reports.profit')}</dt>
               <dd className={`font-medium ${shipment.profit != null && shipment.profit > 0 ? 'text-emerald-600' : shipment.profit != null && shipment.profit < 0 ? 'text-red-600' : ''}`}>
                 {shipment.profit != null ? `${shipment.profit} ${shipment.currency}` : '—'}
               </dd>
             </div>
             <div>
-              <dt className="text-slate-500">Currency</dt>
+              <dt className="text-slate-500">{t('requestForm.currency')}</dt>
               <dd className="font-medium">{shipment.currency}</dd>
             </div>
           </dl>
@@ -217,18 +219,18 @@ export default function ShipmentDetailPage() {
 
         {/* Parties */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Parties</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('shipmentDetail.parties')}</h3>
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <dt className="text-slate-500">Client</dt>
+              <dt className="text-slate-500">{t('shipmentsList.client')}</dt>
               <dd className="font-medium">{shipment.client?.companyName || '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Carrier</dt>
+              <dt className="text-slate-500">{t('shipmentsList.carrier')}</dt>
               <dd className="font-medium">{shipment.carrier?.companyName || '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Assigned Manager</dt>
+              <dt className="text-slate-500">{t('shipmentDetail.assignedManager')}</dt>
               <dd className="font-medium">{shipment.assignedTo?.name || '—'}</dd>
             </div>
           </dl>
@@ -236,22 +238,22 @@ export default function ShipmentDetailPage() {
 
         {/* Dates */}
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Dates</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('shipmentDetail.dates')}</h3>
           <dl className="grid grid-cols-2 gap-3 text-sm">
             <div>
-              <dt className="text-slate-500">Created</dt>
+              <dt className="text-slate-500">{t('shipmentsList.created')}</dt>
               <dd className="font-medium">{new Date(shipment.createdAt).toLocaleString()}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">ETA</dt>
+              <dt className="text-slate-500">{t('newShipment.eta')}</dt>
               <dd className="font-medium">{shipment.eta ? new Date(shipment.eta).toLocaleString() : '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">ATD</dt>
+              <dt className="text-slate-500">{t('shipmentDetail.atd')}</dt>
               <dd className="font-medium">{shipment.atd ? new Date(shipment.atd).toLocaleString() : '—'}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">ATA</dt>
+              <dt className="text-slate-500">{t('shipmentDetail.ata')}</dt>
               <dd className="font-medium">{shipment.ata ? new Date(shipment.ata).toLocaleString() : '—'}</dd>
             </div>
           </dl>
@@ -261,10 +263,10 @@ export default function ShipmentDetailPage() {
       {/* Status Transition */}
       {transitions.length > 0 && (
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Update Status</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('shipmentDetail.updateStatus')}</h3>
           <div className="flex items-end gap-4">
             <div className="flex-1">
-              <label className="label-field">Comment (optional)</label>
+              <label className="label-field">{t('shipmentDetail.comment')}</label>
               <input
                 type="text"
                 value={statusComment}
@@ -292,23 +294,23 @@ export default function ShipmentDetailPage() {
       {/* Custom Status */}
       {customStatuses.length > 0 && (
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Custom Status</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('customStatuses.assignStatus')}</h3>
           <div className="flex items-end gap-4">
             <div className="flex-1">
-              <label className="label-field">Status</label>
+              <label className="label-field">{t('common.status')}</label>
               <select
                 value={selectedCustomStatus || shipment.customStatusId || ''}
                 onChange={(e) => setSelectedCustomStatus(e.target.value)}
                 className="input-field"
               >
-                <option value="">— None —</option>
+                <option value="">{t('shipmentDetail.none')}</option>
                 {customStatuses.map((cs) => (
                   <option key={cs.id} value={cs.id}>{cs.name}</option>
                 ))}
               </select>
             </div>
             <div className="flex-1">
-              <label className="label-field">Note (optional)</label>
+              <label className="label-field">{t('customStatuses.statusNote')}</label>
               <input
                 type="text"
                 value={customNote}
@@ -322,11 +324,11 @@ export default function ShipmentDetailPage() {
               disabled={updatingCustom}
               className="btn-primary disabled:opacity-50"
             >
-              {updatingCustom ? 'Updating...' : 'Set Status'}
+              {updatingCustom ? t('shipmentDetail.updating') : t('shipmentDetail.setStatus')}
             </button>
           </div>
           {shipment.customStatusNote && (
-            <p className="text-sm text-slate-500 mt-2">Note: {shipment.customStatusNote}</p>
+            <p className="text-sm text-slate-500 mt-2">{t('common.notes')}: {shipment.customStatusNote}</p>
           )}
         </div>
       )}

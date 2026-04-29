@@ -200,6 +200,9 @@ const az = {
     alcohol_tobacco: 'Spirtli içkilər və tütün',
     animals: 'Canlı heyvanlar',
     plants: 'Bitkilər və toxumlar',
+    vehicles: 'Nəqliyyat vasitələri',
+    food: 'Qida və tez xarab olan məhsullar',
+    clothing: 'Geyim və tekstil',
     other: 'Digər',
   },
 
@@ -278,6 +281,46 @@ const az = {
     assign: 'Daşıyıcı təyin et',
     selectCarrier: 'Daşıyıcı seçin',
     assigned: 'Təyin edilmiş daşıyıcı',
+  },
+
+  docTypes: {
+    invoice: 'Kommersiya fakturası',
+    packing_list: 'Qablaşdırma siyahısı',
+    certificate_of_origin: 'Mənşə sertifikatı',
+    quality_cert: 'Keyfiyyət sertifikatı',
+    phytosanitary: 'Fitosanitar sertifikat',
+    veterinary: 'Baytarlıq sertifikatı',
+    msds: 'Təhlükəsizlik pasportu (MSDS)',
+    license: 'Lisenziya / İcazə',
+    other: 'Digər sənəd',
+  },
+
+  shipmentDetail: {
+    parties: 'Tərəflər',
+    assignedManager: 'Təyin edilmiş menecer',
+    dates: 'Tarixlər',
+    atd: 'Faktiki yola düşmə',
+    ata: 'Faktiki gəliş',
+    updateStatus: 'Statusu yenilə',
+    comment: 'Şərh (istəyə bağlı)',
+    none: '— Heç biri —',
+    updating: 'Yenilənir...',
+    setStatus: 'Statusu təyin et',
+    noTimeline: 'Hələ status dəyişikliyi yoxdur',
+    system: 'Sistem',
+  },
+
+  requestDetail: {
+    requestFrom: 'Sorğu',
+    startReview: 'Baxışa başla',
+    markQuoted: 'Qiymət təklif et',
+    convertToShipment: 'Göndərməyə çevir',
+    reject: 'Rədd et',
+    priority: 'Prioritet',
+    noDocuments: 'Sənəd əlavə edilməyib',
+    assigning: 'Təyin edilir...',
+    clearanceNeeded: 'Rəsmiləşdirmə tələb olunur',
+    notFound: 'Sorğu tapılmadı',
   },
 
   // İdarəetmə paneli

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import configuration from './config/configuration';
@@ -18,6 +19,7 @@ import { ShipmentRequestsModule } from './shipment-requests/shipment-requests.mo
 import { PortalModule } from './portal/portal.module';
 import { CustomStatusesModule } from './custom-statuses/custom-statuses.module';
 import { SuperAdminModule } from './superadmin/superadmin.module';
+import { AuditLogInterceptor } from './common/interceptors/audit-log.interceptor';
 import { ReportsModule } from './reports/reports.module';
 import { LeadsModule } from './leads/leads.module';
 import { PortalAuthModule } from './portal-auth/portal-auth.module';
@@ -48,6 +50,9 @@ import { PortalAuthModule } from './portal-auth/portal-auth.module';
     ReportsModule,
     LeadsModule,
     PortalAuthModule,
+  ],
+  providers: [
+    { provide: APP_INTERCEPTOR, useClass: AuditLogInterceptor },
   ],
 })
 export class AppModule {}

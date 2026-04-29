@@ -200,7 +200,24 @@ const en = {
     alcohol_tobacco: 'Alcohol & Tobacco',
     animals: 'Live Animals',
     plants: 'Plants & Seeds',
+    vehicles: 'Vehicles',
+    food: 'Food & Perishables',
+    clothing: 'Clothing & Textiles',
     other: 'Other',
+  },
+
+  // Request detail
+  requestDetail: {
+    requestFrom: 'Request from',
+    startReview: 'Start Review',
+    markQuoted: 'Mark Quoted',
+    convertToShipment: 'Convert to Shipment',
+    reject: 'Reject',
+    priority: 'Priority',
+    noDocuments: 'No documents attached',
+    assigning: 'Assigning...',
+    clearanceNeeded: 'Clearance needed',
+    notFound: 'Request not found',
   },
 
   // Invoices
@@ -278,6 +295,44 @@ const en = {
     assign: 'Assign Carrier',
     selectCarrier: 'Select a carrier',
     assigned: 'Assigned Carrier',
+  },
+
+  docTypes: {
+    invoice: 'Commercial Invoice',
+    packing_list: 'Packing List',
+    certificate_of_origin: 'Certificate of Origin',
+    quality_cert: 'Quality Certificate',
+    phytosanitary: 'Phytosanitary Certificate',
+    veterinary: 'Veterinary Certificate',
+    msds: 'Material Safety Data Sheet (MSDS)',
+    license: 'License / Permit',
+    other: 'Other Document',
+  },
+
+  shipmentDetail: {
+    parties: 'Parties',
+    assignedManager: 'Assigned Manager',
+    dates: 'Dates',
+    atd: 'Actual Departure',
+    ata: 'Actual Arrival',
+    updateStatus: 'Update Status',
+    comment: 'Comment (optional)',
+    none: '— None —',
+    updating: 'Updating...',
+    setStatus: 'Set Status',
+    noTimeline: 'No status changes yet',
+    system: 'System',
+  },
+
+  requestDetail: {
+    requestFrom: 'Request from',
+    startReview: 'Start Review',
+    markQuoted: 'Mark Quoted',
+    convertToShipment: 'Convert to Shipment',
+    reject: 'Reject',
+    priority: 'Priority',
+    noDocuments: 'No documents attached',
+    assigning: 'Assigning...',
   },
 
   // Dashboard
