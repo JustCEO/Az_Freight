@@ -164,13 +164,13 @@ export default function InvoiceDetailPage() {
               style={{ width: `${paidPercent}%` }}
             />
           </div>
-          <p className="text-xs text-slate-400 mt-1 text-right">{paidPercent.toFixed(0)}% paid</p>
+          <p className="text-xs text-slate-400 mt-1 text-right">{paidPercent.toFixed(0)}% {t('invoiceDetail.paidPercent')}</p>
         </div>
 
         {/* Notes */}
         {invoice.notes && (
           <div className="bg-white rounded-xl border border-slate-200 p-6 lg:col-span-2">
-            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Notes</h3>
+            <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('common.notes')}</h3>
             <p className="text-sm text-slate-700 whitespace-pre-wrap">{invoice.notes}</p>
           </div>
         )}
@@ -179,10 +179,10 @@ export default function InvoiceDetailPage() {
       {/* Форма частичной оплаты */}
       {(invoice.status === 'partially_paid' || invoice.status === 'sent' || invoice.status === 'overdue') && remaining > 0 && (
         <div className="bg-white rounded-xl border border-slate-200 p-6">
-          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Record Payment</h3>
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('invoiceDetail.recordPayment')}</h3>
           <div className="flex flex-wrap items-end gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Amount ({invoice.currency})</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('invoiceDetail.amount')} ({invoice.currency})</label>
               <input
                 type="number"
                 step="0.01"
@@ -195,7 +195,7 @@ export default function InvoiceDetailPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Payment Date</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">{t('invoiceDetail.paymentDate')}</label>
               <input
                 type="date"
                 value={paymentDate}
@@ -208,7 +208,7 @@ export default function InvoiceDetailPage() {
               disabled={paymentLoading || !paymentAmount}
               className="btn-primary disabled:opacity-50"
             >
-              {paymentLoading ? 'Recording...' : 'Record Payment'}
+              {paymentLoading ? t('invoiceDetail.recording') : t('invoiceDetail.recordPayment')}
             </button>
           </div>
           {paymentError && <p className="text-sm text-red-600 mt-2">{paymentError}</p>}
