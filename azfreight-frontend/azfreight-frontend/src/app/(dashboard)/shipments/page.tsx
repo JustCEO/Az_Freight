@@ -25,6 +25,10 @@ export default function ShipmentsPage() {
   const [status, setStatus] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const [transportFilter, setTransportFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const limit = 20;
 
   const fetchData = useCallback(async () => {
@@ -60,6 +64,9 @@ export default function ShipmentsPage() {
               <option key={s} value={s}>{t('statuses.' + s)}</option>
             ))}
           </select>
+          <button onClick={() => setShowFilters(!showFilters)} className="px-3 py-2 text-sm text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-50">
+            {showFilters ? '✕' : '⚙'} {t('common.search')}
+          </button>
         </div>
         <div className="flex items-center gap-2">
           {(user?.role === 'admin' || user?.role === 'superadmin') && (
@@ -82,6 +89,30 @@ export default function ShipmentsPage() {
           </Link>
         </div>
       </div>
+
+      {showFilters && (
+        <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="label-field">{t('requestForm.transportType')}</label>
+              <select value={transportFilter} onChange={(e) => { setTransportFilter(e.target.value); setPage(1); }} className="input-field">
+                <option value="">All</option>
+                {['road_tir', 'sea', 'air', 'rail'].map((tp) => (
+                  <option key={tp} value={tp}>{t('transport.' + tp)}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label-field">{t('common.date')} (from)</label>
+              <input type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPage(1); }} className="input-field" />
+            </div>
+            <div>
+              <label className="label-field">{t('common.date')} (to)</label>
+              <input type="date" value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPage(1); }} className="input-field" />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm">
         {loading ? (
