@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException, 
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePreferencesDto } from './dto/update-preferences.dto';
@@ -26,7 +27,10 @@ const USER_SELECT = {
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private emailService: EmailService,
+  ) {}
 
   async findAll(tenantId: string, query: PaginationDto) {
     const { page = 1, limit = 20, search } = query;
@@ -82,8 +86,8 @@ export class UsersService {
       });
 
       let inviteUrl: string | undefined;
+      const tenant = await tx.tenant.findUnique({ where: { id: tenantId } });
       if (dto.sendInvitation) {
-        const tenant = await tx.tenant.findUnique({ where: { id: tenantId } });
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + (dto.invitationExpiresInDays || 7));
 
@@ -101,8 +105,12 @@ export class UsersService {
         inviteUrl = `${frontendUrl}/portal/${tenant?.slug}/register?invite=${invitation.token}`;
       }
 
-      return { ...user, inviteUrl };
+      return { ...user, inviteUrl, tenantName: tenant?.name };
     });
+
+    if (result.inviteUrl && result.tenantName) {
+      await this.emailService.sendInvitation(dto.email, result.inviteUrl, result.tenantName, dto.role);
+    }
 
     return result;
   }
