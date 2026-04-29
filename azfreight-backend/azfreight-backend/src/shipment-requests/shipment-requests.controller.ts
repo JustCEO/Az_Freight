@@ -13,6 +13,7 @@ import {
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ShipmentRequestsService } from './shipment-requests.service';
 import { CreateShipmentRequestDto } from './dto/create-shipment-request.dto';
+import { CreateManualRequestDto } from './dto/create-manual-request.dto';
 import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
 import { FilterRequestsDto } from './dto/filter-requests.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
@@ -42,10 +43,23 @@ export class ShipmentRequestsController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('manager')
+  @Post('shipment-requests/manual')
+  createManual(@CurrentUser() user: JwtPayload, @Body() dto: CreateManualRequestDto) {
+    return this.service.createManual(user.tenantId, user.sub, dto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin', 'manager')
   @Get('shipment-requests')
   findAll(@CurrentUser() user: JwtPayload, @Query() query: FilterRequestsDto) {
     return this.service.findAll(user.tenantId, query);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Get('shipment-requests/search-contacts')
+  async searchContacts(@CurrentUser() user: JwtPayload, @Query('q') q: string) {
+    return this.service.searchContacts(user.tenantId, q || '');
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

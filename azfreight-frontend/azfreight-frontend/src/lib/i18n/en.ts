@@ -489,6 +489,21 @@ const en = {
     clientLoginDesc: 'Existing client? Login to track your shipments.',
   },
 
+  manualRequest: {
+    title: 'New Request',
+    create: 'Create Request',
+    contact: 'Contact',
+    contactRequired: 'Select a client/lead or enter new contact details',
+    searchExisting: 'Search Existing',
+    newContact: 'New Contact',
+    searchPlaceholder: 'Search clients or leads by name or email...',
+    existingClient: 'Client',
+    existingLead: 'Lead',
+    changeContact: 'Change',
+    client: 'Client',
+    lead: 'Lead',
+  },
+
   reports: {
     title: 'Reports',
     totalShipments: 'Total Shipments',

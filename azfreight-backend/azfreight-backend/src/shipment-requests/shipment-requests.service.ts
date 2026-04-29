@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { CreateShipmentRequestDto } from './dto/create-shipment-request.dto';
+import { CreateManualRequestDto } from './dto/create-manual-request.dto';
 import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
 import { FilterRequestsDto } from './dto/filter-requests.dto';
 import { CARGO_REQUIREMENTS } from './cargo-requirements';
@@ -107,6 +108,137 @@ export class ShipmentRequestsService {
     }
 
     return { id: request.id, message: 'Request submitted successfully' };
+  }
+
+  async createManual(tenantId: string, createdById: string, dto: CreateManualRequestDto) {
+    let clientId: string | undefined;
+    let leadId: string | undefined;
+    let requesterName = '';
+    let requesterEmail = '';
+    let requesterPhone: string | undefined;
+    let companyName: string | undefined;
+
+    if (dto.clientId) {
+      const client = await this.prisma.client.findFirst({ where: { id: dto.clientId, tenantId } });
+      if (!client) throw new NotFoundException('Client not found');
+      clientId = client.id;
+      requesterName = client.companyName;
+      requesterEmail = client.email || '';
+      requesterPhone = client.phone || undefined;
+      companyName = client.companyName;
+    } else if (dto.leadId) {
+      const lead = await this.prisma.lead.findFirst({ where: { id: dto.leadId, tenantId } });
+      if (!lead) throw new NotFoundException('Lead not found');
+      leadId = lead.id;
+      requesterName = lead.contactName;
+      requesterEmail = lead.email;
+      requesterPhone = lead.phone || undefined;
+      companyName = lead.companyName || undefined;
+    } else if (dto.contactName && dto.contactEmail) {
+      const existingClient = await this.prisma.client.findFirst({
+        where: { tenantId, email: dto.contactEmail, isActive: true },
+      });
+      if (existingClient) {
+        clientId = existingClient.id;
+      } else {
+        const existingLead = await this.prisma.lead.findFirst({
+          where: { tenantId, email: dto.contactEmail },
+        });
+        if (existingLead) {
+          leadId = existingLead.id;
+        } else {
+          const lead = await this.prisma.lead.create({
+            data: {
+              tenantId,
+              contactName: dto.contactName,
+              email: dto.contactEmail,
+              phone: dto.contactPhone,
+              companyName: dto.contactCompany,
+              source: 'MANUAL',
+            },
+          });
+          leadId = lead.id;
+        }
+      }
+      requesterName = dto.contactName;
+      requesterEmail = dto.contactEmail;
+      requesterPhone = dto.contactPhone;
+      companyName = dto.contactCompany;
+    } else {
+      throw new BadRequestException('Provide clientId, leadId, or contact details (contactName + contactEmail)');
+    }
+
+    const transportTypes = dto.transportTypes || ['road_tir'];
+    const transportOrder = dto.transportOrder || transportTypes;
+
+    const request = await this.prisma.shipmentRequest.create({
+      data: {
+        tenantId,
+        requesterName,
+        requesterEmail,
+        requesterPhone,
+        companyName,
+        originCountry: dto.originCountry,
+        originCity: dto.originCity,
+        destinationCountry: dto.destinationCountry,
+        destinationCity: dto.destinationCity,
+        cargoType: dto.cargoType,
+        cargoSubtype: dto.cargoSubtype,
+        cargoDescription: dto.cargoDescription,
+        weightKg: dto.weightKg,
+        volumeCbm: dto.volumeCbm,
+        packageCount: dto.packageCount,
+        declaredValue: dto.declaredValue,
+        currency: dto.currency || 'USD',
+        incoterms: dto.incoterms,
+        hsCode: dto.hsCode,
+        transportTypes,
+        transportOrder,
+        preferredDate: dto.preferredDate ? new Date(dto.preferredDate) : undefined,
+        isUrgent: dto.isUrgent || false,
+        notes: dto.notes,
+        clientId,
+        leadId,
+      },
+      include: {
+        client: { select: { id: true, companyName: true } },
+        lead: { select: { id: true, contactName: true } },
+      },
+    });
+
+    return request;
+  }
+
+  async searchContacts(tenantId: string, query: string) {
+    if (query.length < 2) return { clients: [], leads: [] };
+
+    const [clients, leads] = await Promise.all([
+      this.prisma.client.findMany({
+        where: {
+          tenantId, isActive: true,
+          OR: [
+            { companyName: { contains: query, mode: 'insensitive' } },
+            { email: { contains: query, mode: 'insensitive' } },
+          ],
+        },
+        take: 5,
+        select: { id: true, companyName: true, email: true, phone: true },
+      }),
+      this.prisma.lead.findMany({
+        where: {
+          tenantId, status: { not: 'LOST' },
+          OR: [
+            { contactName: { contains: query, mode: 'insensitive' } },
+            { email: { contains: query, mode: 'insensitive' } },
+            { companyName: { contains: query, mode: 'insensitive' } },
+          ],
+        },
+        take: 5,
+        select: { id: true, contactName: true, companyName: true, email: true, phone: true, status: true },
+      }),
+    ]);
+
+    return { clients, leads };
   }
 
   async findAll(tenantId: string, query: FilterRequestsDto) {

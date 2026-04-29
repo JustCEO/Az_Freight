@@ -5,10 +5,11 @@ export interface JwtPayload {
   email: string;
   role: string;
   tenantId: string;
+  tokenType?: 'dashboard' | 'portal';
 }
 
 export const CurrentUser = createParamDecorator(
-  (data: keyof JwtPayload | undefined, ctx: ExecutionContext): JwtPayload | string => {
+  (data: keyof JwtPayload | undefined, ctx: ExecutionContext): JwtPayload | string | undefined => {
     const request = ctx.switchToHttp().getRequest();
     const user = request.user as JwtPayload;
     return data ? user[data] : user;

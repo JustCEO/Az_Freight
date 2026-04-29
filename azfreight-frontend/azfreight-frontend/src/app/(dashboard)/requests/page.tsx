@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { listShipmentRequests, type ShipmentRequestSummary } from '@/lib/api/shipment-requests';
 import { CARGO_TYPE_LABELS } from '@/lib/cargo-requirements';
 import Pagination from '@/components/pagination';
@@ -53,6 +54,9 @@ export default function RequestsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-slate-900">{t('requestsList.title')}</h1>
+        <Link href="/requests/new" className="btn-primary">
+          + {t('manualRequest.title')}
+        </Link>
       </div>
       <div className="flex items-center gap-4 mb-4">
         <input

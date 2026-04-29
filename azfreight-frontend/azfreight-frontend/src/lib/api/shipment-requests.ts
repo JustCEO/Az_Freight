@@ -78,3 +78,14 @@ export function convertRequest(id: string) {
 export function getNewRequestCount() {
   return get<number>('/shipment-requests/new-count');
 }
+
+export function createManualRequest(data: Record<string, unknown>) {
+  return post<ShipmentRequestDetail>('/shipment-requests/manual', data);
+}
+
+export function searchContacts(q: string) {
+  return get<{
+    clients: { id: string; companyName: string; email: string | null; phone: string | null }[];
+    leads: { id: string; contactName: string; companyName: string | null; email: string; phone: string | null; status: string }[];
+  }>(`/shipment-requests/search-contacts?q=${encodeURIComponent(q)}`);
+}

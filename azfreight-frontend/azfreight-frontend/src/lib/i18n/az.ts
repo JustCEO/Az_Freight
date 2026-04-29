@@ -489,6 +489,21 @@ const az = {
     clientLoginDesc: 'Mövcud müştəri? Yüklərinizi izləmək üçün daxil olun.',
   },
 
+  manualRequest: {
+    title: 'Yeni sorğu',
+    create: 'Sorğu yarat',
+    contact: 'Əlaqə',
+    contactRequired: 'Müştəri/lid seçin və ya yeni əlaqə məlumatları daxil edin',
+    searchExisting: 'Mövcud axtar',
+    newContact: 'Yeni əlaqə',
+    searchPlaceholder: 'Müştəri və ya lid axtarın...',
+    existingClient: 'Müştəri',
+    existingLead: 'Lid',
+    changeContact: 'Dəyiş',
+    client: 'Müştəri',
+    lead: 'Lid',
+  },
+
   reports: {
     title: 'Hesabatlar',
     totalShipments: 'Ümumi göndərmələr',

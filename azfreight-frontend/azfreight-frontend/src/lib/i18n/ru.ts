@@ -489,6 +489,21 @@ const ru = {
     clientLoginDesc: 'Уже клиент? Войдите чтобы отслеживать ваши грузы.',
   },
 
+  manualRequest: {
+    title: 'Новая заявка',
+    create: 'Создать заявку',
+    contact: 'Контакт',
+    contactRequired: 'Выберите клиента/лид или введите новые контактные данные',
+    searchExisting: 'Найти существующего',
+    newContact: 'Новый контакт',
+    searchPlaceholder: 'Поиск клиентов или лидов по имени или email...',
+    existingClient: 'Клиент',
+    existingLead: 'Лид',
+    changeContact: 'Изменить',
+    client: 'Клиент',
+    lead: 'Лид',
+  },
+
   reports: {
     title: 'Отчёты',
     totalShipments: 'Всего отправлений',
