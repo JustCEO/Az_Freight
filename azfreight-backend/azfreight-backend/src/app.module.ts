@@ -23,7 +23,6 @@ import { AuditLogInterceptor } from './common/interceptors/audit-log.interceptor
 import { ReportsModule } from './reports/reports.module';
 import { LeadsModule } from './leads/leads.module';
 import { PortalAuthModule } from './portal-auth/portal-auth.module';
-import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -51,7 +50,6 @@ import { EmailModule } from './email/email.module';
     ReportsModule,
     LeadsModule,
     PortalAuthModule,
-    EmailModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: AuditLogInterceptor },

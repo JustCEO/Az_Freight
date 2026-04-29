@@ -2,14 +2,12 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { JwtService } from '@nestjs/jwt';
 import { v4 as uuid } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
-import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class PortalAuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-    private emailService: EmailService,
   ) {}
 
   async requestAccess(tenantSlug: string, email: string) {
@@ -41,9 +39,7 @@ export class PortalAuthService {
 
     const magicLink = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/portal/${tenantSlug}/login?token=${token}`;
 
-    await this.emailService.sendMagicLink(email, magicLink, tenant.name);
-
-    return { message: 'Login link sent to your email', magicLink };
+    return { message: 'Login link generated', magicLink };
   }
 
   async verify(token: string) {
