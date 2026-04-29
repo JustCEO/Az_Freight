@@ -23,6 +23,9 @@ import { AuditLogInterceptor } from './common/interceptors/audit-log.interceptor
 import { ReportsModule } from './reports/reports.module';
 import { LeadsModule } from './leads/leads.module';
 import { PortalAuthModule } from './portal-auth/portal-auth.module';
+import { ExpensesModule } from './expenses/expenses.module';
+import { QuotesModule } from './quotes/quotes.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -50,6 +53,9 @@ import { PortalAuthModule } from './portal-auth/portal-auth.module';
     ReportsModule,
     LeadsModule,
     PortalAuthModule,
+    ExpensesModule,
+    QuotesModule,
+    NotificationsModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: AuditLogInterceptor },
