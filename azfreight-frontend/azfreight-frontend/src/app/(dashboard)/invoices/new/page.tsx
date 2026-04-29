@@ -91,16 +91,16 @@ export default function NewInvoicePage() {
             </select>
           </div>
           <div>
-            <label className="label-field">Shipment (optional)</label>
+            <label className="label-field">{t('newInvoice.shipmentOptional')}</label>
             <select value={form.shipmentId} onChange={(e) => update('shipmentId', e.target.value)} className="input-field">
-              <option value="">None</option>
+              <option value="">{t('newInvoice.none')}</option>
               {shipments.map((s) => (
                 <option key={s.id} value={s.id}>{s.referenceNumber}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="label-field">Currency</label>
+            <label className="label-field">{t('newInvoice.currency')}</label>
             <select value={form.currency} onChange={(e) => update('currency', e.target.value)} className="input-field">
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
@@ -110,28 +110,28 @@ export default function NewInvoicePage() {
             </select>
           </div>
           <div>
-            <label className="label-field">Amount *</label>
+            <label className="label-field">{t('newInvoice.amountRequired')}</label>
             <input type="number" step="0.01" value={form.amount} onChange={(e) => update('amount', e.target.value)} className="input-field" required />
           </div>
           <div>
-            <label className="label-field">Issued Date *</label>
+            <label className="label-field">{t('newInvoice.issuedDateRequired')}</label>
             <input type="date" value={form.issuedDate} onChange={(e) => update('issuedDate', e.target.value)} className="input-field" required />
           </div>
           <div>
-            <label className="label-field">Due Date *</label>
+            <label className="label-field">{t('newInvoice.dueDateRequired')}</label>
             <input type="date" value={form.dueDate} onChange={(e) => update('dueDate', e.target.value)} className="input-field" required />
           </div>
         </div>
 
         <div>
-          <label className="label-field">Notes</label>
+          <label className="label-field">{t('common.notes')}</label>
           <textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} className="input-field" rows={3} />
         </div>
 
         <div className="flex justify-end gap-3">
-          <button type="button" onClick={() => router.push('/invoices')} className="btn-secondary">Cancel</button>
+          <button type="button" onClick={() => router.push('/invoices')} className="btn-secondary">{t('common.cancel')}</button>
           <button type="submit" disabled={submitting} className="btn-primary disabled:opacity-50">
-            {submitting ? 'Creating...' : 'Create Invoice'}
+            {submitting ? t('newInvoice.creating') : t('newInvoice.createInvoice')}
           </button>
         </div>
       </form>
