@@ -272,7 +272,7 @@ export default function ShipmentDetailPage() {
                 value={statusComment}
                 onChange={(e) => setStatusComment(e.target.value)}
                 className="input-field"
-                placeholder="Add a comment..."
+                placeholder={t('shipmentDetail.addComment')}
               />
             </div>
             <div className="flex gap-2">
@@ -316,7 +316,7 @@ export default function ShipmentDetailPage() {
                 value={customNote}
                 onChange={(e) => setCustomNote(e.target.value)}
                 className="input-field"
-                placeholder="Status note..."
+                placeholder={t('shipmentDetail.statusNotePlaceholder')}
               />
             </div>
             <button
@@ -335,9 +335,9 @@ export default function ShipmentDetailPage() {
 
       {/* Timeline */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">
-        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Timeline</h3>
+        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">{t('tracking.timeline')}</h3>
         {timeline.length === 0 ? (
-          <p className="text-sm text-slate-500">No status changes yet</p>
+          <p className="text-sm text-slate-500">{t('shipmentDetail.noTimeline')}</p>
         ) : (
           <div className="relative">
             <div className="absolute left-3 top-2 bottom-2 w-0.5 bg-slate-200" />
@@ -354,7 +354,7 @@ export default function ShipmentDetailPage() {
                       <StatusBadge status={entry.newStatus} />
                     </div>
                     <div className="mt-1 text-sm text-slate-500">
-                      <span className="font-medium text-slate-700">{entry.changedBy?.name || 'System'}</span>
+                      <span className="font-medium text-slate-700">{entry.changedBy?.name || t('shipmentDetail.system')}</span>
                       {' · '}
                       {new Date(entry.createdAt).toLocaleString()}
                     </div>
