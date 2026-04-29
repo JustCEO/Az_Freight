@@ -537,6 +537,7 @@ const ru = {
     timezone: 'Часовой пояс',
     currency: 'Валюта по умолчанию',
     adminSection: 'Администрирование',
+    portalLink: 'Клиентский портал',
   },
 
   auth: {

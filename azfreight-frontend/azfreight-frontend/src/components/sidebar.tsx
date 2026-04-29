@@ -180,6 +180,9 @@ export default function Sidebar() {
           <div className="min-w-0">
             <div className="text-sm font-medium truncate">{user?.name || t('common.loading')}</div>
             <div className="text-xs text-slate-400">{user ? t(`roles.${user.role}`) : ''}</div>
+            {user?.tenant?.name && (
+              <div className="text-xs text-slate-500 truncate">{user.tenant.name}</div>
+            )}
           </div>
         </div>
       </div>

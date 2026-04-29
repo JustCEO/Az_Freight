@@ -59,6 +59,7 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findFirst({
       where: { email: dto.email, isActive: true },
+      include: { tenant: { select: { name: true, slug: true } } },
     });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -80,6 +81,8 @@ export class AuthService {
     return {
       user: {
         id: user.id, email: user.email, name: user.name, role: user.role,
+        tenantId: user.tenantId,
+        tenant: user.tenant,
         preferredLocale: user.preferredLocale, preferredTheme: user.preferredTheme,
         preferredTimezone: user.preferredTimezone, preferredCurrency: user.preferredCurrency,
       },
@@ -131,6 +134,7 @@ export class AuthService {
         preferredTheme: true,
         preferredTimezone: true,
         preferredCurrency: true,
+        tenant: { select: { name: true, slug: true } },
       },
     });
     if (!user) {

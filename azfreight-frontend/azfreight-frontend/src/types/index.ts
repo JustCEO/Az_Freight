@@ -22,6 +22,7 @@ export interface User {
   role: UserRole;
   phone: string | null;
   tenantId: string;
+  tenant?: { name: string; slug: string } | null;
   isActive: boolean;
   lastLogin: string | null;
   createdAt: string;

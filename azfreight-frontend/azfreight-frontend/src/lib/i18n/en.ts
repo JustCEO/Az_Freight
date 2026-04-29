@@ -537,6 +537,7 @@ const en = {
     timezone: 'Timezone',
     currency: 'Default Currency',
     adminSection: 'Administration',
+    portalLink: 'Client portal',
   },
 
   auth: {

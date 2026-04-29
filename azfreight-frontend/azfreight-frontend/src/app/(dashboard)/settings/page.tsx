@@ -96,6 +96,20 @@ export default function SettingsPage() {
     <div className="max-w-3xl">
       <h1 className="text-2xl font-bold text-slate-900 mb-6">{t('settings.title')}</h1>
 
+      {/* Company info */}
+      {user?.tenant && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white text-lg font-bold">
+            {user.tenant.name.charAt(0)}
+          </div>
+          <div>
+            <div className="text-lg font-semibold text-slate-900">{user.tenant.name}</div>
+            <div className="text-sm text-slate-500">{t(`roles.${user.role}`)} · {user.email}</div>
+            <div className="text-xs text-slate-400">{t('settings.portalLink')}: /portal/{user.tenant.slug}</div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-6">
         {/* Language */}
         <div>

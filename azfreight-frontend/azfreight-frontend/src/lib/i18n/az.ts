@@ -537,6 +537,7 @@ const az = {
     timezone: 'Saat qurşağı',
     currency: 'Standart valyuta',
     adminSection: 'Administrasiya',
+    portalLink: 'Müştəri portalı',
   },
 
   auth: {
