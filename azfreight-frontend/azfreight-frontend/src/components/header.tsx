@@ -38,8 +38,8 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white border-b border-slate-200 px-4 sm:px-8 py-4 flex items-center justify-between">
-      <h1 className="text-lg sm:text-xl font-semibold text-slate-900">{title}</h1>
+    <header className="bg-white border-b border-slate-200 pl-14 pr-4 sm:px-8 lg:px-8 py-4 flex items-center justify-between">
+      <h1 className="text-lg sm:text-xl font-semibold text-slate-900 truncate">{title}</h1>
       <div className="flex items-center gap-3">
         <NotificationBell />
         <span className="text-sm text-slate-500 hidden sm:inline">{user?.name}</span>
