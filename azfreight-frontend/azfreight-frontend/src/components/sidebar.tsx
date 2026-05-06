@@ -167,7 +167,7 @@ export default function Sidebar() {
         <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
-      <aside className={`fixed left-0 top-0 h-full w-64 bg-slate-900 text-white flex flex-col z-40 transform transition-transform duration-200 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+      <aside className={`fixed left-0 top-0 h-full w-64 bg-slate-900 text-white flex-col z-40 ${mobileOpen ? 'flex' : 'hidden'} lg:flex`}>
       <div className="p-6 border-b border-slate-700">
         <div className="flex items-center gap-3">
           <svg className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
