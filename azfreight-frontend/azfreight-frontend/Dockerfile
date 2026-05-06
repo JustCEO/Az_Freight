@@ -10,6 +10,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY . .
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Production stage
