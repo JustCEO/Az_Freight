@@ -26,6 +26,7 @@ import { PortalAuthModule } from './portal-auth/portal-auth.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { NotificationsModule } from './notifications/notifications.module';
       load: [configuration],
     }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }]),
+    MailModule,
     PrismaModule,
     StorageModule,
     AuthModule,

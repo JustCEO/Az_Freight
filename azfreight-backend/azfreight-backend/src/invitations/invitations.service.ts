@@ -7,13 +7,17 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { RegisterByInviteDto } from './dto/register-by-invite.dto';
 import { canManageRole } from '../common/constants/role-hierarchy';
 
 @Injectable()
 export class InvitationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mail: MailService,
+  ) {}
 
   async create(tenantId: string, invitedById: string, dto: CreateInvitationDto, inviterRole?: string) {
     if (dto.role === 'superadmin') {
@@ -40,6 +44,8 @@ export class InvitationsService {
     });
 
     const inviteUrl = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/portal/${tenant.slug}/register?invite=${invitation.token}`;
+
+    this.mail.sendInvitation(dto.email, inviteUrl, tenant.name).catch(() => {});
 
     return { ...invitation, inviteUrl };
   }
