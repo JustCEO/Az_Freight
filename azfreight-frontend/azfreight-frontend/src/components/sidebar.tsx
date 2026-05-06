@@ -163,11 +163,12 @@ export default function Sidebar() {
       </button>
 
       {/* Overlay */}
-      {mobileOpen && (
-        <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setMobileOpen(false)} />
-      )}
+      <div
+        className={`fixed inset-0 bg-black/50 z-30 lg:hidden transition-opacity duration-300 ${mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setMobileOpen(false)}
+      />
 
-      <aside className={`fixed left-0 top-0 h-full w-64 bg-slate-900 text-white flex-col z-40 ${mobileOpen ? 'flex' : 'hidden'} lg:flex`}>
+      <aside className={`fixed left-0 top-0 h-full w-64 bg-slate-900 text-white flex flex-col z-40 transition-transform duration-300 ease-in-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
       <div className="p-6 border-b border-slate-700">
         <div className="flex items-center gap-3">
           <svg className="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
