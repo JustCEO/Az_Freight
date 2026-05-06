@@ -31,42 +31,18 @@
     @apply block text-sm font-medium text-slate-700 mb-1;
     @apply dark:text-slate-300;
   }
-
-  /* Dark mode for common card/table patterns */
-  :is(.dark) .bg-white {
-    @apply !bg-slate-900;
-  }
-  :is(.dark) .bg-slate-50 {
-    @apply !bg-slate-800;
-  }
-  :is(.dark) .bg-slate-50\/50 {
-    @apply !bg-slate-800/50;
-  }
-  :is(.dark) .border-slate-200 {
-    @apply !border-slate-700;
-  }
-  :is(.dark) .border-slate-100 {
-    @apply !border-slate-700;
-  }
-  :is(.dark) .text-slate-900 {
-    @apply !text-slate-100;
-  }
-  :is(.dark) .text-slate-700 {
-    @apply !text-slate-300;
-  }
-  :is(.dark) .text-slate-600 {
-    @apply !text-slate-400;
-  }
-  :is(.dark) .text-slate-500 {
-    @apply !text-slate-400;
-  }
-  :is(.dark) .text-slate-400 {
-    @apply !text-slate-500;
-  }
-  :is(.dark) .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
-    @apply !border-slate-700;
-  }
-  :is(.dark) .hover\:bg-slate-50:hover {
-    @apply !bg-slate-800;
-  }
 }
+
+/* Dark mode overrides — using raw CSS instead of @apply to avoid PostCSS infinite expansion. */
+:is(.dark) .bg-white { background-color: rgb(15 23 42) !important; }
+:is(.dark) .bg-slate-50 { background-color: rgb(30 41 59) !important; }
+:is(.dark) .bg-slate-50\/50 { background-color: rgb(30 41 59 / 0.5) !important; }
+:is(.dark) .border-slate-200,
+:is(.dark) .border-slate-100 { border-color: rgb(51 65 85) !important; }
+:is(.dark) .text-slate-900 { color: rgb(241 245 249) !important; }
+:is(.dark) .text-slate-700 { color: rgb(203 213 225) !important; }
+:is(.dark) .text-slate-600,
+:is(.dark) .text-slate-500 { color: rgb(148 163 184) !important; }
+:is(.dark) .text-slate-400 { color: rgb(100 116 139) !important; }
+:is(.dark) .divide-slate-200 > :not([hidden]) ~ :not([hidden]) { border-color: rgb(51 65 85) !important; }
+:is(.dark) .hover\:bg-slate-50:hover { background-color: rgb(30 41 59) !important; }
