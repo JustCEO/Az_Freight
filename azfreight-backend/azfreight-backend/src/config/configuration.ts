@@ -1,5 +1,6 @@
 export default () => ({
   port: parseInt(process.env.PORT || '3000', 10),
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3001',
   jwt: {
     secret: process.env.JWT_SECRET || 'change-me',
     accessExpiration: process.env.JWT_ACCESS_EXPIRATION || '15m',
