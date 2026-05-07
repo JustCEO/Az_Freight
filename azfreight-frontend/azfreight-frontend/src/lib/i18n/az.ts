@@ -832,6 +832,19 @@ const az = {
     hasAccount: 'Artıq hesabınız var?',
     registrationFailed: 'Qeydiyyat uğursuz oldu',
   },
+  notifications: {
+    title: 'Bildirişlər',
+    markAllRead: 'Hamısını oxu',
+    noNotifications: 'Bildiriş yoxdur',
+    viewAll: 'Hamısını göstər',
+  },
+  pnl: {
+    revenue: 'Gəlir',
+    expenses: 'Xərclər',
+    netPnl: 'Xalis mənfəət',
+    period: 'Dövr',
+    profitLoss: 'Mənfəət və zərər',
+  },
 };
 
 export default az;

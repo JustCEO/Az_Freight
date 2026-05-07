@@ -832,6 +832,19 @@ const ru = {
     hasAccount: 'Уже есть аккаунт?',
     registrationFailed: 'Ошибка регистрации',
   },
+  notifications: {
+    title: 'Уведомления',
+    markAllRead: 'Прочитать все',
+    noNotifications: 'Нет уведомлений',
+    viewAll: 'Смотреть все',
+  },
+  pnl: {
+    revenue: 'Выручка',
+    expenses: 'Расходы',
+    netPnl: 'Чистая прибыль',
+    period: 'Период',
+    profitLoss: 'Прибыль и убытки',
+  },
 };
 
 export default ru;
