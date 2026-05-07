@@ -14,6 +14,7 @@ import { CarriersModule } from './carriers/carriers.module';
 import { DocumentsModule } from './documents/documents.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
+import { DriversModule } from './drivers/drivers.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { ShipmentRequestsModule } from './shipment-requests/shipment-requests.module';
 import { PortalModule } from './portal/portal.module';
@@ -47,6 +48,7 @@ import { MailModule } from './mail/mail.module';
     DocumentsModule,
     InvoicesModule,
     VehiclesModule,
+    DriversModule,
     InvitationsModule,
     ShipmentRequestsModule,
     PortalModule,
