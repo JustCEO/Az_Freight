@@ -844,6 +844,19 @@ const en = {
     hasAccount: 'Already have an account?',
     registrationFailed: 'Registration failed',
   },
+  notifications: {
+    title: 'Notifications',
+    markAllRead: 'Mark all read',
+    noNotifications: 'No notifications',
+    viewAll: 'View all',
+  },
+  pnl: {
+    revenue: 'Revenue',
+    expenses: 'Expenses',
+    netPnl: 'Net P&L',
+    period: 'Period',
+    profitLoss: 'Profit & Loss',
+  },
 };
 
 export default en;

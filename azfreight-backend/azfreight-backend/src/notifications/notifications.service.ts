@@ -73,11 +73,11 @@ export class NotificationsService {
     message?: string,
     entityType?: string,
     entityId?: string,
-    roleFilter?: string,
+    roleFilter?: string | string[],
   ) {
     const where: Record<string, unknown> = { tenantId, isActive: true };
     if (roleFilter) {
-      where.role = roleFilter;
+      where.role = Array.isArray(roleFilter) ? { in: roleFilter } : roleFilter;
     }
 
     const users = await this.prisma.user.findMany({

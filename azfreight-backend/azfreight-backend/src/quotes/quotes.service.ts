@@ -1,12 +1,18 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
 import { QuoteStatus, TransportType } from '@prisma/client';
 
+const NOTIFY_ROLES = ['admin', 'manager', 'director'];
+
 @Injectable()
 export class QuotesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+  ) {}
 
   async findAll(tenantId: string, status?: string) {
     const where: Record<string, unknown> = { tenantId };
@@ -122,7 +128,11 @@ export class QuotesService {
     if (dto.vatRate !== undefined) data.vatRate = dto.vatRate;
     if (dto.margin !== undefined) data.margin = dto.margin;
     if (dto.notes !== undefined) data.notes = dto.notes;
-    if (dto.status !== undefined) data.status = dto.status as QuoteStatus;
+    if (dto.status !== undefined) {
+      data.status = dto.status as QuoteStatus;
+      this.notifications.notify(tenantId, 'QUOTE_STATUS', 'Quote updated',
+        `Quote ${quote.quoteNumber} was ${dto.status}`, 'quote', id, NOTIFY_ROLES).catch(() => {});
+    }
 
     if (dto.validDays !== undefined) {
       const validUntil = new Date();

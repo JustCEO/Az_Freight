@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { get, patch } from '@/lib/api-client';
 import { isAuthenticated } from '@/lib/api-client';
+import { useTranslation } from '@/lib/i18n';
 
 interface Notification {
   id: string;
@@ -16,6 +18,8 @@ interface Notification {
 }
 
 export default function NotificationBell() {
+  const router = useRouter();
+  const { t } = useTranslation();
   const [count, setCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -23,8 +27,8 @@ export default function NotificationBell() {
   const fetchCount = useCallback(async () => {
     if (!isAuthenticated()) return;
     try {
-      const c = await get<number>('/notifications/unread-count');
-      setCount(c);
+      const res = await get<{ count: number }>('/notifications/unread-count');
+      setCount(res.count);
     } catch { /* ignore */ }
   }, []);
 
@@ -44,6 +48,21 @@ export default function NotificationBell() {
   const handleOpen = () => {
     setOpen(!open);
     if (!open) fetchAll();
+  };
+
+  const handleClick = (n: Notification) => {
+    if (!n.isRead) markRead(n.id);
+    const linkMap: Record<string, string> = {
+      lead: '/leads',
+      client: '/clients',
+      request: '/requests',
+      quote: '/quotes',
+      shipment: '/shipments',
+    };
+    if (n.entityType && n.entityId && linkMap[n.entityType]) {
+      setOpen(false);
+      router.push(`${linkMap[n.entityType]}/${n.entityId}`);
+    }
   };
 
   const markRead = async (id: string) => {
@@ -80,21 +99,23 @@ export default function NotificationBell() {
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-10 z-50 w-80 bg-white rounded-xl border border-slate-200 shadow-xl max-h-96 overflow-y-auto">
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-              <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
+              <h3 className="text-sm font-semibold text-slate-900">{t('notifications.title') === 'notifications.title' ? 'Notifications' : t('notifications.title')}</h3>
               {count > 0 && (
                 <button onClick={markAllRead} className="text-xs text-blue-600 hover:text-blue-800">
-                  Mark all read
+                  {t('notifications.markAllRead') === 'notifications.markAllRead' ? 'Mark all read' : t('notifications.markAllRead')}
                 </button>
               )}
             </div>
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-slate-500">No notifications</div>
+              <div className="px-4 py-8 text-center text-sm text-slate-500">
+                {t('notifications.noNotifications') === 'notifications.noNotifications' ? 'No notifications' : t('notifications.noNotifications')}
+              </div>
             ) : (
               <div className="divide-y divide-slate-100">
-                {notifications.slice(0, 20).map((n) => (
+                {notifications.slice(0, 10).map((n) => (
                   <div
                     key={n.id}
-                    onClick={() => !n.isRead && markRead(n.id)}
+                    onClick={() => handleClick(n)}
                     className={`px-4 py-3 cursor-pointer hover:bg-slate-50 ${!n.isRead ? 'bg-blue-50/50' : ''}`}
                   >
                     <div className="flex items-start gap-2">
