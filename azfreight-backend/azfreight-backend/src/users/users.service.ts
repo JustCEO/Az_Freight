@@ -158,6 +158,19 @@ export class UsersService {
     });
   }
 
+  async deletePermanently(tenantId: string, id: string) {
+    const user = await this.prisma.user.findFirst({ where: { id, tenantId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.notification.deleteMany({ where: { userId: id } });
+      await tx.invitation.deleteMany({ where: { invitedById: id } });
+      await tx.user.delete({ where: { id } });
+    });
+
+    return { deleted: true, name: user.name };
+  }
+
   async getPreferences(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },

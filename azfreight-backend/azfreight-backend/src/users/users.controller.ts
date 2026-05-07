@@ -57,4 +57,10 @@ export class UsersController {
   remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.usersService.remove(user.tenantId, id);
   }
+
+  @Delete(':id/permanent')
+  @Roles('admin', 'superadmin', 'director')
+  deletePermanently(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.usersService.deletePermanently(user.tenantId, id);
+  }
 }
