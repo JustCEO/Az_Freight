@@ -1,12 +1,18 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
 import { LeadSource, LeadStatus } from '@prisma/client';
 
+const NOTIFY_ROLES = ['admin', 'manager', 'director'];
+
 @Injectable()
 export class LeadsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notifications: NotificationsService,
+  ) {}
 
   async findAll(tenantId: string, status?: string) {
     const where: Record<string, unknown> = { tenantId };
@@ -37,7 +43,7 @@ export class LeadsService {
   }
 
   async create(tenantId: string, dto: CreateLeadDto) {
-    return this.prisma.lead.create({
+    const lead = await this.prisma.lead.create({
       data: {
         tenantId,
         contactName: dto.contactName,
@@ -48,6 +54,11 @@ export class LeadsService {
         source: (dto.source as LeadSource) || 'MANUAL',
       },
     });
+
+    this.notifications.notify(tenantId, 'NEW_LEAD', 'New lead received',
+      `${lead.contactName} submitted a request`, 'lead', lead.id, NOTIFY_ROLES).catch(() => {});
+
+    return lead;
   }
 
   async update(tenantId: string, id: string, dto: UpdateLeadDto) {
@@ -88,6 +99,9 @@ export class LeadsService {
       where: { leadId: id, clientId: null },
       data: { clientId: client.id },
     });
+
+    this.notifications.notify(tenantId, 'LEAD_CONVERTED', 'Lead converted to client',
+      `${lead.contactName} is now a client`, 'client', client.id, NOTIFY_ROLES).catch(() => {});
 
     return { lead: { id, status: 'CONVERTED' }, client };
   }

@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { CreateShipmentRequestDto } from './dto/create-shipment-request.dto';
 import { CreateManualRequestDto } from './dto/create-manual-request.dto';
 import { UpdateRequestStatusDto } from './dto/update-request-status.dto';
@@ -9,11 +10,14 @@ import { CARGO_REQUIREMENTS } from './cargo-requirements';
 import { v4 as uuid } from 'uuid';
 import * as path from 'path';
 
+const NOTIFY_ROLES = ['admin', 'manager', 'director'];
+
 @Injectable()
 export class ShipmentRequestsService {
   constructor(
     private prisma: PrismaService,
     private storage: StorageService,
+    private notifications: NotificationsService,
   ) {}
 
   async createPublic(
@@ -106,6 +110,9 @@ export class ShipmentRequestsService {
         });
       }
     }
+
+    this.notifications.notify(tenant.id, 'NEW_REQUEST', 'New request from portal',
+      `${dto.requesterName} submitted a shipment request`, 'request', request.id, NOTIFY_ROLES).catch(() => {});
 
     return { id: request.id, message: 'Request submitted successfully' };
   }
@@ -205,6 +212,9 @@ export class ShipmentRequestsService {
         lead: { select: { id: true, contactName: true } },
       },
     });
+
+    this.notifications.notify(tenantId, 'NEW_REQUEST', 'New request created',
+      `Request created for ${requesterName}`, 'request', request.id, NOTIFY_ROLES).catch(() => {});
 
     return request;
   }
@@ -308,7 +318,14 @@ export class ShipmentRequestsService {
     if (dto.notes !== undefined) data.notes = dto.notes;
     if (dto.rejectionReason !== undefined) data.rejectionReason = dto.rejectionReason;
 
-    return this.prisma.shipmentRequest.update({ where: { id }, data });
+    const updated = await this.prisma.shipmentRequest.update({ where: { id }, data });
+
+    if (dto.requestStatus) {
+      this.notifications.notify(tenantId, 'REQUEST_STATUS', 'Request status updated',
+        `Request for ${request.requesterName} changed to ${dto.requestStatus}`, 'request', id, NOTIFY_ROLES).catch(() => {});
+    }
+
+    return updated;
   }
 
   // Назначить перевозчика на запрос
