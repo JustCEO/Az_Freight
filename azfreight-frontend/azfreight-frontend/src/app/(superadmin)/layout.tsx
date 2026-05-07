@@ -70,7 +70,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   ];
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-slate-50">
       <aside className="w-64 bg-gray-900 text-white flex flex-col">
         <div className="px-6 py-5 border-b border-gray-700">
           <h1 className="text-lg font-bold tracking-wide">AzFreight</h1>

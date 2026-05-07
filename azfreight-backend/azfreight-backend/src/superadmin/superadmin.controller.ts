@@ -45,6 +45,12 @@ export class SuperAdminController {
     return this.superAdminService.deactivateTenant(id);
   }
 
+  // Полное удаление тенанта и всех данных
+  @Delete('tenants/:id/permanent')
+  deleteTenantPermanently(@Param('id') id: string) {
+    return this.superAdminService.deleteTenant(id);
+  }
+
   // Получение пользователей конкретного тенанта
   @Get('tenants/:id/users')
   getTenantUsers(@Param('id') id: string) {
