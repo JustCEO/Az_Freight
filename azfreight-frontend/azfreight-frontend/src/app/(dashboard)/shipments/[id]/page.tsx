@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getShipment, getTimeline, updateShipmentStatus } from '@/lib/api/shipments';
+import { getShipment, getTimeline, updateShipmentStatus, updateShipment } from '@/lib/api/shipments';
 import { listCustomStatuses, assignCustomStatus } from '@/lib/api/custom-statuses';
+import { listVehicles, type Vehicle } from '@/lib/api/vehicles';
+import { listDrivers, type Driver } from '@/lib/api/drivers';
 import type { Shipment, ShipmentStatusLog, CustomStatus } from '@/types';
 import StatusBadge from '@/components/status-badge';
 import Loading from '@/components/loading';
@@ -36,12 +38,25 @@ export default function ShipmentDetailPage() {
   const [customNote, setCustomNote] = useState('');
   const [updatingCustom, setUpdatingCustom] = useState(false);
 
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [fleetVehicleId, setFleetVehicleId] = useState('');
+  const [fleetDriverId, setFleetDriverId] = useState('');
+  const [savingFleet, setSavingFleet] = useState(false);
+
   useEffect(() => {
     Promise.all([getShipment(id), getTimeline(id)])
-      .then(([s, tl]) => { setShipment(s); setTimeline(tl); })
+      .then(([s, tl]) => {
+        setShipment(s);
+        setTimeline(tl);
+        setFleetVehicleId((s as Record<string, unknown>).vehicleId as string || '');
+        setFleetDriverId((s as Record<string, unknown>).driverId as string || '');
+      })
       .catch(() => router.push('/shipments'))
       .finally(() => setLoading(false));
     listCustomStatuses().then(setCustomStatuses).catch(() => {});
+    listVehicles(undefined, 'available').then(setVehicles).catch(() => {});
+    listDrivers(undefined, 'available').then(setDrivers).catch(() => {});
   }, [id, router]);
 
   async function handleStatusChange(newStatus: string) {
@@ -332,6 +347,44 @@ export default function ShipmentDetailPage() {
           )}
         </div>
       )}
+
+      {/* Fleet Assignment */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Fleet Assignment</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Vehicle</label>
+            <select className="input-field" value={fleetVehicleId} onChange={(e) => setFleetVehicleId(e.target.value)}>
+              <option value="">— No vehicle —</option>
+              {vehicles.map((v) => <option key={v.id} value={v.id}>{v.plateNumber} {v.brand ? `(${v.brand} ${v.model || ''})` : ''}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Driver</label>
+            <select className="input-field" value={fleetDriverId} onChange={(e) => setFleetDriverId(e.target.value)}>
+              <option value="">— No driver —</option>
+              {drivers.map((d) => <option key={d.id} value={d.id}>{d.name} {d.licenseNumber ? `(${d.licenseNumber})` : ''}</option>)}
+            </select>
+          </div>
+        </div>
+        <button
+          onClick={async () => {
+            setSavingFleet(true);
+            try {
+              const updated = await updateShipment(id, {
+                vehicleId: fleetVehicleId || null,
+                driverId: fleetDriverId || null,
+              });
+              setShipment(updated);
+            } catch { /* ignore */ }
+            setSavingFleet(false);
+          }}
+          disabled={savingFleet}
+          className="btn-primary text-sm mt-3 disabled:opacity-50"
+        >
+          {savingFleet ? 'Saving...' : 'Save Fleet'}
+        </button>
+      </div>
 
       {/* Timeline */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">

@@ -291,6 +291,8 @@ model Shipment {
   atd                DateTime?
   ata                DateTime?
   assignedToId       String?         @map("assigned_to")
+  vehicleId          String?         @map("vehicle_id")
+  driverId           String?         @map("driver_id")
   createdById        String          @map("created_by")
   notes              String?
   createdAt          DateTime        @default(now()) @map("created_at")
@@ -302,6 +304,8 @@ model Shipment {
   assignedTo         User?           @relation("AssignedTo", fields: [assignedToId], references: [id])
   createdBy          User            @relation("CreatedBy", fields: [createdById], references: [id])
   customStatus       CustomStatus?   @relation(fields: [customStatusId], references: [id])
+  vehicle            Vehicle?        @relation(fields: [vehicleId], references: [id])
+  shipmentDriver     Driver?         @relation(fields: [driverId], references: [id])
 
   statusLogs         ShipmentStatusLog[]
   invoices           Invoice[]
@@ -404,9 +408,12 @@ model Vehicle {
   gpsProvider      String?       @map("gps_provider") @db.VarChar(100)
   status           VehicleStatus @default(available)
   fuelType         String?       @map("fuel_type") @db.VarChar(20)
+  driverId         String?       @map("driver_id")
   createdAt        DateTime      @default(now()) @map("created_at")
 
   tenant           Tenant        @relation(fields: [tenantId], references: [id])
+  driver           Driver?       @relation(fields: [driverId], references: [id])
+  shipments        Shipment[]
 
   @@index([tenantId])
   @@map("vehicles")
@@ -428,6 +435,8 @@ model Driver {
   createdAt         DateTime     @default(now()) @map("created_at")
 
   tenant            Tenant       @relation(fields: [tenantId], references: [id])
+  vehicles          Vehicle[]
+  shipments         Shipment[]
 
   @@index([tenantId])
   @@map("drivers")
