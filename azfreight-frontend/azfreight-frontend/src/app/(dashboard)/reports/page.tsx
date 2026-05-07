@@ -7,6 +7,7 @@ import {
   getOverview, getMonthlyStats, getTopRoutes, getTopClients, getCarrierPerformance,
   type ReportOverview, type MonthlyStats, type TopRoute, type TopClient, type CarrierPerformance,
 } from '@/lib/api/reports';
+import { listExpenses, type Expense } from '@/lib/api/expenses';
 
 const STATUS_COLORS: Record<string, string> = {
   request: '#64748B', confirmed: '#3B82F6', in_transit: '#F59E0B',
@@ -21,6 +22,7 @@ export default function ReportsPage() {
   const [routes, setRoutes] = useState<TopRoute[]>([]);
   const [clients, setClients] = useState<TopClient[]>([]);
   const [carriers, setCarriers] = useState<CarrierPerformance[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -29,12 +31,14 @@ export default function ReportsPage() {
       getTopRoutes().catch(() => []),
       getTopClients().catch(() => []),
       getCarrierPerformance().catch(() => []),
-    ]).then(([ov, mo, ro, cl, ca]) => {
+      listExpenses().catch(() => []),
+    ]).then(([ov, mo, ro, cl, ca, ex]) => {
       setOverview(ov);
       setMonthly(mo);
       setRoutes(ro);
       setClients(cl);
       setCarriers(ca);
+      setExpenses(ex);
     }).finally(() => setLoading(false));
   }, []);
 
@@ -224,6 +228,46 @@ export default function ReportsPage() {
           </div>
         )}
       </div>
+
+      {/* P&L Summary */}
+      {(() => {
+        const totalRevenue = overview?.revenue || 0;
+        const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount) + Number(e.vatAmount || 0), 0);
+        const netPnl = totalRevenue - totalExpenses;
+        return (
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Profit & Loss</h2>
+            <div className="grid grid-cols-3 gap-6">
+              <div>
+                <p className="text-sm text-slate-500">Revenue (Invoices)</p>
+                <p className="text-2xl font-bold text-emerald-600">{fmt(totalRevenue)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500">Total Expenses</p>
+                <p className="text-2xl font-bold text-red-600">{fmt(totalExpenses)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-slate-500">Net P&L</p>
+                <p className={`text-2xl font-bold ${netPnl >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  {netPnl >= 0 ? '+' : ''}{fmt(netPnl)}
+                </p>
+              </div>
+            </div>
+            {totalRevenue > 0 && (
+              <div className="mt-4">
+                <div className="flex h-4 rounded-full overflow-hidden bg-slate-100">
+                  <div className="bg-emerald-500" style={{ width: `${Math.max(0, (totalRevenue / (totalRevenue + totalExpenses)) * 100)}%` }} />
+                  <div className="bg-red-400" style={{ width: `${Math.max(0, (totalExpenses / (totalRevenue + totalExpenses)) * 100)}%` }} />
+                </div>
+                <div className="flex justify-between text-xs text-slate-500 mt-1">
+                  <span>Revenue</span>
+                  <span>Expenses</span>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }
