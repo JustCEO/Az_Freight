@@ -70,7 +70,7 @@ export default function QuotesPage() {
             </thead>
             <tbody className="divide-y divide-slate-200">
               {quotes.map((q) => (
-                <tr key={q.id} className="cursor-pointer hover:bg-slate-50">
+                <tr key={q.id} onClick={() => router.push(`/quotes/${q.id}`)} className="cursor-pointer hover:bg-slate-50">
                   <td className="px-6 py-4 text-sm font-medium text-blue-600">{q.quoteNumber}</td>
                   <td className="px-6 py-4 text-sm text-slate-700">{q.client?.companyName || '—'}</td>
                   <td className="px-6 py-4 text-sm text-slate-700">{q.originCity} → {q.destCity}</td>
