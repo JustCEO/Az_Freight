@@ -29,8 +29,8 @@ export default function NewShipmentPage() {
     destinationCity: '',
     destinationAddress: '',
     cargoDescription: '',
-    cargoWeight: '',
-    cargoVolume: '',
+    weightKg: '',
+    volumeCbm: '',
     packageCount: '',
     clientRate: '',
     carrierRate: '',
@@ -79,8 +79,8 @@ export default function NewShipmentPage() {
       if (form.originAddress) body.originAddress = form.originAddress;
       if (form.destinationAddress) body.destinationAddress = form.destinationAddress;
       if (form.cargoDescription) body.cargoDescription = form.cargoDescription;
-      if (form.cargoWeight) body.cargoWeight = parseFloat(form.cargoWeight);
-      if (form.cargoVolume) body.cargoVolume = parseFloat(form.cargoVolume);
+      if (form.weightKg) body.weightKg = parseFloat(form.weightKg);
+      if (form.volumeCbm) body.volumeCbm = parseFloat(form.volumeCbm);
       if (form.packageCount) body.packageCount = parseInt(form.packageCount);
       if (form.clientRate) body.clientRate = parseFloat(form.clientRate);
       if (form.carrierRate) body.carrierRate = parseFloat(form.carrierRate);
@@ -196,11 +196,11 @@ export default function NewShipmentPage() {
             </div>
             <div>
               <label className="label-field">{t('newShipment.weight')}</label>
-              <input type="number" step="0.01" value={form.cargoWeight} onChange={(e) => updateField('cargoWeight', e.target.value)} className="input-field" />
+              <input type="number" step="0.01" value={form.weightKg} onChange={(e) => updateField('weightKg', e.target.value)} className="input-field" />
             </div>
             <div>
               <label className="label-field">{t('newShipment.volume')}</label>
-              <input type="number" step="0.01" value={form.cargoVolume} onChange={(e) => updateField('cargoVolume', e.target.value)} className="input-field" />
+              <input type="number" step="0.01" value={form.volumeCbm} onChange={(e) => updateField('volumeCbm', e.target.value)} className="input-field" />
             </div>
             <div>
               <label className="label-field">{t('newShipment.packageCount')}</label>
