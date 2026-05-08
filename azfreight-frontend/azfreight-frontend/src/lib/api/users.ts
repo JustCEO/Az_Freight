@@ -38,6 +38,10 @@ export function deleteUser(id: string) {
   return del<User>(`/users/${id}`);
 }
 
+export function deleteUserPermanently(id: string) {
+  return del<{ deleted: boolean; name: string }>(`/users/${id}/permanent`);
+}
+
 export function getPreferences() {
   return get<UserPreferences>('/users/me/preferences');
 }

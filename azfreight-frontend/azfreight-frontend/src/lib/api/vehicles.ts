@@ -21,12 +21,13 @@ export interface Vehicle {
   createdAt: string;
 }
 
-export const listVehicles = (search?: string, status?: string) => {
+export const listVehicles = async (search?: string, status?: string): Promise<Vehicle[]> => {
   const params = new URLSearchParams();
   if (search) params.set('search', search);
   if (status) params.set('status', status);
   const qs = params.toString();
-  return get<Vehicle[]>(`/vehicles${qs ? `?${qs}` : ''}`);
+  const res = await get<{ data: Vehicle[] } | Vehicle[]>(`/vehicles${qs ? `?${qs}` : ''}`);
+  return Array.isArray(res) ? res : res.data;
 };
 
 export const getVehicle = (id: string) => get<Vehicle>(`/vehicles/${id}`);

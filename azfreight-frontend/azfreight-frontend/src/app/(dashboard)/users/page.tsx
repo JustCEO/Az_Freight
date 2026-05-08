@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { listUsers, createUser, updateUser, toggleUserActive, deleteUser } from '@/lib/api/users';
+import { listUsers, createUser, updateUser, toggleUserActive, deleteUserPermanently } from '@/lib/api/users';
 import { listInvitations, deleteInvitation, type Invitation } from '@/lib/api/invitations';
 import { getAllUsers, type PlatformUser } from '@/lib/api/superadmin';
 import { useAuth } from '@/context/auth-context';
@@ -124,13 +124,19 @@ export default function UsersPage() {
     } catch { /* ignore */ }
   };
 
-  const handleDelete = async (userId: string) => {
+  const handleDelete = async (userId: string, userName: string) => {
     if (userId === currentUser?.id) return;
-    if (!window.confirm(t('common.confirm') + '?')) return;
+    const input = prompt(`To permanently delete user "${userName}", type the name exactly:`);
+    if (input !== userName) {
+      if (input !== null) alert('Name does not match. Deletion cancelled.');
+      return;
+    }
     try {
-      await deleteUser(userId);
-      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, isActive: false } : u));
-    } catch { /* ignore */ }
+      await deleteUserPermanently(userId);
+      setUsers((prev) => prev.filter((u) => u.id !== userId));
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to delete user');
+    }
   };
 
   const handleRevokeInvite = async (id: string) => {
@@ -423,7 +429,7 @@ export default function UsersPage() {
                                 {t('users.activate')}
                               </button>
                             )}
-                            <button onClick={() => handleDelete(u.id)} className="text-red-500 hover:text-red-700 text-xs font-medium">
+                            <button onClick={() => handleDelete(u.id, u.name)} className="text-red-500 hover:text-red-700 text-xs font-medium">
                               {t('common.delete')}
                             </button>
                           </div>

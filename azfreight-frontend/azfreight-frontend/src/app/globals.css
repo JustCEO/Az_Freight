@@ -34,15 +34,34 @@
 }
 
 /* Dark mode overrides — using raw CSS instead of @apply to avoid PostCSS infinite expansion. */
+/* Backgrounds */
 :is(.dark) .bg-white { background-color: rgb(15 23 42) !important; }
 :is(.dark) .bg-slate-50 { background-color: rgb(30 41 59) !important; }
+:is(.dark) .bg-slate-100 { background-color: rgb(30 41 59) !important; }
 :is(.dark) .bg-slate-50\/50 { background-color: rgb(30 41 59 / 0.5) !important; }
+
+/* Borders */
 :is(.dark) .border-slate-200,
-:is(.dark) .border-slate-100 { border-color: rgb(51 65 85) !important; }
-:is(.dark) .text-slate-900 { color: rgb(241 245 249) !important; }
+:is(.dark) .border-slate-100,
+:is(.dark) .border-slate-300 { border-color: rgb(51 65 85) !important; }
+:is(.dark) .divide-slate-200 > :not([hidden]) ~ :not([hidden]),
+:is(.dark) .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: rgb(51 65 85) !important; }
+
+/* Text */
+:is(.dark) .text-slate-900,
+:is(.dark) .text-slate-800 { color: rgb(241 245 249) !important; }
 :is(.dark) .text-slate-700 { color: rgb(203 213 225) !important; }
 :is(.dark) .text-slate-600,
 :is(.dark) .text-slate-500 { color: rgb(148 163 184) !important; }
 :is(.dark) .text-slate-400 { color: rgb(100 116 139) !important; }
-:is(.dark) .divide-slate-200 > :not([hidden]) ~ :not([hidden]) { border-color: rgb(51 65 85) !important; }
+
+/* Hover states */
 :is(.dark) .hover\:bg-slate-50:hover { background-color: rgb(30 41 59) !important; }
+:is(.dark) .hover\:bg-slate-100:hover { background-color: rgb(30 41 59) !important; }
+
+/* Ring / focus */
+:is(.dark) .ring-slate-200 { --tw-ring-color: rgb(51 65 85) !important; }
+
+/* Shadow reduction in dark */
+:is(.dark) .shadow-sm,
+:is(.dark) .shadow-xl { --tw-shadow-color: rgb(0 0 0 / 0.3) !important; }
