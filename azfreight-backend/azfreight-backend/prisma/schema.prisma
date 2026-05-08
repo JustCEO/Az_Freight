@@ -207,7 +207,7 @@ model Client {
   taxId              String?   @map("tax_id") @db.VarChar(50)
   voen               String?   @db.VarChar(10)
   address            String?
-  country            String?   @db.VarChar(3)
+  country            String?   @db.VarChar(100)
   city               String?   @db.VarChar(255)
   phone              String?   @db.VarChar(50)
   email              String?   @db.VarChar(255)
