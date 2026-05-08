@@ -27,6 +27,7 @@ import { PortalAuthModule } from './portal-auth/portal-auth.module';
 import { ExpensesModule } from './expenses/expenses.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { CbarModule } from './cbar/cbar.module';
 import { MailModule } from './mail/mail.module';
 
 @Module({
@@ -60,6 +61,7 @@ import { MailModule } from './mail/mail.module';
     ExpensesModule,
     QuotesModule,
     NotificationsModule,
+    CbarModule,
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: AuditLogInterceptor },
