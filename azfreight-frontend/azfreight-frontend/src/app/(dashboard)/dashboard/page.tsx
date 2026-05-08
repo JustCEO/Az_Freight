@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { listShipments } from '@/lib/api/shipments';
+import { get } from '@/lib/api-client';
 import type { Shipment, ShipmentStatus } from '@/types';
 import StatusBadge from '@/components/status-badge';
 import { TRANSPORT_LABELS } from '@/lib/constants';
@@ -25,8 +26,16 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const [shipments, setShipments] = useState<Shipment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rates, setRates] = useState<{ code: string; rate: number }[]>([]);
+  const [ratesDate, setRatesDate] = useState('');
 
   useEffect(() => {
+    get<{ date: string; rates: { code: string; name: string; rate: number }[] }>('/cbar/rates')
+      .then((res) => {
+        setRatesDate(res.date);
+        setRates(res.rates.filter((r) => ['USD', 'EUR', 'RUB', 'TRY', 'GBP', 'GEL'].includes(r.code)));
+      })
+      .catch(() => {});
     listShipments({ limit: 1000 })
       .then((res) => setShipments(res.data))
       .catch(() => {})
@@ -103,6 +112,23 @@ export default function DashboardPage() {
           </table>
         </div>
       </div>
+      {/* CBAR Currency Rates */}
+      {rates.length > 0 && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">{t('dashboard.currencyRates') === 'dashboard.currencyRates' ? 'CBAR Exchange Rates (AZN)' : t('dashboard.currencyRates')}</h2>
+            <span className="text-xs text-slate-400">{ratesDate}</span>
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
+            {rates.map((r) => (
+              <div key={r.code} className="text-center">
+                <div className="text-xs text-slate-500 mb-1">{r.code}/AZN</div>
+                <div className="text-lg font-bold text-slate-900">{r.rate.toFixed(4)}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
