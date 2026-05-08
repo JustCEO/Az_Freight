@@ -107,5 +107,13 @@ export class UpdateShipmentDto {
 
   @IsOptional()
   @IsString()
+  vehicleId?: string | null;
+
+  @IsOptional()
+  @IsString()
+  driverId?: string | null;
+
+  @IsOptional()
+  @IsString()
   notes?: string;
 }

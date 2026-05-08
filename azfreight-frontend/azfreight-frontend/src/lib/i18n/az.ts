@@ -363,6 +363,8 @@ const az = {
   dashboard: {
     recentShipments: 'Son göndərmələr',
     noShipmentsYet: 'Hələ göndərmə yoxdur',
+    currencyRates: 'CBAR Valyuta Məzənnələri (AZN)',
+    lastUpdated: 'Yenilənib',
     refNumber: 'İst. №',
   },
 

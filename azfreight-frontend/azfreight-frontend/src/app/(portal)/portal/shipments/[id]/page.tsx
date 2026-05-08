@@ -78,11 +78,11 @@ export default function PortalShipmentDetailPage() {
             </div>
             <div>
               <dt className="text-slate-500">Weight</dt>
-              <dd className="font-medium">{shipment.cargoWeight ? `${shipment.cargoWeight} kg` : '—'}</dd>
+              <dd className="font-medium">{shipment.weightKg ? `${shipment.weightKg} kg` : '—'}</dd>
             </div>
             <div>
               <dt className="text-slate-500">Volume</dt>
-              <dd className="font-medium">{shipment.cargoVolume ? `${shipment.cargoVolume} m³` : '—'}</dd>
+              <dd className="font-medium">{shipment.volumeCbm ? `${shipment.volumeCbm} m³` : '—'}</dd>
             </div>
             <div>
               <dt className="text-slate-500">Packages</dt>

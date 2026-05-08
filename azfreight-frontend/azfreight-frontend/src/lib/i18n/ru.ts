@@ -363,6 +363,8 @@ const ru = {
   dashboard: {
     recentShipments: 'Последние отправления',
     noShipmentsYet: 'Отправлений пока нет',
+    currencyRates: 'Курсы ЦБАР (AZN)',
+    lastUpdated: 'Обновлено',
     refNumber: '№ отпр.',
   },
 

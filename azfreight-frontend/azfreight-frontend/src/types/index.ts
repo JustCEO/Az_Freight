@@ -109,8 +109,8 @@ export interface Shipment {
   destinationCity: string;
   destinationAddress: string | null;
   cargoDescription: string | null;
-  cargoWeight: number | null;
-  cargoVolume: number | null;
+  weightKg: number | null;
+  volumeCbm: number | null;
   packageCount: number | null;
   clientRate: number | null;
   carrierRate: number | null;

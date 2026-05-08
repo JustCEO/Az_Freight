@@ -219,11 +219,13 @@ export default function UsersPage() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('usersPage.company')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.status')}</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('usersPage.lastLogin')}</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">{t('common.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
                   {displayedUsers.map((u) => {
                     const pu = u as PlatformUser;
+                    const isSelf = pu.id === currentUser?.id;
                     return (
                       <tr key={pu.id} className={!pu.isActive ? 'opacity-50' : ''}>
                         <td className="px-6 py-4 text-sm font-medium text-slate-900">{pu.name}</td>
@@ -242,11 +244,29 @@ export default function UsersPage() {
                         <td className="px-6 py-4 text-sm text-slate-500">
                           {pu.lastLogin ? new Date(pu.lastLogin).toLocaleDateString() : '—'}
                         </td>
+                        <td className="px-6 py-4 text-sm">
+                          {!isSelf && (
+                            <div className="flex gap-2">
+                              {pu.isActive ? (
+                                <button onClick={() => handleToggleActive(pu.id, false)} className="text-amber-600 hover:text-amber-800 text-xs font-medium">
+                                  {t('users.deactivate')}
+                                </button>
+                              ) : (
+                                <button onClick={() => handleToggleActive(pu.id, true)} className="text-emerald-600 hover:text-emerald-800 text-xs font-medium">
+                                  {t('users.activate')}
+                                </button>
+                              )}
+                              <button onClick={() => handleDelete(pu.id, pu.name)} className="text-red-500 hover:text-red-700 text-xs font-medium">
+                                {t('common.delete')}
+                              </button>
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}
                   {displayedUsers.length === 0 && (
-                    <tr><td colSpan={6} className="px-6 py-8 text-center text-sm text-slate-500">{t('usersPage.noUsersFound')}</td></tr>
+                    <tr><td colSpan={7} className="px-6 py-8 text-center text-sm text-slate-500">{t('usersPage.noUsersFound')}</td></tr>
                   )}
                 </tbody>
               </table>

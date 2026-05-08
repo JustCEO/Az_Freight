@@ -35,6 +35,14 @@ export class DocumentsService {
     });
   }
 
+  async findByEntity(tenantId: string, entityType: string, entityId: string) {
+    return this.prisma.document.findMany({
+      where: { tenantId, linkedEntityType: entityType, linkedEntityId: entityId },
+      orderBy: { createdAt: 'desc' },
+      include: { uploadedBy: { select: { id: true, name: true } } },
+    });
+  }
+
   async findOne(tenantId: string, id: string) {
     const doc = await this.prisma.document.findFirst({
       where: { id, tenantId },

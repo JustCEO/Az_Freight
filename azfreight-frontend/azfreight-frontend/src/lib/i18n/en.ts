@@ -375,6 +375,8 @@ const en = {
   dashboard: {
     recentShipments: 'Recent Shipments',
     noShipmentsYet: 'No shipments yet',
+    currencyRates: 'CBAR Exchange Rates (AZN)',
+    lastUpdated: 'Last updated',
     refNumber: 'Ref #',
   },
 
