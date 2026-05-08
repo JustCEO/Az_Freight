@@ -6,6 +6,8 @@ import { getShipment, getTimeline, updateShipmentStatus, updateShipment } from '
 import { listCustomStatuses, assignCustomStatus } from '@/lib/api/custom-statuses';
 import { listVehicles, type Vehicle } from '@/lib/api/vehicles';
 import { listDrivers, type Driver } from '@/lib/api/drivers';
+import { listDocuments, uploadDocument, deleteDocument } from '@/lib/api/documents';
+import type { Document } from '@/types';
 import type { Shipment, ShipmentStatusLog, CustomStatus } from '@/types';
 import StatusBadge from '@/components/status-badge';
 import Loading from '@/components/loading';
@@ -40,6 +42,9 @@ export default function ShipmentDetailPage() {
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [docType, setDocType] = useState('other');
   const [fleetVehicleId, setFleetVehicleId] = useState('');
   const [fleetDriverId, setFleetDriverId] = useState('');
   const [savingFleet, setSavingFleet] = useState(false);
@@ -57,6 +62,7 @@ export default function ShipmentDetailPage() {
     listCustomStatuses().then(setCustomStatuses).catch(() => {});
     listVehicles(undefined, 'available').then(setVehicles).catch(() => {});
     listDrivers(undefined, 'available').then(setDrivers).catch(() => {});
+    listDocuments('shipment', id).then(setDocuments).catch(() => {});
   }, [id, router]);
 
   async function handleStatusChange(newStatus: string) {
@@ -347,6 +353,57 @@ export default function ShipmentDetailPage() {
           )}
         </div>
       )}
+
+      {/* Documents */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Documents</h3>
+          <div className="flex items-center gap-2">
+            <select className="input-field w-40 text-xs" value={docType} onChange={(e) => setDocType(e.target.value)}>
+              {['invoice', 'packing_list', 'cmr', 'bill_of_lading', 'certificate', 'declaration', 'contract', 'other'].map((dt) => (
+                <option key={dt} value={dt}>{dt.replace('_', ' ').toUpperCase()}</option>
+              ))}
+            </select>
+            <label className={`btn-secondary text-xs cursor-pointer ${uploadingDoc ? 'opacity-50 pointer-events-none' : ''}`}>
+              {uploadingDoc ? 'Uploading...' : '+ Upload'}
+              <input type="file" className="hidden" disabled={uploadingDoc} onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setUploadingDoc(true);
+                try {
+                  await uploadDocument(file, docType, 'shipment', id);
+                  const docs = await listDocuments('shipment', id);
+                  setDocuments(docs);
+                } catch { /* ignore */ }
+                setUploadingDoc(false);
+                e.target.value = '';
+              }} />
+            </label>
+          </div>
+        </div>
+        {documents.length === 0 ? (
+          <p className="text-sm text-slate-500">No documents uploaded</p>
+        ) : (
+          <div className="space-y-2">
+            {documents.map((doc) => (
+              <div key={doc.id} className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-lg">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded">{doc.docType}</span>
+                  <span className="text-sm text-slate-900 truncate">{doc.originalName}</span>
+                  <span className="text-xs text-slate-400">{new Date(doc.createdAt).toLocaleDateString()}</span>
+                </div>
+                <button onClick={async () => {
+                  if (!confirm('Delete this document?')) return;
+                  try {
+                    await deleteDocument(doc.id);
+                    setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
+                  } catch { /* ignore */ }
+                }} className="text-red-500 hover:text-red-700 text-xs font-medium shrink-0 ml-2">Delete</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Fleet Assignment */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">
