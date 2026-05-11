@@ -70,4 +70,31 @@ export class DriversService {
     if (!driver) throw new NotFoundException('Driver not found');
     return this.prisma.driver.delete({ where: { id } });
   }
+
+  // ── Trainings ──
+
+  async listTrainings(driverId: string) {
+    return this.prisma.driverTraining.findMany({
+      where: { driverId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createTraining(driverId: string, data: { title: string; issuedAt?: string; expiresAt?: string; documentUrl?: string }) {
+    return this.prisma.driverTraining.create({
+      data: {
+        driverId,
+        title: data.title,
+        issuedAt: data.issuedAt ? new Date(data.issuedAt) : undefined,
+        expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
+        documentUrl: data.documentUrl,
+      },
+    });
+  }
+
+  async deleteTraining(driverId: string, trainingId: string) {
+    const t = await this.prisma.driverTraining.findFirst({ where: { id: trainingId, driverId } });
+    if (!t) throw new NotFoundException('Training not found');
+    return this.prisma.driverTraining.delete({ where: { id: trainingId } });
+  }
 }

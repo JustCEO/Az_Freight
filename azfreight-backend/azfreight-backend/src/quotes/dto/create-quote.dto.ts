@@ -71,9 +71,20 @@ export class CreateQuoteDto {
   @IsNumber()
   validDays?: number;
 
-  @IsOptional()
-  @IsString()
+  @IsOptional() @IsString()
   notes?: string;
+
+  @IsOptional() @IsString()
+  termsConditions?: string;
+
+  @IsOptional() @IsString()
+  routeType?: string;
+
+  @IsOptional() @IsString()
+  loadType?: string;
+
+  @IsOptional() @IsString()
+  loadSubCategory?: string;
 
   @IsArray()
   @ValidateNested({ each: true })

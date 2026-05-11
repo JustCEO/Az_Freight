@@ -42,4 +42,21 @@ export class DriversController {
   remove(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.driversService.remove(user.tenantId, id);
   }
+
+  @Get(':id/trainings')
+  listTrainings(@Param('id') id: string) {
+    return this.driversService.listTrainings(id);
+  }
+
+  @Post(':id/trainings')
+  @Roles('admin', 'manager', 'director')
+  createTraining(@Param('id') id: string, @Body() body: { title: string; issuedAt?: string; expiresAt?: string; documentUrl?: string }) {
+    return this.driversService.createTraining(id, body);
+  }
+
+  @Delete(':id/trainings/:tid')
+  @Roles('admin', 'manager', 'director')
+  deleteTraining(@Param('id') id: string, @Param('tid') tid: string) {
+    return this.driversService.deleteTraining(id, tid);
+  }
 }
