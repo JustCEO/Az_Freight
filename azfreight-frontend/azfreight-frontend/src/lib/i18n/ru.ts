@@ -936,6 +936,18 @@ const ru = {
       OVERSIZED: 'Негабаритный', VALUABLE: 'Ценный', BULK: 'Навалочный', LIQUID: 'Жидкий' },
     loadSubCategory: 'Подкатегория',
   },
+  documents: {
+    upload: 'Загрузить документ', noDocuments: 'Документы не прикреплены', deleteConfirm: 'Удалить документ?',
+    types: {
+      contract: 'Договор', certificate: 'Сертификат', license: 'Лицензия', insurance: 'Страховка',
+      compliance: 'Соответствие', receipt: 'Чек', proof_of_payment: 'Подтверждение оплаты',
+      rate_sheet: 'Тариф', inquiry: 'Запрос', proposal: 'Предложение',
+      quote_document: 'Документ котировки', client_request: 'Заявка клиента',
+      customs_document: 'Таможенный документ', invoice_document: 'Счёт',
+      technical_passport: 'Техпаспорт', inspection_cert: 'Сертификат осмотра',
+      adr_cert: 'Сертификат ADR', other: 'Другое',
+    },
+  },
 };
 
 export default ru;

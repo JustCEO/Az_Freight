@@ -936,6 +936,18 @@ const az = {
       OVERSIZED: 'Qabaritdən kənar', VALUABLE: 'Dəyərli', BULK: 'Kütləvi', LIQUID: 'Maye' },
     loadSubCategory: 'Alt kateqoriya',
   },
+  documents: {
+    upload: 'Sənəd yüklə', noDocuments: 'Sənəd əlavə edilməyib', deleteConfirm: 'Bu sənədi silmək istəyirsiniz?',
+    types: {
+      contract: 'Müqavilə', certificate: 'Sertifikat', license: 'Lisenziya', insurance: 'Sığorta',
+      compliance: 'Uyğunluq', receipt: 'Qəbz', proof_of_payment: 'Ödəniş təsdiqi',
+      rate_sheet: 'Tarif cədvəli', inquiry: 'Sorğu', proposal: 'Təklif',
+      quote_document: 'Təklif sənədi', client_request: 'Müştəri sorğusu',
+      customs_document: 'Gömrük sənədi', invoice_document: 'Faktura',
+      technical_passport: 'Texniki pasport', inspection_cert: 'Yoxlama sertifikatı',
+      adr_cert: 'ADR sertifikatı', other: 'Digər',
+    },
+  },
 };
 
 export default az;

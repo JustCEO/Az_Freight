@@ -16,7 +16,7 @@ export class CreateDocumentDto {
   @IsInt()
   sizeBytes: number;
 
-  @IsEnum(['cmr', 'bill_of_lading', 'awb', 'rail_waybill', 'invoice', 'packing_list', 'certificate', 'declaration', 'contract', 'scan_signed', 'other'])
+  @IsString()
   docType: string;
 
   @IsString()

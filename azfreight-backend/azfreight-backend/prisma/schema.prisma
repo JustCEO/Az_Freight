@@ -70,6 +70,21 @@ enum DocType {
   declaration
   contract
   scan_signed
+  insurance
+  license
+  compliance
+  receipt
+  proof_of_payment
+  rate_sheet
+  inquiry
+  proposal
+  quote_document
+  client_request
+  customs_document
+  invoice_document
+  technical_passport
+  inspection_cert
+  adr_cert
   other
 }
 
