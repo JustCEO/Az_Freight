@@ -55,7 +55,7 @@ export default function PortalShipmentsPage() {
   useEffect(() => {
     const token = localStorage.getItem('portalToken');
     if (!token) {
-      router.push('/portal');
+      setLoading(false);
       return;
     }
 
@@ -77,6 +77,18 @@ export default function PortalShipmentsPage() {
   const clientData = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('portalClient') || '{}') : {};
 
   if (loading) return <Loading />;
+
+  if (!localStorage.getItem('portalToken')) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Session expired</h2>
+          <p className="text-slate-500 mb-4">Please use the magic link from your email to sign in.</p>
+          <a href="/portal" className="btn-primary">Back to Portal</a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
