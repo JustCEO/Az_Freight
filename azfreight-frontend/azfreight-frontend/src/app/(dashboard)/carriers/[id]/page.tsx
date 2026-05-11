@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { getCarrier, updateCarrier } from '@/lib/api/carriers';
 import type { Carrier } from '@/types';
 import Loading from '@/components/loading';
+import DocumentsSection from '@/components/documents-section';
 import { TRANSPORT_LABELS } from '@/lib/constants';
 import { useTranslation } from '@/lib/i18n';
 
@@ -199,6 +200,8 @@ export default function CarrierDetailPage() {
               <div><dt className="text-slate-500">Contact Email</dt><dd className="font-medium">{String(rec.contactEmail || '—')}</dd></div>
             </dl>
           </div>
+
+          <DocumentsSection entityType="carrier" entityId={id} documentTypes={['contract', 'certificate', 'license', 'insurance', 'compliance', 'other']} />
         </div>
       </div>
     );

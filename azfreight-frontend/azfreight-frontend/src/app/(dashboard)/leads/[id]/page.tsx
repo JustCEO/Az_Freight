@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { getLead, updateLead, convertLead, deleteLead, type Lead } from '@/lib/api/leads';
 import { useTranslation } from '@/lib/i18n';
 import Loading from '@/components/loading';
+import DocumentsSection from '@/components/documents-section';
 
 const STATUS_COLORS: Record<string, string> = {
   NEW: 'bg-slate-100 text-slate-700',
@@ -127,6 +128,8 @@ export default function LeadDetailPage() {
           )}
         </div>
       </div>
+
+      <DocumentsSection entityType="lead" entityId={id} documentTypes={['inquiry', 'contract', 'proposal', 'other']} />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { getInvoice, updateInvoiceStatus, recordPayment } from '@/lib/api/invoic
 import type { Invoice } from '@/types';
 import StatusBadge from '@/components/status-badge';
 import Loading from '@/components/loading';
+import DocumentsSection from '@/components/documents-section';
 import { INVOICE_STATUS_LABELS } from '@/lib/constants';
 import { useTranslation } from '@/lib/i18n';
 
@@ -233,6 +234,8 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
       )}
+
+      <DocumentsSection entityType="invoice" entityId={id} documentTypes={['invoice_document', 'proof_of_payment', 'other']} />
     </div>
   );
 }

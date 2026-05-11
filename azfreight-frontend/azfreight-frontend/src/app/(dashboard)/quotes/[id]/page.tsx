@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getQuote, updateQuote, convertQuote, deleteQuote, type Quote } from '@/lib/api/quotes';
 import { useTranslation } from '@/lib/i18n';
 import Loading from '@/components/loading';
+import DocumentsSection from '@/components/documents-section';
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-slate-100 text-slate-700',
@@ -237,6 +238,8 @@ export default function QuoteDetailPage() {
           )}
         </div>
       ) : null}
+
+      <DocumentsSection entityType="quote" entityId={id} documentTypes={['quote_document', 'client_request', 'rate_sheet', 'other']} />
 
       {/* Metadata */}
       <div className="text-xs text-slate-400">

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { getExpense, updateExpense, deleteExpense, type Expense } from '@/lib/api/expenses';
 import { useTranslation } from '@/lib/i18n';
 import Loading from '@/components/loading';
+import DocumentsSection from '@/components/documents-section';
 
 const CATEGORIES = ['customs_duty', 'storage', 'insurance', 'port_charges', 'bank_fee', 'transport', 'documentation', 'vat', 'other'];
 
@@ -159,6 +160,8 @@ export default function ExpenseDetailPage() {
           {expense.createdBy && ` by ${expense.createdBy.name}`}
         </div>
       </div>
+
+      <DocumentsSection entityType="expense" entityId={id} documentTypes={['receipt', 'invoice', 'customs_document', 'other']} />
     </div>
   );
 }
