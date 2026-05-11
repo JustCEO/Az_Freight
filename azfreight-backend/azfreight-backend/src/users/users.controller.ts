@@ -63,4 +63,26 @@ export class UsersController {
   deletePermanently(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
     return this.usersService.deletePermanently(user.tenantId, id);
   }
+
+  @Get(':id/stats')
+  getStats(@CurrentUser() user: JwtPayload, @Param('id') id: string) {
+    return this.usersService.getStats(user.tenantId, id);
+  }
+
+  @Get(':id/certificates')
+  listCertificates(@Param('id') id: string) {
+    return this.usersService.listCertificates(id);
+  }
+
+  @Post(':id/certificates')
+  @Roles('admin', 'director')
+  createCertificate(@Param('id') id: string, @Body() body: { title: string; issuedAt?: string; expiresAt?: string; documentUrl?: string }) {
+    return this.usersService.createCertificate(id, body);
+  }
+
+  @Delete(':id/certificates/:cid')
+  @Roles('admin', 'director')
+  deleteCertificate(@Param('id') id: string, @Param('cid') cid: string) {
+    return this.usersService.deleteCertificate(id, cid);
+  }
 }

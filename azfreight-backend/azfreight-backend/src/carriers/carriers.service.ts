@@ -35,15 +35,20 @@ export class CarriersService {
   }
 
   async create(tenantId: string, dto: CreateCarrierDto) {
-    return this.prisma.carrier.create({
-      data: { tenantId, ...dto },
-    });
+    const data: Record<string, unknown> = { tenantId, ...dto };
+    if (dto.contractStart) data.contractStart = new Date(dto.contractStart);
+    if (dto.contractEnd) data.contractEnd = new Date(dto.contractEnd);
+    if (dto.seaFreightType) data.seaFreightType = dto.seaFreightType;
+    return this.prisma.carrier.create({ data: data as never });
   }
 
   async update(tenantId: string, id: string, dto: UpdateCarrierDto) {
+    const data: Record<string, unknown> = { ...dto };
+    if (dto.contractStart) data.contractStart = new Date(dto.contractStart);
+    if (dto.contractEnd) data.contractEnd = new Date(dto.contractEnd);
     const result = await this.prisma.carrier.updateMany({
       where: { id, tenantId },
-      data: dto,
+      data: data as never,
     });
     if (result.count === 0) throw new NotFoundException('Carrier not found');
     return this.prisma.carrier.findUnique({ where: { id } });

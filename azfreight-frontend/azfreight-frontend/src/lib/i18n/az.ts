@@ -889,6 +889,53 @@ const az = {
     assignDriver: 'Sürücü',
     save: 'Saxla',
   },
+  clientCrm: {
+    loyalty: { REGULAR: 'Adi', SILVER: 'Gümüş', GOLD: 'Qızıl', PLATINUM: 'Platin' },
+    paymentTerms: { CIA: 'Ön ödəmə', COD: 'Təhvildə ödəmə', NET7: 'Net 7', NET15: 'Net 15', NET30: 'Net 30', NET60: 'Net 60', NET90: 'Net 90' },
+    jobQuantity: 'İş sayı', mostRecentShipment: 'Son göndərmə',
+    blacklisted: 'Qara siyahıda', blacklistReason: 'Səbəb',
+    ogLicense: 'OG Lisenziya', creditTerm: 'Kredit müddəti (gün)', insuranceLimit: 'Sığorta limiti',
+    division: 'Bölmə', contractNumber: 'Müqavilə nömrəsi',
+    contractStart: 'Müqavilə başlanğıcı', contractEnd: 'Müqavilə sonu', contractDetails: 'Müqavilə təfərrüatları',
+    contacts: { title: 'Əlaqələr', name: 'Ad', email: 'Email', phone: 'Telefon', role: 'Vəzifə', add: 'Əlaqə əlavə et', empty: 'Əlaqə yoxdur' },
+    avl: { title: 'Təsdiq edilmiş təchizatçılar (AVL)', description: 'Bu müştəri üçün təsdiq edilmiş daşıyıcılar',
+      addEntry: 'Əlavə et', vendorName: 'Təchizatçı', serviceType: 'Xidmət növü',
+      reviewDate: 'Yoxlama tarixi', rejectedReason: 'İmtina səbəbi', empty: 'Qeyd yoxdur' },
+    avlStatus: { IN_PROGRESS: 'Davam edir', APPROVED: 'Təsdiq edilib', REJECTED: 'Rədd edilib' },
+  },
+  carrierCrm: {
+    seaFreightType: { CONTAINERS: 'Konteyner', BREAKBULK: 'Ümumi yük', BOTH: 'Hər ikisi' },
+    hasWarehouse: 'Anbar var', customClearance: 'Gömrük rəsmiləşdirməsi',
+    taxResidence: 'Vergi rezidentliyi / DTA', complianceCert: 'Uyğunluq sertifikatı',
+    contactPerson: 'Əlaqə şəxsi', contactEmail: 'Əlaqə emaili',
+  },
+  vehicleCrm: {
+    trailerType: { CURTAINSIDER: 'Tentli', FLATBED: 'Platforma', REEFER: 'Soyuducu', TANKER: 'Sistern', BOX: 'Qapalı', LOWBOY: 'Aşağı platforma', OTHER: 'Digər' },
+    fuelType: { EURO5: 'Euro 5', EURO6: 'Euro 6', DIESEL: 'Dizel', ELECTRIC: 'Elektrik', OTHER: 'Digər' },
+    tare: 'Tara çəkisi (kq)', maintenance: 'Texniki baxış', lastMaintenanceDate: 'Son baxış',
+    maintenanceNotes: 'Baxış qeydləri',
+  },
+  driverCrm: {
+    trainings: { title: 'Təlimlər və sertifikatlar', add: 'Əlavə et',
+      issuedAt: 'Verilmə tarixi', expiresAt: 'Bitmə tarixi', expiringSoon: 'Tezliklə bitir',
+      expired: 'Vaxtı keçib', count: 'sertifikat' },
+  },
+  usersCrm: {
+    department: { title: 'Şöbə', OPERATIONS: 'Əməliyyatlar', SALES: 'Satış', FINANCE: 'Maliyyə',
+      LOGISTICS: 'Logistika', MANAGEMENT: 'İdarəetmə', HR: 'HR', IT: 'IT', OTHER: 'Digər' },
+    employeeRate: 'İşçi dərəcəsi', rateUnit: { PER_HOUR: 'saatda', PER_MONTH: 'ayda' },
+    performance: { title: 'Göstəricilər', jobsApproved: 'Təsdiq edilən işlər', quoteQty: 'Təklif sayı',
+      successRate: 'Uğur dərəcəsi', turnover: 'Dövriyyə' },
+    certificates: { title: 'Sertifikatlar', add: 'Əlavə et',
+      issuedAt: 'Verilmə', expiresAt: 'Bitmə' },
+  },
+  quoteCrm: {
+    termsConditions: 'Şərtlər',
+    routeType: { title: 'Marşrut növü', DIRECT: 'Birbaşa', TRANSIT: 'Tranzit', MULTIMODAL: 'Multimodal' },
+    loadType: { title: 'Yük növü', GENERAL: 'Ümumi', HAZARDOUS: 'Təhlükəli', PERISHABLE: 'Tezxarab olan',
+      OVERSIZED: 'Qabaritdən kənar', VALUABLE: 'Dəyərli', BULK: 'Kütləvi', LIQUID: 'Maye' },
+    loadSubCategory: 'Alt kateqoriya',
+  },
 };
 
 export default az;

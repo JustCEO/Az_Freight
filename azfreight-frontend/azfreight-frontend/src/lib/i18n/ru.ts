@@ -889,6 +889,53 @@ const ru = {
     assignDriver: 'Водитель',
     save: 'Сохранить',
   },
+  clientCrm: {
+    loyalty: { REGULAR: 'Обычный', SILVER: 'Серебро', GOLD: 'Золото', PLATINUM: 'Платина' },
+    paymentTerms: { CIA: 'Предоплата', COD: 'Наложенный платёж', NET7: 'Net 7', NET15: 'Net 15', NET30: 'Net 30', NET60: 'Net 60', NET90: 'Net 90' },
+    jobQuantity: 'Кол-во отправлений', mostRecentShipment: 'Последняя отправка',
+    blacklisted: 'В чёрном списке', blacklistReason: 'Причина',
+    ogLicense: 'Лицензия OG', creditTerm: 'Кредитный срок (дни)', insuranceLimit: 'Лимит страховки',
+    division: 'Подразделение', contractNumber: 'Номер договора',
+    contractStart: 'Начало договора', contractEnd: 'Конец договора', contractDetails: 'Детали договора',
+    contacts: { title: 'Контакты', name: 'Имя', email: 'Email', phone: 'Телефон', role: 'Должность', add: 'Добавить контакт', empty: 'Контакты не добавлены' },
+    avl: { title: 'Список поставщиков (AVL)', description: 'Одобренные перевозчики и сервис-провайдеры',
+      addEntry: 'Добавить', vendorName: 'Поставщик', serviceType: 'Тип услуги',
+      reviewDate: 'Дата проверки', rejectedReason: 'Причина отказа', empty: 'Записей нет' },
+    avlStatus: { IN_PROGRESS: 'В процессе', APPROVED: 'Одобрен', REJECTED: 'Отклонён' },
+  },
+  carrierCrm: {
+    seaFreightType: { CONTAINERS: 'Контейнеры', BREAKBULK: 'Генгруз', BOTH: 'Оба' },
+    hasWarehouse: 'Есть склад', customClearance: 'Таможенное оформление',
+    taxResidence: 'Налоговая резиденция / ДТА', complianceCert: 'Сертификат соответствия',
+    contactPerson: 'Контактное лицо', contactEmail: 'Email контакта',
+  },
+  vehicleCrm: {
+    trailerType: { CURTAINSIDER: 'Тент', FLATBED: 'Платформа', REEFER: 'Рефрижератор', TANKER: 'Цистерна', BOX: 'Фургон', LOWBOY: 'Низкорамник', OTHER: 'Другой' },
+    fuelType: { EURO5: 'Евро 5', EURO6: 'Евро 6', DIESEL: 'Дизель', ELECTRIC: 'Электро', OTHER: 'Другой' },
+    tare: 'Масса тары (кг)', maintenance: 'ТО', lastMaintenanceDate: 'Последнее ТО',
+    maintenanceNotes: 'Заметки ТО',
+  },
+  driverCrm: {
+    trainings: { title: 'Обучение и сертификаты', add: 'Добавить',
+      issuedAt: 'Выдан', expiresAt: 'Истекает', expiringSoon: 'Скоро истекает',
+      expired: 'Просрочен', count: 'сертификатов' },
+  },
+  usersCrm: {
+    department: { title: 'Отдел', OPERATIONS: 'Операции', SALES: 'Продажи', FINANCE: 'Финансы',
+      LOGISTICS: 'Логистика', MANAGEMENT: 'Управление', HR: 'HR', IT: 'IT', OTHER: 'Другое' },
+    employeeRate: 'Ставка сотрудника', rateUnit: { PER_HOUR: 'в час', PER_MONTH: 'в месяц' },
+    performance: { title: 'Показатели', jobsApproved: 'Одобрено работ', quoteQty: 'Кол-во котировок',
+      successRate: 'Успешность', turnover: 'Оборот' },
+    certificates: { title: 'Сертификаты', add: 'Добавить',
+      issuedAt: 'Выдан', expiresAt: 'Истекает' },
+  },
+  quoteCrm: {
+    termsConditions: 'Условия',
+    routeType: { title: 'Тип маршрута', DIRECT: 'Прямой', TRANSIT: 'Транзит', MULTIMODAL: 'Мультимодальный' },
+    loadType: { title: 'Тип груза', GENERAL: 'Общий', HAZARDOUS: 'Опасный', PERISHABLE: 'Скоропортящийся',
+      OVERSIZED: 'Негабаритный', VALUABLE: 'Ценный', BULK: 'Навалочный', LIQUID: 'Жидкий' },
+    loadSubCategory: 'Подкатегория',
+  },
 };
 
 export default ru;

@@ -901,6 +901,53 @@ const en = {
     assignDriver: 'Assign Driver',
     save: 'Save Fleet',
   },
+  clientCrm: {
+    loyalty: { REGULAR: 'Regular', SILVER: 'Silver', GOLD: 'Gold', PLATINUM: 'Platinum' },
+    paymentTerms: { CIA: 'Cash in Advance', COD: 'Cash on Delivery', NET7: 'Net 7', NET15: 'Net 15', NET30: 'Net 30', NET60: 'Net 60', NET90: 'Net 90' },
+    jobQuantity: 'Job Quantity', mostRecentShipment: 'Most Recent Shipment',
+    blacklisted: 'Blacklisted', blacklistReason: 'Blacklist Reason',
+    ogLicense: 'OG License', creditTerm: 'Credit Term (days)', insuranceLimit: 'Insurance Limit',
+    division: 'Division', contractNumber: 'Contract Number',
+    contractStart: 'Contract Start', contractEnd: 'Contract End', contractDetails: 'Contract Details',
+    contacts: { title: 'Contacts', name: 'Name', email: 'Email', phone: 'Phone', role: 'Role/Title', add: 'Add Contact', empty: 'No contacts added' },
+    avl: { title: 'Approved Vendor List', description: 'Pre-approved carriers and service providers for this client',
+      addEntry: 'Add Entry', vendorName: 'Vendor Name', serviceType: 'Service Type',
+      reviewDate: 'Review Date', rejectedReason: 'Rejection Reason', empty: 'No AVL entries' },
+    avlStatus: { IN_PROGRESS: 'In Progress', APPROVED: 'Approved', REJECTED: 'Rejected' },
+  },
+  carrierCrm: {
+    seaFreightType: { CONTAINERS: 'Containers', BREAKBULK: 'Breakbulk', BOTH: 'Both' },
+    hasWarehouse: 'Has Warehouse', customClearance: 'Custom Clearance',
+    taxResidence: 'Tax Residence / DTA', complianceCert: 'Compliance Certificate',
+    contactPerson: 'Contact Person', contactEmail: 'Contact Email',
+  },
+  vehicleCrm: {
+    trailerType: { CURTAINSIDER: 'Curtainsider', FLATBED: 'Flatbed', REEFER: 'Reefer', TANKER: 'Tanker', BOX: 'Box', LOWBOY: 'Lowboy', OTHER: 'Other' },
+    fuelType: { EURO5: 'Euro 5', EURO6: 'Euro 6', DIESEL: 'Diesel', ELECTRIC: 'Electric', OTHER: 'Other' },
+    tare: 'Tare Weight (kg)', maintenance: 'Maintenance', lastMaintenanceDate: 'Last Maintenance',
+    maintenanceNotes: 'Maintenance Notes',
+  },
+  driverCrm: {
+    trainings: { title: 'Trainings & Certifications', add: 'Add Training',
+      issuedAt: 'Issued', expiresAt: 'Expires', expiringSoon: 'Expiring soon',
+      expired: 'Expired', count: 'certifications' },
+  },
+  usersCrm: {
+    department: { title: 'Department', OPERATIONS: 'Operations', SALES: 'Sales', FINANCE: 'Finance',
+      LOGISTICS: 'Logistics', MANAGEMENT: 'Management', HR: 'HR', IT: 'IT', OTHER: 'Other' },
+    employeeRate: 'Employee Rate', rateUnit: { PER_HOUR: 'per hour', PER_MONTH: 'per month' },
+    performance: { title: 'Performance', jobsApproved: 'Jobs Approved', quoteQty: 'Quote Quantity',
+      successRate: 'Success Rate', turnover: 'Turnover' },
+    certificates: { title: 'Certifications', add: 'Add Certificate',
+      issuedAt: 'Issued', expiresAt: 'Expires' },
+  },
+  quoteCrm: {
+    termsConditions: 'Terms & Conditions',
+    routeType: { title: 'Route Type', DIRECT: 'Direct', TRANSIT: 'Transit', MULTIMODAL: 'Multimodal' },
+    loadType: { title: 'Load Type', GENERAL: 'General', HAZARDOUS: 'Hazardous', PERISHABLE: 'Perishable',
+      OVERSIZED: 'Oversized', VALUABLE: 'Valuable', BULK: 'Bulk', LIQUID: 'Liquid' },
+    loadSubCategory: 'Sub-Category',
+  },
 };
 
 export default en;

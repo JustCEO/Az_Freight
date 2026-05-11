@@ -194,6 +194,11 @@ model User {
   createdExpenses        Expense[]         @relation("ExpenseCreatedBy")
   createdQuotes          Quote[]           @relation("QuoteCreatedBy")
   notifications          Notification[]
+  department             String?           @db.VarChar(50)
+  employeeRate           Decimal?          @map("employee_rate") @db.Decimal(10, 2)
+  employeeRateUnit       String?           @map("employee_rate_unit") @db.VarChar(20)
+  employeeRateCurrency   String?           @map("employee_rate_currency") @db.VarChar(3)
+  certificates           UserCertificate[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -217,6 +222,19 @@ model Client {
   outstandingBalance Decimal   @default(0) @map("outstanding_balance") @db.Decimal(12, 2)
   notes              String?
   isActive           Boolean   @default(true) @map("is_active")
+  loyaltyStatus      ClientLoyalty @default(REGULAR) @map("loyalty_status")
+  jobQuantity        Int       @default(0) @map("job_quantity")
+  division           String?   @db.VarChar(255)
+  contractNumber     String?   @map("contract_number") @db.VarChar(100)
+  contractStart      DateTime? @map("contract_start") @db.Date
+  contractEnd        DateTime? @map("contract_end") @db.Date
+  contractDetails    String?   @map("contract_details")
+  paymentTerms       PaymentTerms? @map("payment_terms")
+  creditTermDays     Int?      @map("credit_term_days")
+  insuranceLimit     Decimal?  @map("insurance_limit") @db.Decimal(12, 2)
+  ogLicense          String?   @map("og_license") @db.VarChar(100)
+  isBlacklisted      Boolean   @default(false) @map("is_blacklisted")
+  blacklistReason    String?   @map("blacklist_reason")
   createdAt          DateTime  @default(now()) @map("created_at")
 
   tenant             Tenant    @relation(fields: [tenantId], references: [id])
@@ -225,6 +243,8 @@ model Client {
   shipmentRequests   ShipmentRequest[]
   portalSessions     ClientPortalSession[]
   quotes             Quote[]
+  contacts           ClientContact[]
+  avlEntries         AVLEntry[]
 
   @@index([tenantId])
   @@map("clients")
@@ -236,19 +256,31 @@ model Carrier {
   companyName     String    @map("company_name") @db.VarChar(255)
   transportTypes  String[]  @map("transport_types")
   taxId           String?   @map("tax_id") @db.VarChar(50)
-  country         String?   @db.VarChar(3)
-  city            String?   @db.VarChar(255)
-  phone           String?   @db.VarChar(50)
-  email           String?   @db.VarChar(255)
-  rating          Decimal   @default(0) @db.Decimal(3, 2)
-  totalShipments  Int       @default(0) @map("total_shipments")
-  onTimeRate      Decimal   @default(0) @map("on_time_rate") @db.Decimal(5, 2)
-  notes           String?
-  isActive        Boolean   @default(true) @map("is_active")
-  createdAt       DateTime  @default(now()) @map("created_at")
+  country          String?   @db.VarChar(100)
+  city             String?   @db.VarChar(255)
+  phone            String?   @db.VarChar(50)
+  email            String?   @db.VarChar(255)
+  rating           Decimal   @default(0) @db.Decimal(3, 2)
+  totalShipments   Int       @default(0) @map("total_shipments")
+  onTimeRate       Decimal   @default(0) @map("on_time_rate") @db.Decimal(5, 2)
+  notes            String?
+  isActive         Boolean   @default(true) @map("is_active")
+  seaFreightType   SeaFreightType? @map("sea_freight_type")
+  hasWarehouse     Boolean   @default(false) @map("has_warehouse")
+  customClearance  Boolean   @default(false) @map("custom_clearance")
+  taxResidenceDTA  String?   @map("tax_residence_dta") @db.VarChar(255)
+  complianceCert   String?   @map("compliance_cert") @db.VarChar(500)
+  contractNumber   String?   @map("contract_number") @db.VarChar(100)
+  contractStart    DateTime? @map("contract_start") @db.Date
+  contractEnd      DateTime? @map("contract_end") @db.Date
+  contractDetails  String?   @map("contract_details")
+  contactPerson    String?   @map("contact_person") @db.VarChar(255)
+  contactEmail     String?   @map("contact_email") @db.VarChar(255)
+  creditTermDays   Int?      @map("credit_term_days")
+  createdAt        DateTime  @default(now()) @map("created_at")
 
-  tenant          Tenant    @relation(fields: [tenantId], references: [id])
-  shipments       Shipment[]
+  tenant           Tenant    @relation(fields: [tenantId], references: [id])
+  shipments        Shipment[]
   shipmentRequests ShipmentRequest[]
 
   @@index([tenantId])
@@ -406,10 +438,14 @@ model Vehicle {
   tirCarnetExpiry  DateTime?     @map("tir_carnet_expiry") @db.Date
   gpsTrackerId     String?       @map("gps_tracker_id") @db.VarChar(100)
   gpsProvider      String?       @map("gps_provider") @db.VarChar(100)
-  status           VehicleStatus @default(available)
-  fuelType         String?       @map("fuel_type") @db.VarChar(20)
-  driverId         String?       @map("driver_id")
-  createdAt        DateTime      @default(now()) @map("created_at")
+  status               VehicleStatus @default(available)
+  fuelType             String?       @map("fuel_type") @db.VarChar(20)
+  driverId             String?       @map("driver_id")
+  trailerType          String?       @map("trailer_type") @db.VarChar(30)
+  tareWeightKg         Decimal?      @map("tare_weight_kg") @db.Decimal(10, 2)
+  lastMaintenanceDate  DateTime?     @map("last_maintenance_date") @db.Date
+  maintenanceNotes     String?       @map("maintenance_notes")
+  createdAt            DateTime      @default(now()) @map("created_at")
 
   tenant           Tenant        @relation(fields: [tenantId], references: [id])
   driver           Driver?       @relation(fields: [driverId], references: [id])
@@ -437,6 +473,7 @@ model Driver {
   tenant            Tenant       @relation(fields: [tenantId], references: [id])
   vehicles          Vehicle[]
   shipments         Shipment[]
+  trainings         DriverTraining[]
 
   @@index([tenantId])
   @@map("drivers")
@@ -705,10 +742,14 @@ model Quote {
   margin         Decimal?    @db.Decimal(5, 2)
   status         QuoteStatus @default(draft)
   validUntil     DateTime    @map("valid_until")
-  notes          String?
-  createdById    String      @map("created_by_id")
-  createdAt      DateTime    @default(now()) @map("created_at")
-  updatedAt      DateTime    @updatedAt @map("updated_at")
+  notes              String?
+  termsConditions    String?           @map("terms_conditions")
+  routeType          String?           @map("route_type") @db.VarChar(20)
+  loadType           String?           @map("load_type") @db.VarChar(30)
+  loadSubCategory    String?           @map("load_sub_category") @db.VarChar(100)
+  createdById        String            @map("created_by_id")
+  createdAt          DateTime          @default(now()) @map("created_at")
+  updatedAt          DateTime          @updatedAt @map("updated_at")
 
   tenant         Tenant      @relation(fields: [tenantId], references: [id])
   client         Client?     @relation(fields: [clientId], references: [id])
@@ -753,4 +794,102 @@ model Notification {
   @@index([userId, isRead])
   @@index([tenantId])
   @@map("notifications")
+}
+
+// ── CRM Extensions ──
+
+enum ClientLoyalty {
+  REGULAR
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum PaymentTerms {
+  CIA
+  COD
+  NET7
+  NET15
+  NET30
+  NET60
+  NET90
+}
+
+enum AVLStatus {
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+}
+
+enum SeaFreightType {
+  CONTAINERS
+  BREAKBULK
+  BOTH
+}
+
+model ClientContact {
+  id        String  @id @default(cuid())
+  tenantId  String  @map("tenant_id")
+  clientId  String  @map("client_id")
+  name      String  @db.VarChar(255)
+  email     String? @db.VarChar(255)
+  phone     String? @db.VarChar(50)
+  role      String? @db.VarChar(100)
+
+  client    Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([clientId])
+  @@map("client_contacts")
+}
+
+model AVLEntry {
+  id             String    @id @default(cuid())
+  tenantId       String    @map("tenant_id")
+  clientId       String    @map("client_id")
+  vendorName     String    @map("vendor_name") @db.VarChar(255)
+  serviceType    String?   @map("service_type") @db.VarChar(100)
+  status         AVLStatus @default(IN_PROGRESS)
+  rejectedReason String?   @map("rejected_reason")
+  reviewDate     DateTime? @map("review_date") @db.Date
+  documentUrl    String?   @map("document_url") @db.VarChar(500)
+  notes          String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  client         Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([clientId])
+  @@map("avl_entries")
+}
+
+model DriverTraining {
+  id          String    @id @default(cuid())
+  driverId    String    @map("driver_id")
+  title       String    @db.VarChar(255)
+  issuedAt    DateTime? @map("issued_at") @db.Date
+  expiresAt   DateTime? @map("expires_at") @db.Date
+  documentUrl String?   @map("document_url") @db.VarChar(500)
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  driver      Driver    @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  @@index([driverId])
+  @@map("driver_trainings")
+}
+
+model UserCertificate {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  title       String    @db.VarChar(255)
+  issuedAt    DateTime? @map("issued_at") @db.Date
+  expiresAt   DateTime? @map("expires_at") @db.Date
+  documentUrl String?   @map("document_url") @db.VarChar(500)
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_certificates")
 }

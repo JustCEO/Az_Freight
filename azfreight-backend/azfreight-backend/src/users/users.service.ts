@@ -193,4 +193,46 @@ export class UsersService {
       select: { preferredLocale: true, preferredTheme: true, preferredTimezone: true, preferredCurrency: true },
     });
   }
+
+  async getStats(tenantId: string, userId: string) {
+    const [jobsApproved, quoteTotal, quoteAccepted, quotes] = await Promise.all([
+      this.prisma.shipment.count({ where: { tenantId, assignedToId: userId, status: { not: 'cancelled' } } }),
+      this.prisma.quote.count({ where: { tenantId, createdById: userId } }),
+      this.prisma.quote.count({ where: { tenantId, createdById: userId, status: 'accepted' } }),
+      this.prisma.quote.findMany({
+        where: { tenantId, createdById: userId, status: 'accepted' },
+        select: { total: true },
+      }),
+    ]);
+
+    const turnover = quotes.reduce((sum, q) => sum + Number(q.total), 0);
+    const successRate = quoteTotal > 0 ? (quoteAccepted / quoteTotal) * 100 : 0;
+
+    return { jobsApproved, quoteQuantity: quoteTotal, successRate: Math.round(successRate * 10) / 10, turnover };
+  }
+
+  async listCertificates(userId: string) {
+    return this.prisma.userCertificate.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async createCertificate(userId: string, data: { title: string; issuedAt?: string; expiresAt?: string; documentUrl?: string }) {
+    return this.prisma.userCertificate.create({
+      data: {
+        userId,
+        title: data.title,
+        issuedAt: data.issuedAt ? new Date(data.issuedAt) : undefined,
+        expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
+        documentUrl: data.documentUrl,
+      },
+    });
+  }
+
+  async deleteCertificate(userId: string, certId: string) {
+    const c = await this.prisma.userCertificate.findFirst({ where: { id: certId, userId } });
+    if (!c) throw new NotFoundException('Certificate not found');
+    return this.prisma.userCertificate.delete({ where: { id: certId } });
+  }
 }
