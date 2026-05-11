@@ -12,17 +12,30 @@ interface LineItem {
   unitPrice: number;
 }
 
+const LOAD_SUBCATEGORIES: Record<string, string[]> = {
+  GENERAL: ['Pallets', 'Boxes', 'Bags', 'Drums', 'Mixed'],
+  HAZARDOUS: ['Class 1', 'Class 2', 'Class 3', 'Class 4', 'Class 5', 'Class 6', 'Class 7', 'Class 8', 'Class 9'],
+  PERISHABLE: ['Chilled', 'Frozen', 'Deep Frozen', 'Ambient'],
+  OVERSIZED: ['Heavy Lift', 'Out of Gauge', 'Project Cargo'],
+  BULK: ['Dry Bulk', 'Wet Bulk', 'Grain'],
+  LIQUID: ['Tanker', 'IBC', 'Flexibag'],
+  VALUABLE: [],
+};
+
 export default function NewQuotePage() {
   const router = useRouter();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [termsOpen, setTermsOpen] = useState(false);
 
   const [form, setForm] = useState({
     originCountry: '', originCity: '', destCountry: '', destCity: '',
     transportType: 'road_tir', cargoType: '', weightKg: '', volumeCbm: '',
     currency: 'USD', vatRate: 18, validDays: 14, notes: '', margin: '',
     clientId: '', leadId: '',
+    // New fields
+    routeType: '', loadType: '', loadSubCategory: '', termsConditions: '',
   });
 
   const [lines, setLines] = useState<LineItem[]>([
@@ -39,6 +52,8 @@ export default function NewQuotePage() {
 
   const addLine = () => setLines((prev) => [...prev, { description: '', quantity: 1, unitPrice: 0 }]);
   const removeLine = (idx: number) => setLines((prev) => prev.filter((_, i) => i !== idx));
+
+  const subCategories = LOAD_SUBCATEGORIES[form.loadType] || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +78,11 @@ export default function NewQuotePage() {
       if (form.margin) data.margin = Number(form.margin);
       if (form.clientId) data.clientId = form.clientId;
       if (form.leadId) data.leadId = form.leadId;
+      // New fields
+      if (form.routeType) data.routeType = form.routeType;
+      if (form.loadType) data.loadType = form.loadType;
+      if (form.loadSubCategory) data.loadSubCategory = form.loadSubCategory;
+      if (form.termsConditions) data.termsConditions = form.termsConditions;
 
       const quote = await createQuote(data);
       router.push(`/quotes/${quote.id}`);
@@ -116,9 +136,40 @@ export default function NewQuotePage() {
               </select>
             </div>
             <div>
+              <label className={labelCls}>Route Type</label>
+              <select className={inputCls} value={form.routeType} onChange={(e) => setForm((p) => ({ ...p, routeType: e.target.value }))}>
+                <option value="">Select...</option>
+                <option value="DIRECT">Direct</option>
+                <option value="TRANSIT">Transit</option>
+                <option value="MULTIMODAL">Multimodal</option>
+              </select>
+            </div>
+            <div>
               <label className={labelCls}>Cargo Type</label>
               <input className={inputCls} value={form.cargoType} onChange={(e) => setForm((p) => ({ ...p, cargoType: e.target.value }))} />
             </div>
+            <div>
+              <label className={labelCls}>Load Type</label>
+              <select className={inputCls} value={form.loadType} onChange={(e) => setForm((p) => ({ ...p, loadType: e.target.value, loadSubCategory: '' }))}>
+                <option value="">Select...</option>
+                <option value="GENERAL">General</option>
+                <option value="HAZARDOUS">Hazardous</option>
+                <option value="PERISHABLE">Perishable</option>
+                <option value="OVERSIZED">Oversized</option>
+                <option value="VALUABLE">Valuable</option>
+                <option value="BULK">Bulk</option>
+                <option value="LIQUID">Liquid</option>
+              </select>
+            </div>
+            {subCategories.length > 0 && (
+              <div>
+                <label className={labelCls}>Load Sub-Category</label>
+                <select className={inputCls} value={form.loadSubCategory} onChange={(e) => setForm((p) => ({ ...p, loadSubCategory: e.target.value }))}>
+                  <option value="">Select...</option>
+                  {subCategories.map((sc) => <option key={sc} value={sc}>{sc}</option>)}
+                </select>
+              </div>
+            )}
             <div>
               <label className={labelCls}>Weight (kg)</label>
               <input type="number" className={inputCls} value={form.weightKg} onChange={(e) => setForm((p) => ({ ...p, weightKg: e.target.value }))} />
@@ -217,6 +268,34 @@ export default function NewQuotePage() {
         <div className="bg-white rounded-xl border border-slate-200 p-6">
           <label className={labelCls}>Notes</label>
           <textarea className={inputCls} rows={3} value={form.notes} onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))} />
+        </div>
+
+        {/* Terms & Conditions (collapsible) */}
+        <div className="bg-white rounded-xl border border-slate-200">
+          <button
+            type="button"
+            onClick={() => setTermsOpen(!termsOpen)}
+            className="w-full flex items-center justify-between p-6 text-left"
+          >
+            <h2 className="text-sm font-semibold text-slate-900">Terms & Conditions</h2>
+            <svg
+              className={`w-5 h-5 text-slate-400 transition-transform ${termsOpen ? 'rotate-180' : ''}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {termsOpen && (
+            <div className="px-6 pb-6">
+              <textarea
+                className={inputCls}
+                rows={6}
+                value={form.termsConditions}
+                onChange={(e) => setForm((p) => ({ ...p, termsConditions: e.target.value }))}
+                placeholder="Enter terms and conditions..."
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex gap-3">

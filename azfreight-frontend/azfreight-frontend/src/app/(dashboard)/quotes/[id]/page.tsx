@@ -24,6 +24,7 @@ export default function QuoteDetailPage() {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState('');
+  const [termsOpen, setTermsOpen] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -75,6 +76,8 @@ export default function QuoteDetailPage() {
 
   if (loading) return <Loading />;
   if (!quote) return null;
+
+  const rec = quote as unknown as Record<string, unknown>;
 
   return (
     <div className="max-w-4xl">
@@ -156,6 +159,19 @@ export default function QuoteDetailPage() {
             <p className="text-slate-500">Volume</p>
             <p className="font-medium text-slate-900">{quote.volumeCbm ? `${quote.volumeCbm} cbm` : '—'}</p>
           </div>
+          {/* New fields */}
+          <div>
+            <p className="text-slate-500">Route Type</p>
+            <p className="font-medium text-slate-900">{String(rec.routeType || '—')}</p>
+          </div>
+          <div>
+            <p className="text-slate-500">Load Type</p>
+            <p className="font-medium text-slate-900">{String(rec.loadType || '—')}</p>
+          </div>
+          <div>
+            <p className="text-slate-500">Load Sub-Category</p>
+            <p className="font-medium text-slate-900">{String(rec.loadSubCategory || '—')}</p>
+          </div>
         </div>
       </div>
 
@@ -197,6 +213,30 @@ export default function QuoteDetailPage() {
           <p className="text-sm text-slate-700 whitespace-pre-wrap">{quote.notes}</p>
         </div>
       )}
+
+      {/* Terms & Conditions (collapsible) */}
+      {rec.termsConditions ? (
+        <div className="bg-white rounded-xl border border-slate-200 mb-6">
+          <button
+            type="button"
+            onClick={() => setTermsOpen(!termsOpen)}
+            className="w-full flex items-center justify-between p-6 text-left"
+          >
+            <h2 className="text-sm font-semibold text-slate-900">Terms & Conditions</h2>
+            <svg
+              className={`w-5 h-5 text-slate-400 transition-transform ${termsOpen ? 'rotate-180' : ''}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {termsOpen && (
+            <div className="px-6 pb-6">
+              <p className="text-sm text-slate-700 whitespace-pre-wrap">{String(rec.termsConditions)}</p>
+            </div>
+          )}
+        </div>
+      ) : null}
 
       {/* Metadata */}
       <div className="text-xs text-slate-400">

@@ -8,6 +8,8 @@ import { useTranslation } from '@/lib/i18n';
 import Loading from '@/components/loading';
 
 const STATUSES = ['available', 'on_route', 'maintenance', 'inactive'];
+const TRAILER_TYPES = ['CURTAINSIDER', 'FLATBED', 'REEFER', 'TANKER', 'BOX', 'LOWBOY', 'OTHER'];
+const FUEL_TYPES = ['EURO5', 'EURO6', 'DIESEL', 'ELECTRIC', 'OTHER'];
 
 export default function VehicleDetailPage() {
   const params = useParams();
@@ -24,12 +26,18 @@ export default function VehicleDetailPage() {
     try {
       const v = await getVehicle(id);
       setVehicle(v);
+      const rec = v as unknown as Record<string, unknown>;
       setForm({
         plateNumber: v.plateNumber, brand: v.brand || '', model: v.model || '',
         year: v.year ? String(v.year) : '', vin: v.vin || '', status: v.status,
         capacityTons: v.capacityTons ? String(v.capacityTons) : '',
         volumeCbm: v.volumeCbm ? String(v.volumeCbm) : '',
         fuelType: v.fuelType || '',
+        // New fields
+        trailerType: (rec.trailerType as string) || '',
+        tareWeightKg: rec.tareWeightKg != null ? String(rec.tareWeightKg) : '',
+        lastMaintenanceDate: rec.lastMaintenanceDate ? String(rec.lastMaintenanceDate).slice(0, 10) : '',
+        maintenanceNotes: (rec.maintenanceNotes as string) || '',
       });
     } catch { router.push('/vehicles'); }
     finally { setLoading(false); }
@@ -48,6 +56,11 @@ export default function VehicleDetailPage() {
       if (form.capacityTons) data.capacityTons = Number(form.capacityTons);
       if (form.volumeCbm) data.volumeCbm = Number(form.volumeCbm);
       if (form.fuelType) data.fuelType = form.fuelType;
+      // New fields
+      if (form.trailerType) data.trailerType = form.trailerType;
+      if (form.tareWeightKg) data.tareWeightKg = Number(form.tareWeightKg);
+      if (form.lastMaintenanceDate) data.lastMaintenanceDate = form.lastMaintenanceDate;
+      if (form.maintenanceNotes) data.maintenanceNotes = form.maintenanceNotes;
       await updateVehicle(id, data);
       setEditing(false);
       await load();
@@ -64,6 +77,7 @@ export default function VehicleDetailPage() {
   if (loading) return <Loading />;
   if (!vehicle) return null;
 
+  const rec = vehicle as unknown as Record<string, unknown>;
   const ic = 'w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm';
 
   const fields: [string, string, string][] = [
@@ -75,7 +89,6 @@ export default function VehicleDetailPage() {
     ['Status', 'status', vehicle.status.replace('_', ' ')],
     ['Capacity (tons)', 'capacityTons', vehicle.capacityTons ? String(vehicle.capacityTons) : '—'],
     ['Volume (cbm)', 'volumeCbm', vehicle.volumeCbm ? String(vehicle.volumeCbm) : '—'],
-    ['Fuel Type', 'fuelType', vehicle.fuelType || '—'],
   ];
 
   return (
@@ -94,6 +107,7 @@ export default function VehicleDetailPage() {
         </div>
       </div>
 
+      {/* Basic Info */}
       <div className="bg-white rounded-xl border border-slate-200 p-6">
         <div className="grid grid-cols-2 gap-4">
           {fields.map(([label, key, display]) => (
@@ -115,6 +129,66 @@ export default function VehicleDetailPage() {
             <p className="font-medium text-slate-900">
               {vehicle.driver ? <Link href={`/drivers/${vehicle.driver.id}`} className="text-blue-600">{vehicle.driver.name}</Link> : '—'}
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Technical */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 mt-6">
+        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Technical</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-slate-500">Trailer Type</p>
+            {editing ? (
+              <select className={ic} value={form.trailerType || ''} onChange={(e) => setForm((p) => ({ ...p, trailerType: e.target.value }))}>
+                <option value="">Select...</option>
+                {TRAILER_TYPES.map((tt) => <option key={tt} value={tt}>{tt}</option>)}
+              </select>
+            ) : (
+              <p className="font-medium text-slate-900">{String(rec.trailerType || '—')}</p>
+            )}
+          </div>
+          <div>
+            <p className="text-sm text-slate-500">Tare Weight (kg)</p>
+            {editing ? (
+              <input type="number" className={ic} value={form.tareWeightKg || ''} onChange={(e) => setForm((p) => ({ ...p, tareWeightKg: e.target.value }))} />
+            ) : (
+              <p className="font-medium text-slate-900">{rec.tareWeightKg != null ? String(rec.tareWeightKg) : '—'}</p>
+            )}
+          </div>
+          <div>
+            <p className="text-sm text-slate-500">Fuel Type</p>
+            {editing ? (
+              <select className={ic} value={form.fuelType || ''} onChange={(e) => setForm((p) => ({ ...p, fuelType: e.target.value }))}>
+                <option value="">Select...</option>
+                {FUEL_TYPES.map((ft) => <option key={ft} value={ft}>{ft}</option>)}
+              </select>
+            ) : (
+              <p className="font-medium text-slate-900">{vehicle.fuelType || '—'}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Maintenance */}
+      <div className="bg-white rounded-xl border border-slate-200 p-6 mt-6">
+        <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-wider mb-4">Maintenance</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <p className="text-sm text-slate-500">Last Maintenance Date</p>
+            {editing ? (
+              <input type="date" className={ic} value={form.lastMaintenanceDate || ''} onChange={(e) => setForm((p) => ({ ...p, lastMaintenanceDate: e.target.value }))} />
+            ) : (
+              <p className="font-medium text-slate-900">{rec.lastMaintenanceDate ? new Date(String(rec.lastMaintenanceDate)).toLocaleDateString() : '—'}</p>
+            )}
+          </div>
+          <div className="col-span-2">
+            <p className="text-sm text-slate-500">Maintenance Notes</p>
+            {editing ? (
+              <textarea className={ic} rows={3} value={form.maintenanceNotes || ''} onChange={(e) => setForm((p) => ({ ...p, maintenanceNotes: e.target.value }))} />
+            ) : (
+              <p className="font-medium text-slate-900 whitespace-pre-wrap">{String(rec.maintenanceNotes || '—')}</p>
+            )}
           </div>
         </div>
       </div>
