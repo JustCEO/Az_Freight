@@ -948,6 +948,18 @@ const en = {
       OVERSIZED: 'Oversized', VALUABLE: 'Valuable', BULK: 'Bulk', LIQUID: 'Liquid' },
     loadSubCategory: 'Sub-Category',
   },
+  documents: {
+    upload: 'Upload Document', noDocuments: 'No documents attached', deleteConfirm: 'Delete this document?',
+    types: {
+      contract: 'Contract', certificate: 'Certificate', license: 'License', insurance: 'Insurance',
+      compliance: 'Compliance', receipt: 'Receipt', proof_of_payment: 'Proof of Payment',
+      rate_sheet: 'Rate Sheet', inquiry: 'Inquiry', proposal: 'Proposal',
+      quote_document: 'Quote Document', client_request: 'Client Request',
+      customs_document: 'Customs Document', invoice_document: 'Invoice',
+      technical_passport: 'Technical Passport', inspection_cert: 'Inspection Certificate',
+      adr_cert: 'ADR Certificate', other: 'Other',
+    },
+  },
 };
 
 export default en;
