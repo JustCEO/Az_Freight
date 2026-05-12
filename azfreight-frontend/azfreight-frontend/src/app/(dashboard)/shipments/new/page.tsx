@@ -146,7 +146,7 @@ export default function NewShipmentPage() {
               <label className="label-field">{t('newShipment.carrier')}</label>
               <select value={form.carrierId} onChange={(e) => updateField('carrierId', e.target.value)} className="input-field">
                 <option value="">{t('newShipment.selectCarrier')}</option>
-                {carriers.map((c) => <option key={c.id} value={c.id}>{c.companyName}</option>)}
+                {carriers.filter((c) => !(c as unknown as Record<string, unknown>).isBlacklisted).map((c) => <option key={c.id} value={c.id}>{c.companyName}</option>)}
               </select>
             </div>
           </div>
