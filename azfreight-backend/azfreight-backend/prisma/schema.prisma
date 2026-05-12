@@ -292,6 +292,13 @@ model Carrier {
   contactPerson    String?   @map("contact_person") @db.VarChar(255)
   contactEmail     String?   @map("contact_email") @db.VarChar(255)
   creditTermDays   Int?      @map("credit_term_days")
+  assessmentStatus AVLAssessmentStatus @default(IN_PROGRESS) @map("assessment_status")
+  rejectedReason   String?   @map("rejected_reason")
+  assessmentDate   DateTime? @map("assessment_date") @db.Date
+  isBlacklisted    Boolean   @default(false) @map("is_blacklisted")
+  blacklistReason  String?   @map("blacklist_reason")
+  ogLicense        String?   @map("og_license") @db.VarChar(100)
+  insuranceLimit   Decimal?  @map("insurance_limit") @db.Decimal(12, 2)
   createdAt        DateTime  @default(now()) @map("created_at")
 
   tenant           Tenant    @relation(fields: [tenantId], references: [id])
@@ -831,6 +838,12 @@ enum PaymentTerms {
 }
 
 enum AVLStatus {
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+}
+
+enum AVLAssessmentStatus {
   IN_PROGRESS
   APPROVED
   REJECTED
