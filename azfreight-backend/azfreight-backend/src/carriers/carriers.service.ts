@@ -8,8 +8,8 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 export class CarriersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(tenantId: string, query: PaginationDto) {
-    const { page = 1, limit = 20, search } = query;
+  async findAll(tenantId: string, query: PaginationDto & { assessmentStatus?: string; isBlacklisted?: string; transportType?: string }) {
+    const { page = 1, limit = 20, search, assessmentStatus, isBlacklisted, transportType } = query;
     const skip = (page - 1) * limit;
 
     const where: Record<string, unknown> = { tenantId, isActive: true };
@@ -19,6 +19,9 @@ export class CarriersService {
         { email: { contains: search, mode: 'insensitive' } },
       ];
     }
+    if (assessmentStatus) where.assessmentStatus = assessmentStatus;
+    if (isBlacklisted === 'true') where.isBlacklisted = true;
+    if (transportType) where.transportTypes = { has: transportType };
 
     const [data, total] = await Promise.all([
       this.prisma.carrier.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }),
@@ -31,14 +34,21 @@ export class CarriersService {
   async findOne(tenantId: string, id: string) {
     const carrier = await this.prisma.carrier.findFirst({ where: { id, tenantId } });
     if (!carrier) throw new NotFoundException('Carrier not found');
-    return carrier;
+
+    const mostRecentShipment = await this.prisma.shipment.findFirst({
+      where: { carrierId: id, tenantId },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    });
+
+    return { ...carrier, mostRecentShipmentDate: mostRecentShipment?.createdAt || null };
   }
 
   async create(tenantId: string, dto: CreateCarrierDto) {
     const data: Record<string, unknown> = { tenantId, ...dto };
     if (dto.contractStart) data.contractStart = new Date(dto.contractStart);
     if (dto.contractEnd) data.contractEnd = new Date(dto.contractEnd);
-    if (dto.seaFreightType) data.seaFreightType = dto.seaFreightType;
+    if (dto.assessmentDate) data.assessmentDate = new Date(dto.assessmentDate);
     return this.prisma.carrier.create({ data: data as never });
   }
 
@@ -46,6 +56,7 @@ export class CarriersService {
     const data: Record<string, unknown> = { ...dto };
     if (dto.contractStart) data.contractStart = new Date(dto.contractStart);
     if (dto.contractEnd) data.contractEnd = new Date(dto.contractEnd);
+    if (dto.assessmentDate) data.assessmentDate = new Date(dto.assessmentDate);
     const result = await this.prisma.carrier.updateMany({
       where: { id, tenantId },
       data: data as never,

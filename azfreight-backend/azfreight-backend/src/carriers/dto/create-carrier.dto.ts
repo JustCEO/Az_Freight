@@ -28,4 +28,14 @@ export class CreateCarrierDto {
   @IsOptional() @IsString() contactPerson?: string;
   @IsOptional() @IsEmail() contactEmail?: string;
   @IsOptional() @IsNumber() creditTermDays?: number;
+
+  @IsOptional() @IsEnum(['IN_PROGRESS', 'APPROVED', 'REJECTED'])
+  assessmentStatus?: string;
+
+  @IsOptional() @IsString() rejectedReason?: string;
+  @IsOptional() @IsDateString() assessmentDate?: string;
+  @IsOptional() @IsBoolean() isBlacklisted?: boolean;
+  @IsOptional() @IsString() blacklistReason?: string;
+  @IsOptional() @IsString() ogLicense?: string;
+  @IsOptional() @IsNumber() insuranceLimit?: number;
 }

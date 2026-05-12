@@ -209,7 +209,7 @@ export default function RequestDetailPage() {
                 className="input-field w-full"
               >
                 <option value="">{t('carriers.selectCarrier')}</option>
-                {carriers.map((c) => (
+                {carriers.filter((c) => !(c as unknown as Record<string, unknown>).isBlacklisted).map((c) => (
                   <option key={c.id} value={c.id}>{c.companyName} ({c.transportTypes.join(', ')})</option>
                 ))}
               </select>
