@@ -16,7 +16,7 @@ export default function Header() {
     '/shipments/new': t('shipmentsList.newShipment'),
     '/clients': t('nav.clients'),
     '/clients/new': t('clientsList.newClient'),
-    '/carriers': t('nav.carriers'),
+    '/carriers': t('avlVendors.title'),
     '/invoices': t('nav.invoices'),
     '/leads': t('leads.title'),
     '/requests': t('nav.requests'),
@@ -30,7 +30,7 @@ export default function Header() {
   if (!title) {
     if (pathname.startsWith('/shipments/')) title = t('nav.shipments');
     else if (pathname.startsWith('/clients/')) title = t('nav.clients');
-    else if (pathname.startsWith('/carriers/')) title = t('nav.carriers');
+    else if (pathname.startsWith('/carriers/')) title = t('avlVendors.title');
     else if (pathname.startsWith('/invoices/')) title = t('nav.invoices');
     else if (pathname.startsWith('/requests/')) title = t('nav.requests');
     else if (pathname.startsWith('/leads/')) title = t('leads.title');
